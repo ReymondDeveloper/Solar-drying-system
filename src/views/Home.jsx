@@ -1,4 +1,5 @@
 import Button from '../component/Button'
+import { NavLink } from "react-router-dom";
 function Home() {
     return(
         <div className="h-screen flex flex-col overflow-hidden">
@@ -7,12 +8,12 @@ function Home() {
                 Solar-Drying Reservation System
                 </h1>
                 <div className="flex gap-3 justify-end my-3">
-                <Button>
-                    Register
-                </Button>
-                <Button>
-                    Sign In
-                </Button>
+                    <NavLink to="/registration" >
+                        <Button>Register</Button>
+                    </NavLink>
+                    <NavLink to="/sign-in" >
+                        <Button>Sign In</Button>
+                    </NavLink>
                 </div>
                 <div className="relative">
                 <span className="content-[''] absolute w-[100dvw] -left-5 bg-green-500 h-[2px]"></span>
