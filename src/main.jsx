@@ -5,7 +5,9 @@ import App from "./App.jsx";
 import "./index.css";
 import Notfound from './views/Notfound.jsx'
 import Home from './views/Home.jsx'
+import Registration from './views/Registration.jsx'
 
+const baseName = import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system";
 const router = createBrowserRouter([
   {
     path: '/',
@@ -16,17 +18,17 @@ const router = createBrowserRouter([
         index: true,
         element: <Home/>
       },
-      // {
-      //   path: 'about-bnd',
-      //   element: <AboutBND/>
-      // },
+      {
+        path: 'registration',
+        element: <Registration/>
+      },
     ]
   },
   {
     path: '*',
     element: <Notfound/>
   }
-]);
+],{ basename: baseName });
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
