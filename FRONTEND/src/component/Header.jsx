@@ -1,6 +1,7 @@
 import { useNavigate, NavLink, useLocation } from "react-router-dom";
+import Burger from "./Burger";
 
-function Header() {
+function Header({ button, setButton }) {
   const navigate = useNavigate();
   const location = useLocation();
   const handleLogOut = (e) => {
@@ -13,7 +14,7 @@ function Header() {
   return (
     <>
       <div className="h-[56px] px-5 bg-[rgba(0,100,0,255)] flex gap-3 items-center font-bold">
-        {!Home && <span className="text-white">-----</span>}
+        {!Home && <Burger button={button} setButton={setButton} />}
         <div className="flex-1 flex items-center justify-between">
           <NavLink to="/home" className="text-2xl text-[#00cc00] abril-fatface">
             {localStorage.getItem("role").toUpperCase()}

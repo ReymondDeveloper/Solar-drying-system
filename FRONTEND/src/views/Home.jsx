@@ -111,38 +111,38 @@ function Home() {
 					"
           src={`${baseIMG}logo.png`}
         />
-        {modules.map((data) =>
-          data.role === localStorage.getItem("role")
-            ? data.list.map((li, index) => (
-                <NavLink
-                  to={li.to}
-                  className="
+        {modules.map(
+          (data) =>
+            data.role === localStorage.getItem("role") &&
+            data.list.map((li, index) => (
+              <NavLink
+                to={li.to}
+                className="
 										flex gap-2 rounded-sm bg-[rgba(138,183,45,255)]
 										md:flex-col md:w-[calc(33.33%-10px)] md:p-5
 										lg:w-[calc(25%-10px)]
 									"
-                  key={index}
-                >
-                  <div
-                    className="
+                key={index}
+              >
+                <div
+                  className="
 											bg-[rgba(110,146,36,255)] w-15 h-20 p-3
 											md:w-20
 										"
-                  >
-                    {li.icon}
-                  </div>
-                  <div
-                    className="
+                >
+                  {li.icon}
+                </div>
+                <div
+                  className="
 											flex-grow flex flex-col justify-center text-white
 											md:flex-grow-0
 										"
-                  >
-                    <span className="font-bold text-lg">{li.title}</span>
-                    <span className="text-xs">{li.description}</span>
-                  </div>
-                </NavLink>
-              ))
-            : null
+                >
+                  <span className="font-bold text-lg">{li.title}</span>
+                  <span className="text-xs">{li.description}</span>
+                </div>
+              </NavLink>
+            ))
         )}
       </div>
     </>
