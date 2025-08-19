@@ -7,4 +7,4 @@ const pool = new Pool({
     database: 'solar-drying'
 })
 
-module.exports = pool
+module.exports = pool 
