@@ -5,7 +5,8 @@ import App from "./App.jsx";
 import "./index.css";
 import Notfound from './views/Notfound.jsx'
 import Home from './views/Home.jsx'
-import Registration from './views/Registration.jsx'
+import Registration from './views/Registration'
+import SignIn from './views/SignIn'
 
 const baseName = import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system";
 const router = createBrowserRouter([
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
       {
         path: 'registration',
         element: <Registration/>
+      },
+      {
+        path: 'sign-in',
+        element: <SignIn/>
       },
     ]
   },

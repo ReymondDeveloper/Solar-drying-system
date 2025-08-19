@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 function Home() {
     const baseIMG = import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system/";
     return(
-        <div className="h-screen flex flex-col overflow-hidden">
+        <div className="h-full flex flex-col">
             <div className="bg-green-900 text-white p-5 pb-4">
                 <h1 className="text-5xl md:text-center abril-fatface">
                 Solar-Drying Reservation System
