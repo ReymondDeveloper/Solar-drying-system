@@ -50,10 +50,9 @@ function Registration() {
                     <span className="content-[''] absolute left-0 bottom-0 bg-[rgba(0,100,0,255)] w-full h-[3px]"></span>
                 </div>
 
-                <form onSubmit={handleSubmit} className='flex-grow flex flex-col gap-4 bg-[rgba(0,100,0,255)] p-5'>
+                <form onSubmit={handleSubmit} className='flex-grow flex flex-col justify-center gap-4 bg-gradient-to-t from-[rgba(0,100,0,255)] via-green-600 to-[rgba(0,100,0,255)] p-5'>
                     <div className='
-                        grid grid-cols-1 
-                        md:grid-cols-2 gap-4
+                        flex flex-col gap-4 md:w-[50%] md:mx-auto
                     '>
                         {formField.map((data, index) => (
                             <div className='
