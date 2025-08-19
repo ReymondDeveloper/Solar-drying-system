@@ -117,13 +117,13 @@ function Navigation({ button, setButton }) {
             link.role === localStorage.getItem("role") &&
             link.navigation.map((nav, index) => (
               <>
-                {nav.icon}
                 <NavLink
                   key={index}
                   onClick={() => setButton(false)}
                   to={nav.to}
                   className="bg-[rgba(255,255,255,0.2)] w-full flex !ps-5 !py-3 transition-all duration-300 hover:bg-[rgba(255,255,255,0.3)]"
                 >
+                  <div className="w-5 me-3 text-white">{nav.icon}</div>
                   <h1 className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                     {nav.title}
                   </h1>
