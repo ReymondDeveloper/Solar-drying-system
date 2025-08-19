@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { GiBookmarklet } from "react-icons/gi";
-import { FaMapMarkedAlt, FaFileMedicalAlt } from "react-icons/fa";
+import { FaMapMarkedAlt, FaFileMedicalAlt, FaGlobe, FaEdit } from "react-icons/fa";
 import { IoPeopleSharp } from "react-icons/io5";
+import { HiClipboardDocumentList } from "react-icons/hi2";
 
 function Home() {
     const navigate = useNavigate();
@@ -16,10 +17,25 @@ function Home() {
     const modules = [
         {role: 'admin',
             list: [
-                {icon: <GiBookmarklet className='w-full h-full' />, title: 'Reservations', description: 'Approve and modify reservations.'},
-                {icon: <FaMapMarkedAlt className='w-full h-full' />, title: 'Availability', description: 'Manage dryer availability.'},
-                {icon: <IoPeopleSharp className='w-full h-full' />, title: 'Accounts', description: 'Manage users` account.'},
-                {icon: <FaFileMedicalAlt className='w-full h-full' />, title: 'Reports', description: 'Generate reports.'},
+                {icon: <GiBookmarklet className='w-full h-full' />, title: 'RESERVATIONS', description: 'Approve and modify reservations.'},
+                {icon: <FaMapMarkedAlt className='w-full h-full' />, title: 'AVAILABILITY', description: 'Manage dryer availability.'},
+                {icon: <IoPeopleSharp className='w-full h-full' />, title: 'ACCOUNTS', description: 'Manage users` account.'},
+                {icon: <FaFileMedicalAlt className='w-full h-full' />, title: 'REPORTS', description: 'Generate reports.'},
+            ]
+        },
+        {role: 'farmer',
+            list: [
+                {icon: <FaMapMarkedAlt className='w-full h-full' />, title: 'CREATE RESERVATION', description: 'Search for available dryers in the area.'},
+                {icon: <GiBookmarklet className='w-full h-full' />, title: 'RESERVATION HISTORY', description: 'View all activities.'},
+                {icon: <HiClipboardDocumentList className='w-full h-full' />, title: 'BOOKING INFORMATION', description: 'View details about your bookings.'},
+                {icon: <FaGlobe className='w-full h-full' />, title: 'ABOUT', description: 'Learn more about us.'},
+            ]
+        },
+        {role: 'owner',
+            list: [
+                {icon: <FaEdit className='w-full h-full' />, title: 'UPDATE DRYER STATUS', description: 'Search for available dryers in the area.'},
+                {icon: <GiBookmarklet className='w-full h-full' />, title: 'BOOKING REQUESTS', description: 'View all activities.'},
+                {icon: <HiClipboardDocumentList className='w-full h-full' />, title: 'DRYER INFORMATION', description: 'View details about your bookings.'},
             ]
         },
     ]
@@ -55,7 +71,7 @@ function Home() {
                                 <div className='flex-grow flex flex-col justify-center text-white
                                     md:flex-grow-0
                                 '>
-                                    <span className='font-bold text-xl'>{li.title}</span>
+                                    <span className='font-bold text-lg'>{li.title}</span>
                                     <span className='text-xs'>{li.description}</span>
                                 </div>
                             </div>
