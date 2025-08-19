@@ -42,7 +42,7 @@ function Home() {
 
     return(
         <div className="h-full flex flex-col">
-            <div className="h-[50px] px-10 bg-[rgba(0,100,0,255)] flex justify-between items-center font-bold">
+            <div className="h-[56px] px-10 bg-[rgba(0,100,0,255)] flex justify-between items-center font-bold">
                 <span className="text-2xl text-[#00cc00] abril-fatface">{localStorage.getItem('role').toUpperCase()}</span>
                 <span className="text-sm text-white hover:text-[#00cc00] trasition-all duration-300 cursor-pointer select-none" onClick={handleLogOut}>Log Out</span>
             </div>
@@ -52,7 +52,7 @@ function Home() {
             ">
                 <img
                     className="absolute -z-1 object-contain opacity-[50%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2
-                    md:top-[50px] md:-translate-y-0"
+                    md:top-[56px] md:-translate-y-0"
                     src={`${baseIMG}logo.png`}
                 />
                 {modules.map((data) => (
