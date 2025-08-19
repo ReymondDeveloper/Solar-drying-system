@@ -1,6 +1,7 @@
 import Button from '../component/Button'
 import { NavLink } from "react-router-dom";
 function Home() {
+    const baseIMG = import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system/";
     return(
         <div className="h-screen flex flex-col overflow-hidden">
             <div className="bg-green-900 text-white p-5 pb-4">
@@ -22,7 +23,7 @@ function Home() {
 
             <img
                 className="object-cover w-full h-full flex-grow rotate-y-180"
-                src="/landing_page.avif"
+                src={`${baseIMG}landing_page.avif`}
             />
         </div>
     )
