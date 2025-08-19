@@ -8,7 +8,7 @@ function OTP() {
     }, []);
 
     const handleOTP = (otp) => {
-        console.log("Entered OTP:", otp);
+        alert(`Entered OTP: ${otp}`);
     };
 
     const handleChange = (e, index) => {
@@ -26,8 +26,8 @@ function OTP() {
     };
 
     return (
-        <div className="fixed inset-0 bg-[rgba(0,0,0,0.75)] flex flex-col gap-3 items-center justify-center">
-            <span className="font-bold text-white">Enter your 4 digit OTP</span>
+        <div className="fixed inset-0 bg-[rgba(0,0,0,0.75)] flex flex-col gap-5 items-center justify-center">
+            <span className="font-bold text-white text-center px-5 mx-auto">Enter the 4 digit OTP sent to your provided Email Address.</span>
             <div className="flex gap-3">
                 {[0, 1, 2, 3].map((_, index) => (
                     <div
