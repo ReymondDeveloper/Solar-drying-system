@@ -7,7 +7,7 @@ import { FaCaretRight } from "react-icons/fa6";
 
 function Registration() {
     const navigate = useNavigate();
-    // const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [otp, setOtp] = useState(false);
 
     const handleBackToHome = (e) => {
@@ -29,22 +29,24 @@ function Registration() {
     ]
 
     const handleSubmit = (e) => {
-        // setLoading(true);
+        setLoading(true);
         e.preventDefault();
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
-        alert(data.email);
-        // data.account_name
-        // data.password
-        // data.role
-        // data.email
+        const Myalert = `
+        Account Name: ${data.account_name}\n
+        Password: ${data.password}\n
+        Role: ${data.role}\n
+        Email: ${data.email}`;
+        alert(Myalert);
+        setLoading(false);
         setOtp(true);
     }
 
     return(
         <>
-            {/* {loading && <Loading />} */}
-            {otp && <OTP />}
+            {loading && <Loading />}
+            {otp && <OTP setOtp={setOtp} />}
             <div className="h-screen overflow-hidden flex flex-col gap-1">
                 <div className="relative p-2">
                     <b onClick={handleBackToHome} className="hover:text-green-500 transition-all duration-300 cursor-pointer">&larr; Create an account</b>

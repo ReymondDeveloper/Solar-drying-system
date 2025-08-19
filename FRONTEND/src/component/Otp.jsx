@@ -1,6 +1,6 @@
 import { useRef, useEffect } from "react";
 
-function OTP() {
+function OTP({ setOtp }) {
     const inputRefs = useRef([]);
 
     useEffect(() => {
@@ -50,6 +50,9 @@ function OTP() {
                         />
                     </div>
                 ))}
+            </div>
+            <div className="px-10 md:px-5 w-full text-center">
+                <button type="button" onClick={() => setOtp(false)} className='rounded-md bg-[rgba(255,255,255,0.5)] hover:bg-[rgba(255,255,255,0.4)] w-full md:w-[50%] py-2 font-bold'>Cancel</button>
             </div>
         </div>
     );
