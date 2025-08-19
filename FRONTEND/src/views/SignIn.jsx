@@ -43,7 +43,7 @@ function SignIn() {
             {loading && <Loading />}
             <div className="h-full bg-gray-200 flex flex-col gap-1">
                 <div className="relative p-2 bg-white">
-                    <b onClick={handleBackToHome} className="hover:text-green-500 transition-all duration-300 cursor-pointer">&larr; Registration</b>
+                    <b onClick={handleBackToHome} className="hover:text-green-500 transition-all duration-300 cursor-pointer">&larr; Signing In</b>
                     <span className="content-[''] absolute left-0 bottom-0 bg-[rgba(0,100,0,255)] w-full h-[3px]"></span>
                 </div>
 
