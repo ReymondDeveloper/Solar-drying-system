@@ -4,9 +4,10 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import App from "./App.jsx";
 import "./index.css";
 import Notfound from './views/Notfound.jsx'
-import Home from './views/Home.jsx'
+import Index from './views/Index'
 import Registration from './views/Registration'
 import SignIn from './views/SignIn'
+import Home from './views/Home'
 
 const baseName = import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system";
 const router = createBrowserRouter([
@@ -17,7 +18,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Home/>
+        element: <Index/>
       },
       {
         path: 'registration',
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
       {
         path: 'sign-in',
         element: <SignIn/>
+      },
+      {
+        path: 'home',
+        element: <Home/>
       },
     ]
   },
