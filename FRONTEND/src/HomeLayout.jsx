@@ -29,6 +29,11 @@ function HomeLayout() {
               "
               src={`${baseIMG}logo.png`}
             />
+
+            <div className="bg-[rgba(0,0,0,0.1)] backdrop-blur-[6px] rounded-lg p-5 w-full text-md text-[rgba(0,100,0,255)] abril-fatface">
+              {String(location.pathname).substring(1).toUpperCase()}
+            </div>
+
             <Outlet />
           </div>
         </div>

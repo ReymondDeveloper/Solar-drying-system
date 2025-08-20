@@ -3,6 +3,7 @@ import axios from "axios";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
+import Search from "../component/Search";
 
 export function Button({ children, onClick, className, type }) {
   return (
@@ -134,6 +135,8 @@ function Reservations() {
 
   return (
     <div className="w-full bg-[rgba(0,0,0,0.1)] backdrop-blur-[6px] rounded-lg p-5">
+      <Search />
+
       <div className="w-full bg-gray-300 rounded-lg p-5 my-5">
         <div className="overflow-auto max-h-[400px]">
           {isLoading ? (
