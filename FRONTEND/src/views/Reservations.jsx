@@ -129,6 +129,8 @@ function Reservations() {
     fetchData();
   }, [Params, limit, currentPage]);
 
+  //do filter here
+
   const totalPages = Math.max(1, Math.ceil(data.length / limit));
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
