@@ -4,11 +4,11 @@ function Burger({ button, setButton }) {
       <button
         type="button"
         onClick={() => setButton(!button)}
-        className="w-[25px] h-[25px] md:hidden z-6 left-0"
+        className="w-[25px] h-[25px] left-0"
       >
         <div
           className={`
-                    flex flex-col md:hidden transistion-all
+                    flex flex-col transistion-all
                     ${button ? "-rotate-135 duration-1000" : "duration-300"}
                     `}
         >

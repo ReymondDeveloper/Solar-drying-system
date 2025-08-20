@@ -1,20 +1,18 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useNavigationType } from "react-router-dom";
 import "./Notfound.css";
 import Button from "../component/Button";
 import { FaArrowLeft } from "react-icons/fa6";
 
 function Notfound() {
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
 
   const handleBack = (e) => {
     e.preventDefault();
-    const navigationType =
-      window.performance?.getEntriesByType("navigation")[0]?.type;
-
-    if (navigationType === "navigate") {
-      navigate("/");
-    } else {
+    if (navigationType === "PUSH") {
       navigate(-1);
+    } else {
+      navigate("/");
     }
   };
 

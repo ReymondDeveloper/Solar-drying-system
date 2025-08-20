@@ -10,6 +10,8 @@ import SignIn from "./views/SignIn";
 import Home from "./views/Home";
 import Reservations from "./views/Reservations";
 import HomeLayout from "./HomeLayout";
+import Availability from "./views/Availability";
+
 const baseName =
   import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system";
 const router = createBrowserRouter(
@@ -43,6 +45,46 @@ const router = createBrowserRouter(
               path: "reservations",
               element: <Reservations />,
             },
+            {
+              path: "availability",
+              element: <Availability />,
+            },
+            {
+              path: "accounts",
+              element: <Availability />,
+            },
+            {
+              path: "reports",
+              element: <Availability />,
+            },
+            {
+              path: "create-reservation",
+              element: <Availability />,
+            },
+            {
+              path: "reservation-history",
+              element: <Availability />,
+            },
+            {
+              path: "booking-information",
+              element: <Availability />,
+            },
+            {
+              path: "about",
+              element: <Availability />,
+            },
+            {
+              path: "update-dryer-status",
+              element: <Availability />,
+            },
+            {
+              path: "booking-requests",
+              element: <Availability />,
+            },
+            {
+              path: "dryer-information",
+              element: <Availability />,
+            }
           ],
         },
       ],

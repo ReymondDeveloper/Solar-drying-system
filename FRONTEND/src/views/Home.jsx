@@ -10,8 +10,6 @@ import { IoPeopleSharp } from "react-icons/io5";
 import { HiClipboardDocumentList } from "react-icons/hi2";
 
 function Home() {
-  const baseIMG =
-    import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system/";
   const modules = [
     {
       role: "admin",
@@ -98,20 +96,7 @@ function Home() {
 
   return (
     <>
-      <div
-        className="
-					flex-grow flex flex-col gap-3 relative p-3
-					md:flex-row md:flex-grow-0 md:flex-wrap
-				"
-      >
-        <img
-          className="
-						absolute -z-1 object-contain opacity-[50%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2
-						md:top-[56px] md:-translate-y-0
-					"
-          src={`${baseIMG}logo.png`}
-        />
-        {modules.map(
+      {modules.map(
           (data) =>
             data.role === localStorage.getItem("role") &&
             data.list.map((li, index) => (
@@ -144,7 +129,6 @@ function Home() {
               </NavLink>
             ))
         )}
-      </div>
     </>
   );
 }

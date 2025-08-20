@@ -13,7 +13,7 @@ function Header({ button, setButton }) {
   const Home = location.pathname === "/home";
   return (
     <>
-      <div className="h-[56px] px-5 bg-[rgba(0,100,0,255)] flex gap-3 items-center font-bold">
+      <div className="min-h-[56px] h-[56px] px-5 bg-[rgba(0,100,0,255)] flex gap-3 items-center font-bold">
         {!Home && <Burger button={button} setButton={setButton} />}
         <div className="flex-1 flex items-center justify-between">
           <NavLink to="/home" className="text-2xl text-[#00cc00] abril-fatface">
