@@ -32,10 +32,10 @@ function Reservations() {
   const Endpoint = '';
 
   useEffect(() => {
-    const fetchData = async (offset) => {
+    const fetchData = async () => {
       setIsLoading(true);
       setIsError(false);
-      currentPage > 1 ? offset = currentPage * limit : offset = 0;
+      const offset = (currentPage - 1) * limit;
       try {
         const res = await axios.get(Endpoint, {
           params: {
