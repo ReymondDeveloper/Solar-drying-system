@@ -1,6 +1,6 @@
 
 const Pagination = ({ limit, setLimit, setCurrentPage, currentPageSafe, currentPage, totalPages }) => {
-  const style = 'rounded-md border border-gray-300 !px-2 !py-1 bg-[rgba(0,0,0,0.1)] hover:hover:bg-[rgba(0,0,0,0.2)]';
+  const style = 'rounded-md border border-gray-300 !px-2 !py-1 text-white font-semibold bg-green-600 hover:bg-green-700 transform-all duration-300';
   return (
     <>
       <div className="flex-col justify-end items-center !p-5 md:hidden">
@@ -19,16 +19,16 @@ const Pagination = ({ limit, setLimit, setCurrentPage, currentPageSafe, currentP
                   setCurrentPage(1);
                 }}
               >
-                <option value="5" className="bg-[#9566FF] font-bold">
+                <option value="5" className="text-black bg-gray-200 font-bold">
                   5
                 </option>
-                <option value="10" className="bg-[#9A7CFF] font-bold">
+                <option value="10" className="text-black bg-gray-100 font-bold">
                   10
                 </option>
-                <option value="15" className="bg-[#9566FF] font-bold">
+                <option value="15" className="text-black bg-gray-200 font-bold">
                   15
                 </option>
-                <option value="20" className="bg-[#9A7CFF] font-bold">
+                <option value="20" className="text-black bg-gray-100 font-bold">
                   20
                 </option>
               </select>
@@ -94,16 +94,16 @@ const Pagination = ({ limit, setLimit, setCurrentPage, currentPageSafe, currentP
                 setCurrentPage(1);
               }}
             >
-              <option value="5" className="bg-gray-200 font-bold">
+              <option value="5" className="text-black bg-gray-200 font-bold">
                 5
               </option>
-              <option value="10" className="bg-gray-100 font-bold">
+              <option value="10" className="text-black bg-gray-100 font-bold">
                 10
               </option>
-              <option value="15" className="bg-gray-200 font-bold">
+              <option value="15" className="text-black bg-gray-200 font-bold">
                 15
               </option>
-              <option value="20" className="bg-gray-100 font-bold">
+              <option value="20" className="text-black bg-gray-100 font-bold">
                 20
               </option>
             </select>

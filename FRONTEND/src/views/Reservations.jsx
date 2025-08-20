@@ -3,7 +3,14 @@ import axios from 'axios';
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
-import Button from '../component/Button'
+
+export function Button({ children, onClick, className, type }) {
+  return(
+    <button type={type ?? 'button'} onClick={onClick} className={`bg-blue-400 rounded-sm font-semibold px-4 py-2 hover:bg-blue-500 text-white transform-all duration-300 ${className} `}>
+      {children}
+    </button>
+  )
+}
 
 function Reservations() {
   let Params;
