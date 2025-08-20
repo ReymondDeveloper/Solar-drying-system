@@ -1,17 +1,31 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { CiSearch, CiFilter } from "react-icons/ci";
 
-function Search() {
+function Search({ setModal }) {
   const inputRef = useRef(null);
 
+  const handleSearchIcon = () => {
+    const input = inputRef.current;
+    if (!input) return;
+
+    if (input.value.trim() === "") {
+      input.focus();
+    } else {
+      handleSearch(input.value);
+    }
+  };
+
+  const handleSearch = (query) => {
+    alert(`Search: ${query}`);
+  };
   return (
     <div
-      className="bg-gray-200 rounded-full w-full border border-5 border-gray-300 py-2 px-5 flex items-center gap-3
+      className="bg-gray-200 rounded-full w-full border border-5 border-gray-300 p-1 flex items-center gap-3
     md:w-1/2 lg:w-1/3 md:mx-auto"
     >
       <div
-        onClick={() => inputRef.current?.focus()}
-        className="rounded-full p-1 cursor-pointer"
+        onClick={handleSearchIcon}
+        className="rounded-full p-3 cursor-pointer hover:bg-[rgba(0,0,0,0.1)] transition-all duration-300"
       >
         <CiSearch />
       </div>
@@ -20,8 +34,16 @@ function Search() {
         type="search"
         className="bg-transparent outline-0 w-full"
         placeholder="Search..."
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            handleSearch(e.target.value);
+          }
+        }}
       />
-      <div className="rounded-full p-1 cursor-pointer">
+      <div
+        onClick={() => setModal((prev) => !prev)}
+        className="rounded-full p-3 cursor-pointer hover:bg-[rgba(0,0,0,0.1)] transition-all duration-300"
+      >
         <CiFilter />
       </div>
     </div>

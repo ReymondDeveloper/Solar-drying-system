@@ -4,6 +4,7 @@ import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
+import Modal from "../component/Modal";
 
 export function Button({ children, onClick, className, type }) {
   return (
@@ -24,7 +25,8 @@ function Reservations() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-
+  const [modal, setModal] = useState(false);
+  const [status, setStatus] = useState("all");
   const tableHeadings = [
     "Account Name",
     "Boooked Dryer",
@@ -134,42 +136,46 @@ function Reservations() {
   if (isError) return <p>Error while fetching the data</p>;
 
   return (
-    <div className="w-full bg-[rgba(0,0,0,0.1)] backdrop-blur-[6px] rounded-lg p-5">
-      <Search />
-
-      <div className="w-full bg-gray-300 rounded-lg p-5 my-5">
-        <div className="overflow-auto max-h-[400px]">
-          {isLoading ? (
-            <TableSkeleton />
-          ) : (
-            <>
-              <Table
-                data={data.slice(startIndex, startIndex + limit)}
-                startIndex={startIndex}
-                tableHeadings={tableHeadings}
-                tableDataCell={tableDataCell}
-              />
-              {data?.length === 0 ? (
-                <div className="flex justify-center items-center">
-                  No Reservations Found
-                </div>
-              ) : (
-                ""
-              )}
-            </>
-          )}
+    <>
+      {modal && (
+        <Modal setModal={setModal} status={status} setStatus={setStatus} />
+      )}
+      <div className="w-full h-[calc(100%-56px)] bg-[rgba(0,0,0,0.1)] backdrop-blur-[6px] rounded-lg p-5">
+        <Search setModal={setModal} />
+        <div className="w-full bg-gray-300 rounded-lg p-5 my-5">
+          <div className="overflow-auto max-h-[400px]">
+            {isLoading ? (
+              <TableSkeleton />
+            ) : (
+              <>
+                <Table
+                  data={data.slice(startIndex, startIndex + limit)}
+                  startIndex={startIndex}
+                  tableHeadings={tableHeadings}
+                  tableDataCell={tableDataCell}
+                />
+                {data?.length === 0 ? (
+                  <div className="flex justify-center items-center">
+                    No Reservations Found
+                  </div>
+                ) : (
+                  ""
+                )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
 
-      <Pagination
-        limit={limit}
-        setLimit={setLimit}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        currentPageSafe={currentPageSafe}
-        totalPages={totalPages}
-      />
-    </div>
+        <Pagination
+          limit={limit}
+          setLimit={setLimit}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          currentPageSafe={currentPageSafe}
+          totalPages={totalPages}
+        />
+      </div>
+    </>
   );
 }
 
