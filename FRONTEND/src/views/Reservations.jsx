@@ -1,5 +1,134 @@
+import { useState, useEffect } from "react";
+import axios from 'axios';
+import TableSkeleton from "../component/TableSkeleton";
+import Table from "../component/Table";
+import Pagination from "../utils/Pagination";
+import Button from '../component/Button'
+
 function Reservations() {
-  return <></>;
+  let Params;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+
+  const tableHeadings = [
+    'Account Name',
+    'Boooked Dryer',
+    'Date',
+    'Status',
+    'Action'
+  ];
+
+  const tableDataCell = [
+    'account_name',
+    'dryer_name',
+    'date',
+    'status',
+    'action'
+  ];
+
+  const Endpoint = '';
+
+  useEffect(() => {
+    const fetchData = async (offset) => {
+      setIsLoading(true);
+      setIsError(false);
+      currentPage > 1 ? offset = currentPage * limit : offset = 0;
+      try {
+        const res = await axios.get(Endpoint, {
+          params: {
+            ...Params,
+            offset,
+            limit,
+          },
+        });
+
+        const { Reservations } = res.data;
+        setData(Array.isArray(Reservations) 
+        ? Reservations.map((data) => {
+          return{
+            account_name: data.account_name,
+            dryer_name: data.dryer_name,
+            date: data.date,
+            status: data.status,
+            action: <Button onClick={() => (alert(data.id))}>Print</Button>,
+          }
+        })
+        : [
+            {account_name: 'A', dryer_name: 'B', date: 'C', status: 'D',
+              action: <Button onClick={() => (alert(1))}>Print</Button>
+            }, 
+            {account_name: '1', dryer_name: '2', date: '3', status: '4',
+              action: <Button onClick={() => (alert(2))}>Print</Button>
+            }, 
+            {account_name: 'A', dryer_name: 'B', date: 'C', status: 'D',
+              action: <Button onClick={() => (alert(3))}>Print</Button>
+            }, 
+            {account_name: '1', dryer_name: '2', date: '3', status: '4',
+              action: <Button onClick={() => (alert(4))}>Print</Button>
+            }, 
+            {account_name: 'A', dryer_name: 'B', date: 'C', status: 'D',
+              action: <Button onClick={() => (alert(5))}>Print</Button>
+            }, 
+            {account_name: '1', dryer_name: '2', date: '3', status: '4',
+              action: <Button onClick={() => (alert(6))}>Print</Button>
+            }, 
+          ]
+        );
+      } catch (error) {
+        console.log(error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [Params, limit, currentPage]);
+
+  const totalPages = Math.max(1, Math.ceil(data.length / limit));
+  const currentPageSafe = Math.min(currentPage, totalPages);
+  const startIndex = (currentPageSafe - 1) * limit;
+
+  if (isError) return <p>Error while fetching the data</p>;
+  
+  return(
+    <div className="w-full bg-[rgba(0,0,0,0.1)] backdrop-blur-[6px] rounded-lg p-5">
+      <div className="w-full bg-gray-300 rounded-lg p-5 my-5">
+        <div className="overflow-auto max-h-[400px]">
+            {isLoading ? (
+                <TableSkeleton />
+            ) : (
+                <>
+                    <Table
+                        data={data.slice(startIndex, startIndex + limit)}
+                        startIndex={startIndex}
+                        tableHeadings={tableHeadings}
+                        tableDataCell={tableDataCell}
+                    />
+                    {data?.length === 0 ? (
+                        <div className="flex justify-center items-center">
+                            No Reservations Found
+                        </div>
+                    ) : (
+                        ''
+                    )}
+                </>
+            )}
+        </div>
+      </div>
+
+      <Pagination
+        limit={limit}
+        setLimit={setLimit}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        currentPageSafe={currentPageSafe}
+        totalPages={totalPages}
+      />
+    </div>
+  )
 }
 
 export default Reservations;
