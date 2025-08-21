@@ -19,7 +19,6 @@ export function Button({ children, onClick, className, type }) {
 }
 
 function Reservations() {
-  let Params;
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
@@ -45,6 +44,18 @@ function Reservations() {
     "action",
   ];
 
+  const filters = [
+    {
+      label: "Status",
+      id: "status",
+      option: [
+        { value: "all", phrase: "All" },
+        { value: "approved", phrase: "Approved" },
+        { value: "denied", phrase: "Denied" },
+      ],
+    },
+  ];
+
   function FakeFallbackData() {
     return Array.from({ length: 6 }, (_, i) => ({
       account_name: i % 2 === 0 ? "A" : "1",
@@ -65,16 +76,15 @@ function Reservations() {
       try {
         const res = await axios.get(Endpoint, {
           params: {
-            ...Params,
             offset,
             limit,
           },
         });
 
-        const { Reservations } = res.data;
+        const { Results } = res.data;
         setData(
-          Array.isArray(Reservations)
-            ? Reservations.map((data) => {
+          Array.isArray(Results)
+            ? Results.map((data) => {
                 return {
                   account_name: data.account_name,
                   dryer_name: data.dryer_name,
@@ -95,7 +105,7 @@ function Reservations() {
       }
     };
     fetchData();
-  }, [Params, limit, currentPage]);
+  }, [limit, currentPage]);
 
   const FilteredData = data.filter((info) => {
     const filterByStatus =
@@ -105,7 +115,7 @@ function Reservations() {
 
     const filterBySearch = search
       ? Object.entries(info)
-          .filter(([key]) => key !== "action")
+          .filter(([key]) => key !== "action" && key !== "status")
           .some(([_, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
@@ -127,7 +137,7 @@ function Reservations() {
   return (
     <>
       {modal && (
-        <Modal setModal={setModal} status={status} setStatus={setStatus} />
+        <Modal setModal={setModal} setStatus={setStatus} filters={filters} />
       )}
       <div className="w-full h-[calc(100%-56px)] bg-[rgba(0,0,0,0.1)] backdrop-blur-[6px] rounded-lg p-5">
         <Search setSearch={setSearch} setModal={setModal} />
@@ -145,7 +155,7 @@ function Reservations() {
                 />
                 {FilteredData?.length === 0 && (
                   <div className="flex justify-center items-center font-bold py-5">
-                    No Reservations Found
+                    No Reservations Found.
                   </div>
                 )}
               </>

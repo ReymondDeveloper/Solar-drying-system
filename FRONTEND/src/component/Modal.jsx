@@ -1,18 +1,7 @@
 import Button from "./Button";
 import { RiCloseLargeLine } from "react-icons/ri";
 
-function Modal({ setModal, status, setStatus }) {
-  const filters = [
-    {
-      label: "Status",
-      id: "status",
-      option: [
-        { value: "all", phrase: "All" },
-        { value: "approved", phrase: "Approved" },
-        { value: "denied", phrase: "Denied" },
-      ],
-    },
-  ];
+function Modal({ setModal, setStatus, filters }) {
   return (
     <>
       <div
@@ -34,9 +23,9 @@ function Modal({ setModal, status, setStatus }) {
               <RiCloseLargeLine />
             </div>
           </div>
-          <div className="w-full flex flex-col gap-1">
+          <div className="w-full flex flex-col gap-3">
             {filters.map((filter, index) => (
-              <>
+              <div key={index} className="w-full flex flex-col gap-1">
                 <label
                   htmlFor={filter.id}
                   className="text-[rgba(0,100,0,255)] font-bold text-md"
@@ -59,7 +48,7 @@ function Modal({ setModal, status, setStatus }) {
                     ))}
                   </select>
                 </div>
-              </>
+              </div>
             ))}
           </div>
           <div className="w-full flex gap-3 justify-end items-center">
