@@ -105,7 +105,6 @@ function SignIn() {
                 Don't have an account yet?{" "}
                 <a
                   className="font-semibold text-green-400 hover:text-gray-400 underline"
-                  href="#"
                   onClick={handleRegister}
                 >
                   Click here to register

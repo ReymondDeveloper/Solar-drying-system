@@ -180,7 +180,7 @@ function Accounts() {
       )}
       <div className="w-full h-[calc(100%-56px)] bg-[rgba(0,0,0,0.1)] backdrop-blur-[6px] rounded-lg p-5">
         <Search setSearch={setSearch} setModal={setModal} />
-        <div className="w-full text-right">
+        <div className="w-full text-right mt-5">
           <Button onClick={() => setAddModal(true)}>Add Account</Button>
         </div>
         <div className="w-full bg-gray-300 rounded-lg p-5 my-5">

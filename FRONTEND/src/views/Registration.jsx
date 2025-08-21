@@ -48,9 +48,11 @@ function Registration() {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
     const Myalert = `
-      Account Name: ${data.account_name}\n
+      First Name: ${data.first_name}\n
+      Last Name: ${data.last_name}\n
+      Address: ${data.address}\n
+      Email: ${data.email}\n
       Password: ${data.password}\n
-      Role: ${data.role}\n
       Email: ${data.email}`;
     alert(Myalert);
     setLoading(false);
@@ -67,7 +69,7 @@ function Registration() {
             <form onSubmit={handleSubmit} className="space-y-5">
               {formField.map((data, index) =>
                 data.id === "full_name" ? (
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div key={index} className="flex flex-col sm:flex-row gap-4">
                     <div className="w-full sm:w-3/5">
                       <label
                         htmlFor="first_name"
@@ -130,14 +132,11 @@ function Registration() {
               </div>
             </form>
 
-            <p
-              className="mt-10 text-center text-sm/6 text-gray-400"
-              onClick={handleSignIn}
-            >
+            <p className="mt-6 text-center text-sm text-gray-400">
               Already have an account?{" "}
               <a
-                href="#"
-                class="font-semibold text-green-400 hover:text-gray-400"
+                className="font-semibold text-green-400 hover:text-gray-400 underline"
+                onClick={handleSignIn}
               >
                 Click here to sign in.
               </a>
