@@ -46,8 +46,6 @@ function Modal({ setModal, status, setStatus }) {
                 <div className="bg-gray-200 w-full rounded-md p-2">
                   <select
                     id={filter.id}
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
                     className="outline-0 w-full text-[rgba(0,100,0,255)]"
                   >
                     {filter.option.map((option, index) => (
@@ -73,7 +71,8 @@ function Modal({ setModal, status, setStatus }) {
             </button>
             <Button
               onClick={() => {
-                alert(`Status: ${status}`);
+                alert(`Status: ${document.getElementById("status").value}`);
+                setStatus(document.getElementById("status").value);
                 setModal(false);
               }}
             >

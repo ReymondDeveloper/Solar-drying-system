@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { CiSearch, CiFilter } from "react-icons/ci";
 
-function Search({ setModal }) {
+function Search({ setSearch, setModal }) {
   const inputRef = useRef(null);
 
   const handleSearchIcon = () => {
@@ -16,6 +16,7 @@ function Search({ setModal }) {
   };
 
   const handleSearch = (query) => {
+    setSearch(query);
     alert(`Search: ${query}`);
   };
   return (

@@ -27,6 +27,8 @@ function Reservations() {
   const [isError, setIsError] = useState(false);
   const [modal, setModal] = useState(false);
   const [status, setStatus] = useState("all");
+  const [search, setSearch] = useState("");
+
   const tableHeadings = [
     "Account Name",
     "Boooked Dryer",
@@ -42,6 +44,16 @@ function Reservations() {
     "status",
     "action",
   ];
+
+  function FakeFallbackData() {
+    return Array.from({ length: 6 }, (_, i) => ({
+      account_name: i % 2 === 0 ? "A" : "1",
+      dryer_name: i % 2 === 0 ? "B" : "2",
+      date: i % 2 === 0 ? "C" : "3",
+      status: i % 2 === 0 ? "D" : "4",
+      action: <Button onClick={() => alert(i + 1)}>Print</Button>,
+    }));
+  }
 
   const Endpoint = "";
 
@@ -73,55 +85,11 @@ function Reservations() {
               })
             : []
         );
-        throw new Error("Simulated error for testing purposes");
+        throw new Error("Simulated error for testing purposes.");
       } catch (error) {
-        // console.log(error);
+        console.log(error);
         // setIsError(true);
-
-        setData([
-          {
-            account_name: "A",
-            dryer_name: "B",
-            date: "C",
-            status: "D",
-            action: <Button onClick={() => alert(1)}>Print</Button>,
-          },
-          {
-            account_name: "1",
-            dryer_name: "2",
-            date: "3",
-            status: "4",
-            action: <Button onClick={() => alert(2)}>Print</Button>,
-          },
-          {
-            account_name: "A",
-            dryer_name: "B",
-            date: "C",
-            status: "D",
-            action: <Button onClick={() => alert(3)}>Print</Button>,
-          },
-          {
-            account_name: "1",
-            dryer_name: "2",
-            date: "3",
-            status: "4",
-            action: <Button onClick={() => alert(4)}>Print</Button>,
-          },
-          {
-            account_name: "A",
-            dryer_name: "B",
-            date: "C",
-            status: "D",
-            action: <Button onClick={() => alert(5)}>Print</Button>,
-          },
-          {
-            account_name: "1",
-            dryer_name: "2",
-            date: "3",
-            status: "4",
-            action: <Button onClick={() => alert(6)}>Print</Button>,
-          },
-        ]);
+        setData(FakeFallbackData());
       } finally {
         setIsLoading(false);
       }
@@ -129,13 +97,32 @@ function Reservations() {
     fetchData();
   }, [Params, limit, currentPage]);
 
-  //do filter here
+  const FilteredData = data.filter((info) => {
+    const filterByStatus =
+      status && status !== "all"
+        ? info.status.toLowerCase().includes(status.toLowerCase())
+        : true;
 
-  const totalPages = Math.max(1, Math.ceil(data.length / limit));
+    const filterBySearch = search
+      ? Object.entries(info)
+          .filter(([key]) => key !== "action")
+          .some(([_, value]) =>
+            String(value).toLowerCase().includes(search.toLowerCase())
+          )
+      : true;
+    return filterByStatus && filterBySearch;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(FilteredData.length / limit));
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
 
-  if (isError) return <p>Error while fetching the data</p>;
+  if (isError)
+    return (
+      <div className="absolute top-0 left-0 w-full h-[calc(100dvh-56px)] text-5xl flex justify-center items-center font-bold py-5">
+        Error while fetching the data
+      </div>
+    );
 
   return (
     <>
@@ -143,7 +130,7 @@ function Reservations() {
         <Modal setModal={setModal} status={status} setStatus={setStatus} />
       )}
       <div className="w-full h-[calc(100%-56px)] bg-[rgba(0,0,0,0.1)] backdrop-blur-[6px] rounded-lg p-5">
-        <Search setModal={setModal} />
+        <Search setSearch={setSearch} setModal={setModal} />
         <div className="w-full bg-gray-300 rounded-lg p-5 my-5">
           <div className="overflow-auto max-h-[400px]">
             {isLoading ? (
@@ -151,17 +138,15 @@ function Reservations() {
             ) : (
               <>
                 <Table
-                  data={data.slice(startIndex, startIndex + limit)}
+                  data={FilteredData.slice(startIndex, startIndex + limit)}
                   startIndex={startIndex}
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}
                 />
-                {data?.length === 0 ? (
-                  <div className="flex justify-center items-center">
+                {FilteredData?.length === 0 && (
+                  <div className="flex justify-center items-center font-bold py-5">
                     No Reservations Found
                   </div>
-                ) : (
-                  ""
                 )}
               </>
             )}
