@@ -114,9 +114,9 @@ function Availability() {
           filters={filters}
         />
       )}
-      <div className="w-full h-[calc(100%-56px)] bg-[rgba(0,0,0,0.1)] backdrop-blur-[6px] rounded-lg p-5">
+      <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
         <Search setSearch={setSearch} setModal={setModal} />
-        <div className="w-full bg-gray-300 rounded-lg p-5 my-5">
+        <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
           <div className="overflow-auto max-h-[400px]">
             {isLoading ? (
               <TableSkeleton />
