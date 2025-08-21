@@ -7,7 +7,7 @@ function Header({ button, setButton }) {
   const handleLogOut = (e) => {
     e.preventDefault();
     localStorage.removeItem("role");
-    navigate("/sign-in");
+    navigate("/");
   };
 
   const Home = location.pathname === "/home";
