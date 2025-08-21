@@ -18,30 +18,53 @@ function SignIn() {
     navigate("/registration");
   };
 
-  const formField = [
-    {
-      label: "Role",
-      type: "select",
-      name: "role",
-      option: [
-        { value: "admin", phrase: "Admin" },
-        { value: "farmer", phrase: "Farmer" },
-        { value: "owner", phrase: "Solar-Dryer Owner" },
-      ],
-    },
-  ];
-
   const handleSubmit = (e) => {
-    setLoading(true);
     e.preventDefault();
+    setLoading(true);
+  
     const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    // const Myalert = `Role: ${data.role}`;
-    // alert(Myalert);
-    localStorage.setItem("role", "admin");
+    const { email } = Object.fromEntries(formData.entries());
+  
+    let role = "";
+  
+    if (email === "admin@gmail.com") {
+      role = "admin";
+    } else if (email === "farmer@gmail.com") {
+      role = "farmer";
+    } else if (email === "owner@gmail.com") {
+      role = "owner";
+    } else {
+      role = "guest";
+    }
+    localStorage.setItem("role", role);
     setLoading(false);
     navigate("/home");
   };
+  
+  // const formField = [
+  //   {
+  //     label: "Role",
+  //     type: "select",
+  //     name: "role",
+  //     option: [
+  //       { value: "admin", phrase: "Admin" },
+  //       { value: "farmer", phrase: "Farmer" },
+  //       { value: "owner", phrase: "Solar-Dryer Owner" },
+  //     ],
+  //   },
+  // ];
+
+  // const handleSubmit = (e) => {
+  //   setLoading(true);
+  //   e.preventDefault();
+  //   const formData = new FormData(e.target);
+  //   const data = Object.fromEntries(formData.entries());
+  //   // const Myalert = `Role: ${data.role}`;
+  //   // alert(Myalert);
+  //   localStorage.setItem("role", "admin");
+  //   setLoading(false);
+  //   navigate("/home");
+  // };
   return (
     <>
       {loading && <Loading />}
