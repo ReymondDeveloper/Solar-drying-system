@@ -14,6 +14,7 @@ import Availability from "./views/Availability";
 import Reports from "./views/Reports";
 import Accounts from "./views/Accounts";
 import Sample from "./views/Sample";
+import CreateReservation from "./views/CreateReservation";
 
 const baseName =
   import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system";
@@ -62,7 +63,7 @@ const router = createBrowserRouter(
             },
             {
               path: "create-reservation",
-              element: <Sample />,
+              element: <CreateReservation />,
             },
             {
               path: "reservation-history",
