@@ -22,7 +22,14 @@ const User = {
       [name, email, password]
     );
     return rows[0];
-  }
+  },
+
+  updatePassword: async (id, hashedPassword) => {
+    await pool.query("UPDATE users SET password = $1 WHERE id = $2", [
+      hashedPassword,
+      id,
+    ]);
+  },
 };
 
 export default User;

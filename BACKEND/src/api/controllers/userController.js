@@ -1,5 +1,5 @@
 import User from "../models/userModel.js"
-
+import bcrypt from "bcryptjs";
 import { hashPassword, comparePassword } from "../helpers/passwordHelper.js";
 import { generateToken } from "../helpers/tokenHelper.js";
 
@@ -49,3 +49,24 @@ export const registerUser = async (req, res, next) => {
       next(err);
     }
   };
+
+  export const updatePassword = async (req, res, next) => {
+    try {
+      const { id } = req.params; 
+      const { password } = req.body;  
+  
+      if (!id || !password) {
+        return res.status(400).json({ message: "User ID and new password required" });
+      }
+  
+      const hashedPassword = await bcrypt.hash(password, 10);
+  
+      await User.updatePassword(id, hashedPassword);
+
+      res.json({ message: "Password updated successfully" });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
+  
