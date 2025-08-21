@@ -4,7 +4,7 @@ import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
-import Modal from "../component/Modal";
+import FilterModal from "../component/FilterModal";
 
 export function Button({ children, onClick, className, type }) {
   return (
@@ -25,7 +25,7 @@ function Reservations() {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [modal, setModal] = useState(false);
-  const [status, setStatus] = useState("all");
+  const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
 
   const tableHeadings = [
@@ -47,7 +47,7 @@ function Reservations() {
   const filters = [
     {
       label: "Status",
-      id: "status",
+      id: "filter",
       option: [
         { value: "all", phrase: "All" },
         { value: "approved", phrase: "Approved" },
@@ -108,9 +108,9 @@ function Reservations() {
   }, [limit, currentPage]);
 
   const FilteredData = data.filter((info) => {
-    const filterByStatus =
-      status && status !== "all"
-        ? info.status.toLowerCase().includes(status.toLowerCase())
+    const filterByFilters =
+      filter && filter !== "all"
+        ? info.status.toLowerCase().includes(filter.toLowerCase())
         : true;
 
     const filterBySearch = search
@@ -120,7 +120,7 @@ function Reservations() {
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;
-    return filterByStatus && filterBySearch;
+    return filterByFilters && filterBySearch;
   });
 
   const totalPages = Math.max(1, Math.ceil(FilteredData.length / limit));
@@ -137,7 +137,11 @@ function Reservations() {
   return (
     <>
       {modal && (
-        <Modal setModal={setModal} setStatus={setStatus} filters={filters} />
+        <FilterModal
+          setModal={setModal}
+          setFilter={setFilter}
+          filters={filters}
+        />
       )}
       <div className="w-full h-[calc(100%-56px)] bg-[rgba(0,0,0,0.1)] backdrop-blur-[6px] rounded-lg p-5">
         <Search setSearch={setSearch} setModal={setModal} />

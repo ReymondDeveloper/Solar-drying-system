@@ -11,6 +11,8 @@ import Home from "./views/Home";
 import Reservations from "./views/Reservations";
 import HomeLayout from "./HomeLayout";
 import Availability from "./views/Availability";
+import Reports from "./views/Reports";
+import Accounts from "./views/Accounts";
 
 const baseName =
   import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system";
@@ -51,11 +53,11 @@ const router = createBrowserRouter(
             },
             {
               path: "accounts",
-              element: <Availability />,
+              element: <Accounts />,
             },
             {
               path: "reports",
-              element: <Availability />,
+              element: <Reports />,
             },
             {
               path: "create-reservation",
@@ -84,7 +86,7 @@ const router = createBrowserRouter(
             {
               path: "dryer-information",
               element: <Availability />,
-            }
+            },
           ],
         },
       ],

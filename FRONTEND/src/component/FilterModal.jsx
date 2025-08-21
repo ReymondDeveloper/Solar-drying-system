@@ -1,7 +1,7 @@
 import Button from "./Button";
 import { RiCloseLargeLine } from "react-icons/ri";
 
-function Modal({ setModal, setStatus, filters }) {
+function FilterModal({ setModal, setFilter, filters }) {
   return (
     <>
       <div
@@ -10,7 +10,7 @@ function Modal({ setModal, setStatus, filters }) {
       >
         <div
           onClick={(e) => e.stopPropagation()}
-          className="w-[320px] min-h-1/2 bg-gray-300 rounded-lg p-5 flex flex-col justify-between items-start"
+          className="w-[320px] min-h-1/2 bg-gray-300 rounded-lg p-5 flex flex-col gap-5 justify-between items-start"
         >
           <div className="w-full flex justify-between items-center">
             <h1 className="font-bold text-2xl text-[rgba(0,100,0,255)]">
@@ -60,8 +60,8 @@ function Modal({ setModal, setStatus, filters }) {
             </button>
             <Button
               onClick={() => {
-                alert(`Status: ${document.getElementById("status").value}`);
-                setStatus(document.getElementById("status").value);
+                alert(`Filter: ${document.getElementById("filter").value}`);
+                setFilter(document.getElementById("filter").value);
                 setModal(false);
               }}
             >
@@ -74,4 +74,4 @@ function Modal({ setModal, setStatus, filters }) {
   );
 }
 
-export default Modal;
+export default FilterModal;
