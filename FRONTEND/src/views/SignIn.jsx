@@ -36,9 +36,9 @@ function SignIn() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    const Myalert = `Role: ${data.role}`;
-    alert(Myalert);
-    localStorage.setItem("role", data.role);
+    // const Myalert = `Role: ${data.role}`;
+    // alert(Myalert);
+    localStorage.setItem("role", "admin");
     setLoading(false);
     navigate("/home");
   };
@@ -46,7 +46,7 @@ function SignIn() {
     <>
       {loading && <Loading />}
       <div className="h-full bg-gray-200 flex flex-col gap-1">
-        <div className="relative p-2 bg-white">
+        {/* <div className="relative p-2 bg-white">
           <b
             onClick={handleBackToHome}
             className="hover:text-green-500 transition-all duration-300 cursor-pointer flex items-center gap-1"
@@ -64,18 +64,14 @@ function SignIn() {
           >
             Click here to register.
           </span>
-        </span>
+        </span> */}
 
-        <form
+        {/* <form
           onSubmit={handleSubmit}
           className="flex-grow flex flex-col justify-center gap-4 bg-gradient-to-t from-[rgba(0,100,0,255)] via-green-600 to-[rgba(0,100,0,255)] p-5"
-        >
-          <div
-            className="
-                        flex flex-col gap-4 md:w-[50%] md:mx-auto
-                    "
-          >
-            {formField.map((data, index) => (
+        > */}
+          <div className="flex-grow flex flex-col justify-center gap-4 bg-gradient-to-t from-[rgba(0,100,0,255)] via-green-600 to-[rgba(0,100,0,255)] p-5">
+            {/* {formField.map((data, index) => (
               <div className="flex items-center gap-3" key={index}>
                 <div className="flex justify-center items-center gap-2 bg-[rgba(0,0,0,0.5)] w-15 rounded-full px-1">
                   <div className="flex justify-center font-bold text-[#00cc00]">
@@ -88,7 +84,7 @@ function SignIn() {
                   className="
                                     flex flex-col gap-1 text-white w-full
                                     md:mx-auto
-                                "
+                                 "
                 >
                   <label className="font-bold">{data.label}</label>
                   <select
@@ -103,87 +99,65 @@ function SignIn() {
                   </select>
                 </div>
               </div>
-            ))}
-            {/* <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-              <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                <form action="#" method="POST" class="space-y-6">
+            ))} */}
+
+            <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-md">
+              <div className="bg-white p-8 rounded-2xl shadow-lg">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <label
-                      for="email"
-                      class="block text-sm/6 font-medium text-gray-100"
-                    >
+                    <label className="block text-sm font-medium text-gray-700" htmlFor="email" >
                       Email address
                     </label>
-                    <div class="mt-2">
-                      <input
-                        id="email"
-                        type="email"
-                        name="email"
-                        required
-                        autocomplete="email"
-                        class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-white sm:text-sm/6"
+                    <div className="mt-2">
+                      <input className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                        id="email" type="email" name="email" requiredautoComplete="email"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <div class="flex items-center justify-between">
-                      <label
-                        for="password"
-                        class="block text-sm/6 font-medium text-gray-100"
-                      >
+                    <div className="flex items-center justify-between">
+                      <label className="block text-sm font-medium text-gray-700" htmlFor="password" >
                         Password
                       </label>
-                      <div class="text-sm">
-                        <a
-                          href="#"
-                          class="font-semibold text-white hover:text-red-400"
-                        >
+                      <div className="text-sm">
+                        <a className="font-semibold text-green-400 hover:text-gray-400" href="#" >
                           Forgot password?
                         </a>
                       </div>
                     </div>
-                    <div class="mt-2">
-                      <input
-                        id="password"
-                        type="password"
-                        name="password"
-                        required
-                        autocomplete="current-password"
-                        class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-white sm:text-sm/6"
-                      />
+                    <div className="mt-2">
+                      <input className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                        id="password" type="password" name="password" required autoComplete="current-password"
+                       />
                     </div>
                   </div>
 
-                  <button
+                  <button 
                     type="submit"
-                    className="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-400 focus:outline-none"
+                    className="flex w-full justify-center rounded-md bg-green-400 px-3 py-2 text-sm font-semibold text-white hover:text-gray-400 focus:outline-none"
                   >
-                    {loading ? "Signing in..." : "Sign In"}
+                    Sign In
                   </button>
                 </form>
 
-                <p class="mt-10 text-center text-sm/6 text-gray-400">
-                  Don't have an account yet ?
-                  <a
-                    href="#"
-                    class="font-semibold text-white hover:text-red-400 underline"
-                  >
-                    {" "}
-                    Click here to register
+                <p className="mt-6 text-center text-sm text-gray-400">
+                  Don't have an account yet? 
+                  <a className="font-semibold text-green-400 hover:text-gray-400 underline" href="#" onClick={handleRegister} >  Click here to register
                   </a>
                 </p>
               </div>
-            </div> */}
+            </div>
 
-            <Button
+
+            {/* <Button
               type={`submit`}
               className={`w-full md:mx-auto border border-green-500`}
             >
               Next
-            </Button>
+            </Button> */}
           </div>
-        </form>
+        {/* </form> */}
       </div>
     </>
   );
