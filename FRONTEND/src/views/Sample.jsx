@@ -1,4 +1,4 @@
-function Reports() {
+function Sample() {
   return (
     <>
       <div className="font-bold w-full h-[calc(100%-56px)] flex justify-center items-center text-5xl">
@@ -8,4 +8,4 @@ function Reports() {
   );
 }
 
-export default Reports;
+export default Sample;

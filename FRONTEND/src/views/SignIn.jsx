@@ -43,7 +43,7 @@ function SignIn() {
       name: "email",
       required: true,
       autoComplete: "email",
-      value: "admin@gmail.com",
+      defaultValue: "admin@gmail.com",
     },
     {
       label: "Password",
@@ -52,7 +52,7 @@ function SignIn() {
       name: "password",
       required: true,
       autoComplete: "password",
-      value: "admin123",
+      defaultValue: "admin123",
     },
   ];
   return (
@@ -79,7 +79,7 @@ function SignIn() {
                         name={field.name}
                         required={field.required}
                         autoComplete={field.autoComplete}
-                        value={field.value}
+                        defaultValue={field.defaultValue}
                       />
                     </div>
                   </div>
