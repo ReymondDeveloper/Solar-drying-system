@@ -1,15 +1,9 @@
-import { useNavigate, NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import Burger from "./Burger";
+import { FaUserCircle } from "react-icons/fa";
 
-function Header({ button, setButton }) {
-  const navigate = useNavigate();
+function Header({ button, setButton, setAccountModal }) {
   const location = useLocation();
-  const handleLogOut = (e) => {
-    e.preventDefault();
-    localStorage.removeItem("role");
-    navigate("/sign-in");
-  };
-
   const Home = location.pathname === "/home";
   return (
     <>
@@ -20,10 +14,12 @@ function Header({ button, setButton }) {
             {localStorage.getItem("role").toUpperCase()}
           </NavLink>
           <span
-            className="text-sm text-white hover:text-[#00cc00] trasition-all duration-300 cursor-pointer select-none"
-            onClick={handleLogOut}
+            onClick={() => setAccountModal(true)}
+            className="bg-[rgba(255,255,255,0.2)] p-5 transition-all duration-300 hover:bg-[rgba(255,255,255,0.3)]"
           >
-            Log Out
+            <div className="w-5 text-white flex items-center justify-center relative">
+              <FaUserCircle />
+            </div>
           </span>
         </div>
       </div>
