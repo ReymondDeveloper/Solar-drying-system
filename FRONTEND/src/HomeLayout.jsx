@@ -9,7 +9,6 @@ function HomeLayout() {
   const location = useLocation();
   const [button, setButton] = useState(false);
   const [accountModal, setAccountModal] = useState(false);
-
   const Home = location.pathname === "/home";
   const baseIMG =
     import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system/";

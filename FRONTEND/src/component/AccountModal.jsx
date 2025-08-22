@@ -29,13 +29,17 @@ function AccountModal({ setAccountModal }) {
             <div className="content-[''] bg-gray-300 h-[2px] my-2"></div>
             <NavLink
               to={"/home/settings"}
+              onClick={() => setAccountModal(false)}
               className="bg-gray-300 p-2 font-bold rounded-md w-full hover:bg-gray-400 flex gap-1 items-center justify-center"
             >
               <IoSettingsSharp />
               Settings
             </NavLink>
           </div>
-          <Button onClick={handleLogOut} className={"w-full bg-green-600 hover:bg-green-700 text-white"}>
+          <Button
+            onClick={handleLogOut}
+            className={"w-full bg-green-600 hover:bg-green-700 text-white"}
+          >
             Logout
           </Button>
         </div>

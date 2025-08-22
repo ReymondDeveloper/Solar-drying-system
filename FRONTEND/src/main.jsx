@@ -50,7 +50,7 @@ const router = createBrowserRouter(
             {
               path: "reservations",
               element: (
-                <Authentication role={'admin'}>
+                <Authentication role={"admin"}>
                   <Reservations />
                 </Authentication>
               ),
@@ -58,7 +58,7 @@ const router = createBrowserRouter(
             {
               path: "availability",
               element: (
-                <Authentication role={'admin'}>
+                <Authentication role={"admin"}>
                   <Availability />
                 </Authentication>
               ),
@@ -66,7 +66,7 @@ const router = createBrowserRouter(
             {
               path: "accounts",
               element: (
-                <Authentication role={'admin'}>
+                <Authentication role={"admin"}>
                   <Accounts />
                 </Authentication>
               ),
@@ -74,7 +74,7 @@ const router = createBrowserRouter(
             {
               path: "reports",
               element: (
-                <Authentication role={'admin'}>
+                <Authentication role={"admin"}>
                   <Reports />
                 </Authentication>
               ),
@@ -82,7 +82,7 @@ const router = createBrowserRouter(
             {
               path: "create-reservation",
               element: (
-                <Authentication role={'farmer'}>
+                <Authentication role={"farmer"}>
                   <CreateReservation />
                 </Authentication>
               ),
@@ -90,7 +90,7 @@ const router = createBrowserRouter(
             {
               path: "reservation-history",
               element: (
-                <Authentication role={'farmer'}>
+                <Authentication role={"farmer"}>
                   <ReservationHistory />
                 </Authentication>
               ),
@@ -98,7 +98,7 @@ const router = createBrowserRouter(
             {
               path: "booking-information",
               element: (
-                <Authentication role={'farmer'}>
+                <Authentication role={"farmer"}>
                   <Sample />
                 </Authentication>
               ),
@@ -106,7 +106,7 @@ const router = createBrowserRouter(
             {
               path: "about",
               element: (
-                <Authentication role={'farmer'}>
+                <Authentication role={"farmer"}>
                   <Sample />
                 </Authentication>
               ),
@@ -114,7 +114,7 @@ const router = createBrowserRouter(
             {
               path: "update-dryer-status",
               element: (
-                <Authentication role={'owner'}>
+                <Authentication role={"owner"}>
                   <Sample />
                 </Authentication>
               ),
@@ -122,7 +122,7 @@ const router = createBrowserRouter(
             {
               path: "booking-requests",
               element: (
-                <Authentication role={'owner'}>
+                <Authentication role={"owner"}>
                   <Sample />
                 </Authentication>
               ),
@@ -130,18 +130,14 @@ const router = createBrowserRouter(
             {
               path: "dryer-information",
               element: (
-                <Authentication role={'owner'}>
+                <Authentication role={"owner"}>
                   <Sample />
                 </Authentication>
               ),
             },
             {
               path: "settings",
-              element: (
-                <Authentication role={'owner'}>
-                  <Sample />
-                </Authentication>
-              ),
+              element: <Sample />,
             },
           ],
         },
