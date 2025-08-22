@@ -4,21 +4,9 @@ import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
-import FilterModal from "../component/FilterModal";
-import AddModal from "../component/AddModal";
+import Modal from "../component/Modal";
 import Loading from "../component/Loading";
-
-export function Button({ children, onClick, className, type }) {
-  return (
-    <button
-      type={type ?? "button"}
-      onClick={onClick}
-      className={`bg-blue-400 rounded-sm font-semibold px-4 py-2 hover:bg-blue-500 text-white transform-all duration-300 ${className} `}
-    >
-      {children}
-    </button>
-  );
-}
+import Button from "../component/Button";
 
 function CreateReservation() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,8 +14,8 @@ function CreateReservation() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [modal, setModal] = useState(false);
-  const [addModal, setAddModal] = useState(false);
+  const [modalFilter, setModalFilter] = useState(false);
+  const [modalAdd, setModalAdd] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,10 +29,11 @@ function CreateReservation() {
 
   const tableDataCell = ["dryer_name", "location", "status", "action"];
 
-  const filters = [
+  const fieldsFilter = [
     {
       label: "Status",
-      id: "filter",
+      type: 'select',
+      name: "status",
       option: [
         { value: "all", phrase: "All" },
         { value: "available", phrase: "Available" },
@@ -53,7 +42,20 @@ function CreateReservation() {
     },
   ];
 
-  const adds = [
+  const handleSubmitFilter = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const Myalert = `
+      Status: ${data.status}`;
+    alert(Myalert);
+    setFilter(data.status);
+    setLoading(false);
+    setModalFilter(false);
+  };
+
+  const fieldsAdd = [
     {
       label: "Crop Type",
       type: "text",
@@ -79,12 +81,7 @@ function CreateReservation() {
     },
   ];
 
-  function handleView(i, status) {
-    alert(`id: ${i + 1}\nStatus: ${status}`);
-    status === 'available' && setAddModal(true);
-  }
-
-  const handleSubmit = (e) => {
+  const handleSubmitAdd = (e) => {
     setLoading(true);
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -95,8 +92,13 @@ function CreateReservation() {
       Payment Type: ${data.payment}`;
     alert(Myalert);
     setLoading(false);
-    setAddModal(false);
+    setModalAdd(false);
   };
+
+  function handleView(i, status) {
+    alert(`id: ${i + 1}\nStatus: ${status}`);
+    status === 'available' && setModalAdd(true);
+  }
 
   const Endpoint = "";
 
@@ -122,7 +124,7 @@ function CreateReservation() {
                   location: data.location,
                   status: data.status,
                   action: (
-                    <Button onClick={() => handleView(index, data.status)}>Reserve</Button>
+                    <Button onClick={() => handleView(index, data.status)} className={'bg-blue-400 hover:bg-blue-500 text-white'}>Reserve</Button>
                   ),
                 };
               })
@@ -138,7 +140,7 @@ function CreateReservation() {
             location:  `Location ${i + 1}`,
             status: i % 2 === 0 ? "available" : "occupied",
             action: 
-              <Button onClick={() => handleView(i, i % 2 === 0 ? "available" : "occupied")}>Reserve</Button>,
+              <Button onClick={() => handleView(i, i % 2 === 0 ? "available" : "occupied")} className={'bg-blue-400 hover:bg-blue-500 text-white'}>Reserve</Button>,
           }));
         }
         setData(FakeFallbackData());
@@ -178,18 +180,26 @@ function CreateReservation() {
   return (
     <>
       {loading && <Loading />}
-      {modal && (
-        <FilterModal
-          setModal={setModal}
-          setFilter={setFilter}
-          filters={filters}
+      {modalFilter && (
+        <Modal
+          setModal={setModalFilter}
+          handleSubmit={handleSubmitFilter}
+          fields={fieldsFilter}
+          title={'Filters'}
+          button_name={'Apply Status'}
         />
       )}
-      {addModal && (
-        <AddModal setAddModal={setAddModal} handleSubmit={handleSubmit} adds={adds} />
+      {modalAdd && (
+        <Modal
+          setModal={setModalAdd}
+          handleSubmit={handleSubmitAdd}
+          fields={fieldsAdd}
+          title={'Reservation'}
+          button_name={'Reserve'}
+        />
       )}
       <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
-        <Search setSearch={setSearch} setModal={setModal} />
+        <Search setSearch={setSearch} setModal={setModalFilter} />
         <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
           <div className="overflow-auto max-h-[400px]">
             {isLoading ? (

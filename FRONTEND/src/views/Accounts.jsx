@@ -4,8 +4,7 @@ import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
-import FilterModal from "../component/FilterModal";
-import AddModal from "../component/AddModal";
+import Modal from "../component/Modal";
 import Button from "../component/Button";
 import Loading from "../component/Loading";
 
@@ -15,8 +14,8 @@ function Accounts() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [modal, setModal] = useState(false);
-  const [addModal, setAddModal] = useState(false);
+  const [modalFilter, setModalFilter] = useState(false);
+  const [modalAdd, setModalAdd] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,13 +35,12 @@ function Accounts() {
     "email",
     "role",
   ];
-
   
-
-  const filters = [
+  const fieldsFilter = [
     {
       label: "Role",
-      id: "filter",
+      type: 'select',
+      name: "role",
       option: [
         { value: "all", phrase: "All" },
         { value: "owner", phrase: "Owner" },
@@ -51,7 +49,20 @@ function Accounts() {
     },
   ];
 
-  const adds = [
+  const handleSubmitFilter = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const Myalert = `
+      Role: ${data.role}`;
+    alert(Myalert);
+    setFilter(data.role);
+    setLoading(false);
+    setModalFilter(false);
+  };
+
+  const fieldsAdd = [
     {
       label: "First Name",
       type: "text",
@@ -93,7 +104,7 @@ function Accounts() {
     },
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmitAdd = (e) => {
     setLoading(true);
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -107,7 +118,7 @@ function Accounts() {
     alert(Myalert);
     setData((prevData) => [...prevData, data]);
     setLoading(false);
-    setAddModal(false);
+    setModalAdd(false);
   };
 
   const Endpoint = "";
@@ -189,20 +200,28 @@ function Accounts() {
   return (
     <>
       {loading && <Loading />}
-      {modal && (
-        <FilterModal
-          setModal={setModal}
-          setFilter={setFilter}
-          filters={filters}
+      {modalFilter && (
+        <Modal
+          setModal={setModalFilter}
+          handleSubmit={handleSubmitFilter}
+          fields={fieldsFilter}
+          title={'Filters'}
+          button_name={'Apply Role'}
         />
       )}
-      {addModal && (
-        <AddModal setAddModal={setAddModal} adds={adds} handleSubmit={handleSubmit} />
+      {modalAdd && (
+        <Modal
+          setModal={setModalAdd}
+          handleSubmit={handleSubmitAdd}
+          fields={fieldsAdd}
+          title={'Registration'}
+          button_name={'Register'}
+        />
       )}
       <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
-        <Search setSearch={setSearch} setModal={setModal} />
+        <Search setSearch={setSearch} setModal={setModalFilter} />
         <div className="w-full text-right mt-5">
-          <Button onClick={() => setAddModal(true)}>Add Account</Button>
+          <Button onClick={() => setModalAdd(true)} className={'bg-green-600 hover:bg-green-700 text-white'}>Create Account</Button>
         </div>
         <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
           <div className="overflow-auto max-h-[400px]">

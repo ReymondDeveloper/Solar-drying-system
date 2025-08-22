@@ -79,7 +79,7 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                     <div
                       key={index}
                       data-cell={`${tableHeadings[index]}: `}
-                      className={`whitespace-nowrap hover:underline hover:decoration-red-500
+                      className={`whitespace-nowrap hover:underline hover:decoration-red-500 capitalize
                             ${
                               index === tableDataCell.length - 1
                                 ? "absolute bottom-0 right-0 m-3 text-end lg:text-center lg:flex lg:justify-center"

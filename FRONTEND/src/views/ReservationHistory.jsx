@@ -5,6 +5,8 @@ import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
 import FilterModal from "../component/FilterModal";
+import Loading from "../component/Loading";
+import ViewModal from "../component/ViewModal";
 
 export function Button({ children, onClick, className, type }) {
   return (
@@ -25,8 +27,10 @@ function ReservationHistory() {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [modal, setModal] = useState(false);
+  const [viewmodal, setViewModal] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const tableHeadings = [
     "Booked Dryer",
@@ -56,14 +60,23 @@ function ReservationHistory() {
     },
   ];
 
-  function FakeFallbackData() {
-    return Array.from({ length: 6 }, (_, i) => ({
-      dryer_name: `Dryer ${i + 1}`,
-      location: `Location ${i + 1}`,
-      date: `Date ${i + 1}`,
-      status: i % 2 === 0 ? "approved" : "denied",
-      action: <Button onClick={() => alert(i + 1)}>View</Button>,
-    }));
+  function handleView(i) {
+    alert(`id: ${i + 1}`);
+    setViewModal(true);
+  }
+
+  const handleSubmit = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const Myalert = `
+      Crop Type: ${data.crop_type}\n
+      Quantity (Cavans): ${data.quantity}\n
+      Payment Type: ${data.payment}`;
+    alert(Myalert);
+    setLoading(false);
+    setViewModal(false);
   }
 
   const Endpoint = "";
@@ -84,13 +97,13 @@ function ReservationHistory() {
         const { Results } = res.data;
         setData(
           Array.isArray(Results)
-            ? Results.map((data) => {
+            ? Results.map((data, index) => {
                 return {
                   account_name: data.account_name,
                   dryer_name: data.dryer_name,
                   date: data.date,
                   status: data.status,
-                  action: <Button onClick={() => alert(data.id)}>Print</Button>,
+                  action: <Button onClick={() => handleView(index)}>Print</Button>,
                 };
               })
             : []
@@ -99,6 +112,15 @@ function ReservationHistory() {
       } catch (error) {
         console.log(error);
         // setIsError(true);
+        function FakeFallbackData() {
+          return Array.from({ length: 6 }, (_, i) => ({
+            dryer_name: `Dryer ${i + 1}`,
+            location: `Location ${i + 1}`,
+            date: `Date ${i + 1}`,
+            status: i % 2 === 0 ? "approved" : "denied",
+            action: <Button onClick={() => handleView(i)}>View</Button>,
+          }));
+        }
         setData(FakeFallbackData());
       } finally {
         setIsLoading(false);
@@ -136,12 +158,16 @@ function ReservationHistory() {
 
   return (
     <>
+      {loading && <Loading />}
       {modal && (
         <FilterModal
           setModal={setModal}
           setFilter={setFilter}
           filters={filters}
         />
+      )}
+      {viewmodal && (
+        <ViewModal setViewModal={setViewModal} handleSubmit={handleSubmit} />
       )}
       <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
         <Search setSearch={setSearch} setModal={setModal} />

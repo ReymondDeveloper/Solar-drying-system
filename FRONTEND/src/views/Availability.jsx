@@ -4,7 +4,8 @@ import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
-import FilterModal from "../component/FilterModal";
+import Modal from "../component/Modal";
+import Loading from "../component/Loading";
 
 function Availability() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -15,23 +16,17 @@ function Availability() {
   const [modal, setModal] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const tableHeadings = ["Registered Dryer", "Location (Sablayan)", "Status"];
 
   const tableDataCell = ["dryer_name", "location", "status"];
-
-  function FakeFallbackData() {
-    return Array.from({ length: 6 }, (_, i) => ({
-      dryer_name: `Dryer ${i + 1}`,
-      location: `Location ${i + 1}`,
-      status: i % 2 === 0 ? "available" : "occupied",
-    }));
-  }
-
-  const filters = [
+  
+  const fields = [
     {
       label: "Status",
-      id: "filter",
+      type: 'select',
+      name: "status",
       option: [
         { value: "all", phrase: "All" },
         { value: "available", phrase: "Available" },
@@ -39,6 +34,20 @@ function Availability() {
       ],
     },
   ];
+
+  const handleSubmit = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const Myalert = `
+      Status: ${data.status}`;
+    alert(Myalert);
+    // setData((prev) => [...prev, data]);
+    setFilter(data.status);
+    setLoading(false);
+    setModal(false);
+  };
 
   const Endpoint = "";
 
@@ -71,6 +80,13 @@ function Availability() {
       } catch (error) {
         console.log(error);
         // setIsError(true);
+        function FakeFallbackData() {
+          return Array.from({ length: 6 }, (_, i) => ({
+            dryer_name: `Dryer ${i + 1}`,
+            location: `Location ${i + 1}`,
+            status: i % 2 === 0 ? "available" : "occupied",
+          }));
+        }
         setData(FakeFallbackData());
       } finally {
         setIsLoading(false);
@@ -107,11 +123,14 @@ function Availability() {
     );
   return (
     <>
+      {loading && <Loading />}
       {modal && (
-        <FilterModal
+        <Modal
           setModal={setModal}
-          setFilter={setFilter}
-          filters={filters}
+          handleSubmit={handleSubmit}
+          fields={fields}
+          title={'Filters'}
+          button_name={'Apply Status'}
         />
       )}
       <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">

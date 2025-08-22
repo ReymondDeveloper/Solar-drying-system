@@ -4,19 +4,9 @@ import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
-import FilterModal from "../component/FilterModal";
-
-export function Button({ children, onClick, className, type }) {
-  return (
-    <button
-      type={type ?? "button"}
-      onClick={onClick}
-      className={`bg-blue-400 rounded-sm font-semibold px-4 py-2 hover:bg-blue-500 text-white transform-all duration-300 ${className} `}
-    >
-      {children}
-    </button>
-  );
-}
+import Modal from "../component/Modal";
+import Button from "../component/Button";
+import Loading from "../component/Loading";
 
 function Reservations() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,6 +17,7 @@ function Reservations() {
   const [modal, setModal] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const tableHeadings = [
     "Account Name",
@@ -44,10 +35,11 @@ function Reservations() {
     "action",
   ];
 
-  const filters = [
+  const fields = [
     {
       label: "Status",
-      id: "filter",
+      type: 'select',
+      name: "status",
       option: [
         { value: "all", phrase: "All" },
         { value: "approved", phrase: "Approved" },
@@ -56,15 +48,19 @@ function Reservations() {
     },
   ];
 
-  function FakeFallbackData() {
-    return Array.from({ length: 6 }, (_, i) => ({
-      account_name: `Name ${i + 1}`,
-      dryer_name: `Dryer ${i + 1}`,
-      date: `Date ${i + 1}`,
-      status: i % 2 === 0 ? "approved" : "denied",
-      action: <Button onClick={() => alert(i + 1)}>Print</Button>,
-    }));
-  }
+  const handleSubmit = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const Myalert = `
+      Status: ${data.status}`;
+    alert(Myalert);
+    // setData((prev) => [...prev, data]);
+    setFilter(data.status);
+    setLoading(false);
+    setModal(false);
+  };
 
   const Endpoint = "";
 
@@ -90,7 +86,7 @@ function Reservations() {
                   dryer_name: data.dryer_name,
                   date: data.date,
                   status: data.status,
-                  action: <Button onClick={() => alert(data.id)}>Print</Button>,
+                  action: <Button onClick={() => alert(data.id)} className={'bg-blue-400 hover:bg-blue-500 text-white'}>Print</Button>,
                 };
               })
             : []
@@ -99,6 +95,15 @@ function Reservations() {
       } catch (error) {
         console.log(error);
         // setIsError(true);
+        function FakeFallbackData() {
+          return Array.from({ length: 6 }, (_, i) => ({
+            account_name: `Name ${i + 1}`,
+            dryer_name: `Dryer ${i + 1}`,
+            date: `Date ${i + 1}`,
+            status: i % 2 === 0 ? "approved" : "denied",
+            action: <Button onClick={() => alert(i + 1)} className={'bg-blue-400 hover:bg-blue-500 text-white'}>Print</Button>,
+          }));
+        }
         setData(FakeFallbackData());
       } finally {
         setIsLoading(false);
@@ -136,11 +141,14 @@ function Reservations() {
 
   return (
     <>
+      {loading && <Loading />}
       {modal && (
-        <FilterModal
+        <Modal
           setModal={setModal}
-          setFilter={setFilter}
-          filters={filters}
+          handleSubmit={handleSubmit}
+          fields={fields}
+          title={'Filters'}
+          button_name={'Apply Status'}
         />
       )}
       <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
