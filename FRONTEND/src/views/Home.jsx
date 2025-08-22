@@ -3,7 +3,6 @@ import { GiBookmarklet } from "react-icons/gi";
 import {
   FaMapMarkedAlt,
   FaFileMedicalAlt,
-  FaGlobe,
   FaEdit,
 } from "react-icons/fa";
 import { IoPeopleSharp } from "react-icons/io5";
@@ -54,18 +53,6 @@ function Home() {
           title: "RESERVATION HISTORY",
           description: "View all activities.",
           to: "/home/reservation-history",
-        },
-        {
-          icon: <HiClipboardDocumentList className="w-full h-full" />,
-          title: "BOOKING INFORMATION",
-          description: "View details about your bookings.",
-          to: "/home/booking-information",
-        },
-        {
-          icon: <FaGlobe className="w-full h-full" />,
-          title: "ABOUT",
-          description: "Learn more about us.",
-          to: "/home/about",
         },
       ],
     },

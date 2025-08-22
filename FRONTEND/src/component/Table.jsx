@@ -37,7 +37,7 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                     <td
                       key={index}
                       data-cell={`${tableHeadings[index]}: `}
-                      className={`text-sm whitespace-nowrap hover:underline hover:decoration-red-500 ${
+                      className={`text-sm whitespace-nowrap hover:underline hover:decoration-red-500 capitalize ${
                         dataCell === "status" || dataCell === "action"
                           ? "text-center"
                           : "text-start"

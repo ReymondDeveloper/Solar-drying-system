@@ -145,10 +145,10 @@ function Accounts() {
         // setIsError(true);
         function FakeFallbackData() {
           return Array.from({ length: 4 }, (_, i) => ({
-            first_name: i % 2 === 0 ? "A" : "1",
-            middle_initial: i % 2 === 0 ? "B" : "2",
-            last_name: i % 2 === 0 ? "C" : "3",
-            email: i % 2 === 0 ? "D" : "4",
+            first_name: `First Name ${i + 1}`,
+            middle_initial: `Middle Initial ${i + 1}`,
+            last_name: `Last Name ${i + 1}`,
+            email: `Email ${i + 1}`,
             role: i % 2 === 0 ? "Owner" : "Farmer",
           }));
         }

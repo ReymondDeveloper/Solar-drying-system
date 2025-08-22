@@ -22,8 +22,8 @@ function Availability() {
 
   function FakeFallbackData() {
     return Array.from({ length: 6 }, (_, i) => ({
-      dryer_name: i % 2 === 0 ? "A" : "1",
-      location: i % 2 === 0 ? "B" : "2",
+      dryer_name: `Dryer ${i + 1}`,
+      location: `Location ${i + 1}`,
       status: i % 2 === 0 ? "available" : "occupied",
     }));
   }
