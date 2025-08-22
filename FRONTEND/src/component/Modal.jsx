@@ -1,7 +1,7 @@
 import Button from "./Button";
 import { RiCloseLargeLine } from "react-icons/ri";
 
-function Modal({ setModal, handleSubmit, title, button_name, fields }) {
+function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
   return (
     <>
       <div
@@ -23,7 +23,7 @@ function Modal({ setModal, handleSubmit, title, button_name, fields }) {
             </div>
           </div>
           <div className="w-full flex flex-col gap-3">
-            {fields.map((field, index) => (
+            {fields?.map((field, index) => (
               <div key={index} className="w-full flex flex-col gap-1">
                 <label className="text-[rgba(0,100,0,255)] font-bold text-md">
                   {field.label}
@@ -56,6 +56,46 @@ function Modal({ setModal, handleSubmit, title, button_name, fields }) {
                     maxLength={field.maxLength}
                   />
                 )}
+              </div>
+            ))}
+
+            {datas?.map((data, index) => (
+              <div key={index} className="w-full flex flex-col gap-3">
+                <div className="flex flex-col">
+                  <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                    <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                      1
+                    </div>
+                    Crop Type
+                  </div>
+                  <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
+                    {data.crop_type}
+                  </div>
+                </div>
+
+                <div className="flex flex-col">
+                  <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                    <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                      2
+                    </div>
+                    Quantity
+                  </div>
+                  <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
+                    {data.quantity} (Cavans)
+                  </div>
+                </div>
+
+                <div className="flex flex-col">
+                  <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                    <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                      3
+                    </div>
+                    Payment Type
+                  </div>
+                  <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
+                    {data.payment}
+                  </div>
+                </div>
               </div>
             ))}
           </div>

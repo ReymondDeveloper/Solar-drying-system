@@ -4,21 +4,9 @@ import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
-import FilterModal from "../component/FilterModal";
 import Loading from "../component/Loading";
-import ViewModal from "../component/ViewModal";
-
-export function Button({ children, onClick, className, type }) {
-  return (
-    <button
-      type={type ?? "button"}
-      onClick={onClick}
-      className={`bg-blue-400 rounded-sm font-semibold px-4 py-2 hover:bg-blue-500 text-white transform-all duration-300 ${className} `}
-    >
-      {children}
-    </button>
-  );
-}
+import Modal from "../component/Modal";
+import Button from "../component/Button";
 
 function ReservationHistory() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,8 +14,8 @@ function ReservationHistory() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [modal, setModal] = useState(false);
-  const [viewmodal, setViewModal] = useState(false);
+  const [modalFilter, setModalFilter] = useState(false);
+  const [modalView, setModalView] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,10 +36,11 @@ function ReservationHistory() {
     "action",
   ];
 
-  const filters = [
+  const fieldsFilter = [
     {
       label: "Status",
-      id: "filter",
+      type: 'select',
+      name: "status",
       option: [
         { value: "all", phrase: "All" },
         { value: "approved", phrase: "Approved" },
@@ -60,12 +49,24 @@ function ReservationHistory() {
     },
   ];
 
-  function handleView(i) {
-    alert(`id: ${i + 1}`);
-    setViewModal(true);
-  }
+  const handleSubmitFilter = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const Myalert = `
+      Status: ${data.status}`;
+    alert(Myalert);
+    setFilter(data.status);
+    setLoading(false);
+    setModalFilter(false);
+  };
 
-  const handleSubmit = (e) => {
+  const datasView = [
+    {crop_type: 'Rice', quantity: '50', payment: 'gcash'},
+  ]
+
+  const handleSubmitView = (e) => {
     setLoading(true);
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -76,7 +77,12 @@ function ReservationHistory() {
       Payment Type: ${data.payment}`;
     alert(Myalert);
     setLoading(false);
-    setViewModal(false);
+    setModalView(false);
+  };
+
+  function handleView(i) {
+    alert(`id: ${i + 1}`);
+    setModalView(true);
   }
 
   const Endpoint = "";
@@ -103,7 +109,7 @@ function ReservationHistory() {
                   dryer_name: data.dryer_name,
                   date: data.date,
                   status: data.status,
-                  action: <Button onClick={() => handleView(index)}>Print</Button>,
+                  action: <Button onClick={() => handleView(index)} className={'bg-blue-400 hover:bg-blue-500 text-white'}>View</Button>,
                 };
               })
             : []
@@ -118,7 +124,7 @@ function ReservationHistory() {
             location: `Location ${i + 1}`,
             date: `Date ${i + 1}`,
             status: i % 2 === 0 ? "approved" : "denied",
-            action: <Button onClick={() => handleView(i)}>View</Button>,
+            action: <Button onClick={() => handleView(i)} className={'bg-blue-400 hover:bg-blue-500 text-white'}>View</Button>,
           }));
         }
         setData(FakeFallbackData());
@@ -159,18 +165,26 @@ function ReservationHistory() {
   return (
     <>
       {loading && <Loading />}
-      {modal && (
-        <FilterModal
-          setModal={setModal}
-          setFilter={setFilter}
-          filters={filters}
+      {modalFilter && (
+        <Modal
+          setModal={setModalFilter}
+          handleSubmit={handleSubmitFilter}
+          fields={fieldsFilter}
+          title={'Filters'}
+          button_name={'Apply Status'}
         />
       )}
-      {viewmodal && (
-        <ViewModal setViewModal={setViewModal} handleSubmit={handleSubmit} />
+      {modalView && (
+        <Modal
+          setModal={setModalView}
+          handleSubmit={handleSubmitView}
+          datas={datasView}
+          title={'Reservation Details'}
+          button_name={'Edit'}
+        />
       )}
       <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
-        <Search setSearch={setSearch} setModal={setModal} />
+        <Search setSearch={setSearch} setModal={setModalFilter} />
         <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
           <div className="overflow-auto max-h-[400px]">
             {isLoading ? (
