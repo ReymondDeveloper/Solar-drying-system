@@ -18,7 +18,7 @@ export function Button({ children, onClick, className, type }) {
   );
 }
 
-function Reservations() {
+function ReservationHistory() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
@@ -29,16 +29,16 @@ function Reservations() {
   const [search, setSearch] = useState("");
 
   const tableHeadings = [
-    "Account Name",
     "Booked Dryer",
+    "Location (Sablayan)",
     "Date",
     "Status",
     "Action",
   ];
 
   const tableDataCell = [
-    "account_name",
     "dryer_name",
+    "location",
     "date",
     "status",
     "action",
@@ -58,11 +58,11 @@ function Reservations() {
 
   function FakeFallbackData() {
     return Array.from({ length: 6 }, (_, i) => ({
-      account_name: i % 2 === 0 ? "A" : "1",
-      dryer_name: i % 2 === 0 ? "B" : "2",
+      dryer_name: i % 2 === 0 ? "A" : "1",
+      location: i % 2 === 0 ? "B" : "2",
       date: i % 2 === 0 ? "C" : "3",
-      status: i % 2 === 0 ? "D" : "4",
-      action: <Button onClick={() => alert(i + 1)}>Print</Button>,
+      status: i % 2 === 0 ? "approved" : "denied",
+      action: <Button onClick={() => alert(i + 1)}>View</Button>,
     }));
   }
 
@@ -159,7 +159,7 @@ function Reservations() {
                 />
                 {FilteredData?.length === 0 && (
                   <div className="flex justify-center items-center font-bold py-5">
-                    No Reservations Found.
+                    No History Found.
                   </div>
                 )}
               </>
@@ -180,4 +180,4 @@ function Reservations() {
   );
 }
 
-export default Reservations;
+export default ReservationHistory;

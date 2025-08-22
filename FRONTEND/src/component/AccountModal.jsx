@@ -18,7 +18,7 @@ function AccountModal({ setAccountModal }) {
       >
         <div
           onClick={(e) => e.stopPropagation()}
-          className="w-[320px] max-h-1/2 bg-gray-300 backdrop-filter-[6px] rounded-bl-lg rounded-br-lg rounded-tl-lg p-5 flex flex-col gap-5 justify-between items-start"
+          className="w-[320px] max-h-1/2 bg-gray-300 rounded-bl-lg rounded-br-lg rounded-tl-lg p-5 flex flex-col gap-5 justify-between items-start"
         >
           <div className="bg-gray-200 rounded-md p-5 w-full">
             <span className="font-bold">

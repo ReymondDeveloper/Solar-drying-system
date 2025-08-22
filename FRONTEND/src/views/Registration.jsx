@@ -38,6 +38,8 @@ function Registration() {
       id: "password",
       type: "password",
       name: "password",
+      minLength: 8,
+      maxLength: 16,
       required: true,
     },
   ];
@@ -119,6 +121,8 @@ function Registration() {
                         name={data.name}
                         type={data.type}
                         required={data.required}
+                        minLength={data.minLength}
+                        maxLength={data.maxLength}
                       />
                     </div>
                   )

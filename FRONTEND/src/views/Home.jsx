@@ -111,7 +111,7 @@ function Home() {
               >
                 <div
                   className="
-											bg-[rgba(110,146,36,255)] w-15 h-20 p-3
+											bg-[rgba(110,146,36,255)] w-15 h-20 p-3 text-white
 											md:w-20
 										"
                 >

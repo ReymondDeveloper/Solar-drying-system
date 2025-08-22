@@ -16,6 +16,7 @@ import Accounts from "./views/Accounts";
 import Sample from "./views/Sample";
 import CreateReservation from "./views/CreateReservation";
 import Authentication from "./component/Authentication";
+import ReservationHistory from "./views/ReservationHistory";
 
 const baseName =
   import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system";
@@ -90,7 +91,7 @@ const router = createBrowserRouter(
               path: "reservation-history",
               element: (
                 <Authentication role={'farmer'}>
-                  <Sample />
+                  <ReservationHistory />
                 </Authentication>
               ),
             },

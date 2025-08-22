@@ -5,6 +5,8 @@ import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
 import FilterModal from "../component/FilterModal";
+import AddModal from "../component/AddModal";
+import Loading from "../component/Loading";
 
 export function Button({ children, onClick, className, type }) {
   return (
@@ -25,8 +27,10 @@ function CreateReservation() {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [modal, setModal] = useState(false);
+  const [addModal, setAddModal] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const tableHeadings = [
     "Registered Dryer",
@@ -36,15 +40,6 @@ function CreateReservation() {
   ];
 
   const tableDataCell = ["dryer_name", "location", "status", "action"];
-
-  function FakeFallbackData() {
-    return Array.from({ length: 6 }, (_, i) => ({
-      dryer_name: i % 2 === 0 ? "A" : "1",
-      location: i % 2 === 0 ? "B" : "2",
-      status: i % 2 === 0 ? "available" : "occupied",
-      action: <Button onClick={() => alert(i + 1)}>Reserve</Button>,
-    }));
-  }
 
   const filters = [
     {
@@ -57,6 +52,51 @@ function CreateReservation() {
       ],
     },
   ];
+
+  const adds = [
+    {
+      label: "Crop Type",
+      type: "text",
+      placeholder: "ex. Rice",
+      required: true,
+      name: "crop_type",
+    },
+    {
+      label: "Quantity (Cavans)",
+      type: "number",
+      min: 1,
+      placeholder: "ex. 50",
+      required: true,
+      name: "quantity",
+    },
+    {
+      label: "Payment Type",
+      type: "select",
+      name: "payment",
+      option: [
+        { value: "gcash", phrase: "Gcash" },
+      ],
+    },
+  ];
+
+  function handleView(i, status) {
+    alert(`id: ${i + 1}\nStatus: ${status}`);
+    status === 'available' && setAddModal(true);
+  }
+
+  const handleSubmit = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const Myalert = `
+      Crop Type: ${data.crop_type}\n
+      Quantity (Cavans): ${data.quantity}\n
+      Payment Type: ${data.payment}`;
+    alert(Myalert);
+    setLoading(false);
+    setAddModal(false);
+  };
 
   const Endpoint = "";
 
@@ -76,15 +116,13 @@ function CreateReservation() {
         const { Results } = res.data;
         setData(
           Array.isArray(Results)
-            ? Results.map((data) => {
+            ? Results.map((data, index) => {
                 return {
                   dryer_name: data.dryer_name,
                   location: data.location,
                   status: data.status,
                   action: (
-                    <Button onClick={() => alert(data.dryer_name)}>
-                      Reserve
-                    </Button>
+                    <Button onClick={() => handleView(index, data.status)}>Reserve</Button>
                   ),
                 };
               })
@@ -94,6 +132,15 @@ function CreateReservation() {
       } catch (error) {
         console.log(error);
         // setIsError(true);
+        function FakeFallbackData() {
+          return Array.from({ length: 6 }, (_, i) => ({
+            dryer_name: i % 2 === 0 ? "A" : "1",
+            location: i % 2 === 0 ? "B" : "2",
+            status: i % 2 === 0 ? "available" : "occupied",
+            action: 
+              <Button onClick={() => handleView(i, i % 2 === 0 ? "available" : "occupied")}>Reserve</Button>,
+          }));
+        }
         setData(FakeFallbackData());
       } finally {
         setIsLoading(false);
@@ -130,12 +177,16 @@ function CreateReservation() {
     );
   return (
     <>
+      {loading && <Loading />}
       {modal && (
         <FilterModal
           setModal={setModal}
           setFilter={setFilter}
           filters={filters}
         />
+      )}
+      {addModal && (
+        <AddModal setAddModal={setAddModal} handleSubmit={handleSubmit} adds={adds} />
       )}
       <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
         <Search setSearch={setSearch} setModal={setModal} />

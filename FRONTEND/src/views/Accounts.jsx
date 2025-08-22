@@ -7,6 +7,7 @@ import Search from "../component/Search";
 import FilterModal from "../component/FilterModal";
 import AddModal from "../component/AddModal";
 import Button from "../component/Button";
+import Loading from "../component/Loading";
 
 function Accounts() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,6 +19,7 @@ function Accounts() {
   const [addModal, setAddModal] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const tableHeadings = [
     "First Name",
@@ -35,15 +37,7 @@ function Accounts() {
     "role",
   ];
 
-  function FakeFallbackData() {
-    return Array.from({ length: 4 }, (_, i) => ({
-      first_name: i % 2 === 0 ? "A" : "1",
-      middle_initial: i % 2 === 0 ? "B" : "2",
-      last_name: i % 2 === 0 ? "C" : "3",
-      email: i % 2 === 0 ? "D" : "4",
-      role: i % 2 === 0 ? "Owner" : "Farmer",
-    }));
-  }
+  
 
   const filters = [
     {
@@ -75,8 +69,8 @@ function Accounts() {
     {
       label: "Password",
       type: "password",
-      min: 6,
-      max: 16,
+      minLength: 6,
+      maxLength: 16,
       placeholder: "Enter 8-16 characters",
       required: true,
       name: "password",
@@ -98,6 +92,23 @@ function Accounts() {
       name: "email",
     },
   ];
+
+  const handleSubmit = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const Myalert = `
+      First Name: ${data.first_name}\n
+      Last Name: ${data.last_name}\n
+      Password: ${data.password}\n
+      Role: ${data.role}\n
+      Email: ${data.email}`;
+    alert(Myalert);
+    setData((prevData) => [...prevData, data]);
+    setLoading(false);
+    setAddModal(false);
+  };
 
   const Endpoint = "";
 
@@ -132,6 +143,15 @@ function Accounts() {
       } catch (error) {
         console.log(error);
         // setIsError(true);
+        function FakeFallbackData() {
+          return Array.from({ length: 4 }, (_, i) => ({
+            first_name: i % 2 === 0 ? "A" : "1",
+            middle_initial: i % 2 === 0 ? "B" : "2",
+            last_name: i % 2 === 0 ? "C" : "3",
+            email: i % 2 === 0 ? "D" : "4",
+            role: i % 2 === 0 ? "Owner" : "Farmer",
+          }));
+        }
         setData(FakeFallbackData());
       } finally {
         setIsLoading(false);
@@ -168,6 +188,7 @@ function Accounts() {
     );
   return (
     <>
+      {loading && <Loading />}
       {modal && (
         <FilterModal
           setModal={setModal}
@@ -176,7 +197,7 @@ function Accounts() {
         />
       )}
       {addModal && (
-        <AddModal setAddModal={setAddModal} setData={setData} adds={adds} />
+        <AddModal setAddModal={setAddModal} adds={adds} handleSubmit={handleSubmit} />
       )}
       <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
         <Search setSearch={setSearch} setModal={setModal} />

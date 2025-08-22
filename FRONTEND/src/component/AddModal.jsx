@@ -1,27 +1,12 @@
 import Button from "./Button";
 import { RiCloseLargeLine } from "react-icons/ri";
 
-function AddModal({ setAddModal, setData, adds }) {
-  const handleSubmit = (e) => {
-    // setLoading(true);
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    const Myalert = `
-      First Name: ${data.first_name}\n
-      Last Name: ${data.last_name}\n
-      Password: ${data.password}\n
-      Role: ${data.role}\n
-      Email: ${data.email}`;
-    alert(Myalert);
-    setData((prevData) => [...prevData, data]);
-    // setLoading(false);
-    setAddModal(false);
-  };
+function AddModal({ setAddModal, adds, handleSubmit }) {
+  
   return (
     <>
       <div
-        onClick={() => setModal(false)}
+        onClick={() => setAddModal(false)}
         className="absolute z-1 top-0 left-0 flex items-center justify-center h-[calc(100dvh-56px)] w-full bg-[rgba(0,0,0,0.75)] backdrop-blur-[6px]"
       >
         <form
@@ -32,7 +17,7 @@ function AddModal({ setAddModal, setData, adds }) {
           <div className="w-full flex justify-between items-center">
             <h1 className="font-bold text-2xl text-[rgba(0,100,0,255)]">Add</h1>
             <div
-              onClick={() => setModal(false)}
+              onClick={() => setAddModal(false)}
               className="p-3 cursor-pointer rounded-full hover:bg-[rgba(0,0,0,0.2)] transition-all duration-300"
             >
               <RiCloseLargeLine />
@@ -69,8 +54,8 @@ function AddModal({ setAddModal, setData, adds }) {
                     required={add.required}
                     spellCheck="false"
                     name={add.name}
-                    minLength={add.min}
-                    maxLength={add.max}
+                    minLength={add.minLength}
+                    maxLength={add.maxLength}
                   />
                 )}
               </div>
@@ -79,7 +64,7 @@ function AddModal({ setAddModal, setData, adds }) {
           <div className="w-full flex gap-3 justify-end items-center">
             <button
               type="button"
-              onClick={() => setModal(false)}
+              onClick={() => setAddModal(false)}
               className="rounded-md hover:bg-[rgba(0,0,0,0.2)] py-2 px-4 transition-all duration-300"
             >
               Cancel

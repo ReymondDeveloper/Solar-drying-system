@@ -53,6 +53,8 @@ function SignIn() {
       required: true,
       autoComplete: "password",
       defaultValue: "admin123",
+      minLength: 6,
+      maxLength: 16
     },
   ];
   return (
@@ -80,6 +82,8 @@ function SignIn() {
                         required={field.required}
                         autoComplete={field.autoComplete}
                         defaultValue={field.defaultValue}
+                        minLength={field.minLength}
+                        maxLength={field.maxLength}
                       />
                     </div>
                   </div>
