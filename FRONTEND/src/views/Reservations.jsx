@@ -116,7 +116,7 @@ function Reservations() {
     const filterBySearch = search
       ? Object.entries(info)
           .filter(([key]) => key !== "action" && key !== "status")
-          .some(([_, value]) =>
+          .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;

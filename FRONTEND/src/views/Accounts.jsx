@@ -149,7 +149,7 @@ function Accounts() {
     const filterBySearch = search
       ? Object.entries(info)
           .filter(([key]) => key !== "role")
-          .some(([_, value]) =>
+          .some(([value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;
