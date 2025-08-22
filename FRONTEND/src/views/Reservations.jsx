@@ -38,7 +38,7 @@ function Reservations() {
   const fields = [
     {
       label: "Status",
-      type: 'select',
+      type: "select",
       name: "status",
       option: [
         { value: "all", phrase: "All" },
@@ -86,7 +86,14 @@ function Reservations() {
                   dryer_name: data.dryer_name,
                   date: data.date,
                   status: data.status,
-                  action: <Button onClick={() => alert(data.id)} className={'bg-blue-400 hover:bg-blue-500 text-white'}>Print</Button>,
+                  action: (
+                    <Button
+                      onClick={() => alert(data.id)}
+                      className={"bg-blue-400 hover:bg-blue-500 text-white"}
+                    >
+                      Print
+                    </Button>
+                  ),
                 };
               })
             : []
@@ -101,7 +108,14 @@ function Reservations() {
             dryer_name: `Dryer ${i + 1}`,
             date: `Date ${i + 1}`,
             status: i % 2 === 0 ? "approved" : "denied",
-            action: <Button onClick={() => alert(i + 1)} className={'bg-blue-400 hover:bg-blue-500 text-white'}>Print</Button>,
+            action: (
+              <Button
+                onClick={() => alert(i + 1)}
+                className={"bg-blue-400 hover:bg-blue-500 text-white"}
+              >
+                Print
+              </Button>
+            ),
           }));
         }
         setData(FakeFallbackData());
@@ -147,8 +161,8 @@ function Reservations() {
           setModal={setModal}
           handleSubmit={handleSubmit}
           fields={fields}
-          title={'Filters'}
-          button_name={'Apply Status'}
+          title={"Filters"}
+          button_name={"Apply Status"}
         />
       )}
       <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
@@ -166,9 +180,22 @@ function Reservations() {
                   tableDataCell={tableDataCell}
                 />
                 {FilteredData?.length === 0 && (
-                  <div className="flex justify-center items-center font-bold py-5">
-                    No Reservations Found.
-                  </div>
+                  <>
+                    <div className="hidden lg:flex justify-center items-center font-bold py-5">
+                      No Reservations Found.
+                    </div>
+
+                    <div className="rounded-md flex flex-col">
+                      <div className="bg-[rgb(138,183,45)] p-2 flex justify-end rounded-t-md">
+                        <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] font-bold rounded-full bg-white">
+                          0
+                        </div>
+                      </div>
+                      <div className="lg:hidden p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
+                        No Reservations Found.
+                      </div>
+                    </div>
+                  </>
                 )}
               </>
             )}

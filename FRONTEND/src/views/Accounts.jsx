@@ -35,11 +35,11 @@ function Accounts() {
     "email",
     "role",
   ];
-  
+
   const fieldsFilter = [
     {
       label: "Role",
-      type: 'select',
+      type: "select",
       name: "role",
       option: [
         { value: "all", phrase: "All" },
@@ -180,7 +180,7 @@ function Accounts() {
     const filterBySearch = search
       ? Object.entries(info)
           .filter(([key]) => key !== "role")
-          .some(([value]) =>
+          .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;
@@ -205,8 +205,8 @@ function Accounts() {
           setModal={setModalFilter}
           handleSubmit={handleSubmitFilter}
           fields={fieldsFilter}
-          title={'Filters'}
-          button_name={'Apply Role'}
+          title={"Filters"}
+          button_name={"Apply Role"}
         />
       )}
       {modalAdd && (
@@ -214,14 +214,19 @@ function Accounts() {
           setModal={setModalAdd}
           handleSubmit={handleSubmitAdd}
           fields={fieldsAdd}
-          title={'Registration'}
-          button_name={'Register'}
+          title={"Registration"}
+          button_name={"Register"}
         />
       )}
       <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
         <Search setSearch={setSearch} setModal={setModalFilter} />
         <div className="w-full text-right mt-5">
-          <Button onClick={() => setModalAdd(true)} className={'bg-green-600 hover:bg-green-700 text-white'}>Create Account</Button>
+          <Button
+            onClick={() => setModalAdd(true)}
+            className={"bg-green-600 hover:bg-green-700 text-white"}
+          >
+            Create Account
+          </Button>
         </div>
         <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
           <div className="overflow-auto max-h-[400px]">
@@ -236,9 +241,22 @@ function Accounts() {
                   tableDataCell={tableDataCell}
                 />
                 {FilteredData?.length === 0 && (
-                  <div className="flex justify-center items-center font-bold py-5">
-                    No Accounts Found.
-                  </div>
+                  <>
+                    <div className="hidden lg:flex justify-center items-center font-bold py-5">
+                      No Accounts Found.
+                    </div>
+
+                    <div className="rounded-md flex flex-col">
+                      <div className="bg-[rgb(138,183,45)] p-2 flex justify-end rounded-t-md">
+                        <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] font-bold rounded-full bg-white">
+                          0
+                        </div>
+                      </div>
+                      <div className="lg:hidden p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
+                        No Accounts Found.
+                      </div>
+                    </div>
+                  </>
                 )}
               </>
             )}
