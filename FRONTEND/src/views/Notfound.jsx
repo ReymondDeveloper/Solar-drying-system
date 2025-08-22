@@ -34,7 +34,7 @@ function Notfound() {
       <p className="text-gray-500">
         It looks like you found a glitch in the matrix...
       </p>
-      <Button onClick={handleBack} className={`flex items-center gap-2`}>
+      <Button onClick={handleBack} className={`flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white`}>
         <FaArrowLeft /> Go Back
       </Button>
     </div>
