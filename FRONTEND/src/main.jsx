@@ -18,6 +18,7 @@ import CreateReservation from "./views/CreateReservation";
 import Authentication from "./component/Authentication";
 import ReservationHistory from "./views/ReservationHistory";
 import BookingRequests from "./views/BookingRequests";
+import Settings from "./views/Settings";
 
 const baseName =
   import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system";
@@ -81,6 +82,14 @@ const router = createBrowserRouter(
               ),
             },
             {
+              path: "settings",
+              element: (
+                <Authentication role={"admin"}>
+                  <Settings />
+                </Authentication>
+              ),
+            },
+            {
               path: "create-reservation",
               element: (
                 <Authentication role={"farmer"}>
@@ -135,10 +144,6 @@ const router = createBrowserRouter(
                   <Sample />
                 </Authentication>
               ),
-            },
-            {
-              path: "settings",
-              element: <Sample />,
             },
           ],
         },
