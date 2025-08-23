@@ -1,5 +1,5 @@
 import express from "express";
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 import userRoutes from "../src/api/routes/userRoutes.js";
 import { errorHandler } from "../src/api/middleware/errorHandler.js";
 import cors from "cors";
