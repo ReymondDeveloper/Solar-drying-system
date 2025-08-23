@@ -14,10 +14,10 @@ function Index() {
                     </h1>
                     <div className="flex gap-3 justify-end my-3">
                         <NavLink to="/registration" >
-                            <Button>Register</Button>
+                            <Button className={'bg-green-600 hover:bg-green-700'}>Register</Button>
                         </NavLink>
                         <NavLink to="/sign-in" >
-                            <Button>Sign In</Button>
+                            <Button className={'bg-green-600 hover:bg-green-700'}>Sign In</Button>
                         </NavLink>
                     </div>
                     <div className="relative">

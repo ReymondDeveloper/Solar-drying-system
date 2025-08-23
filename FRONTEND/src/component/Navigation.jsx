@@ -1,105 +1,9 @@
 import { NavLink } from "react-router-dom";
-import { GiBookmarklet } from "react-icons/gi";
-import {
-  FaMapMarkedAlt,
-  FaFileMedicalAlt,
-  FaGlobe,
-  FaEdit,
-} from "react-icons/fa";
-import { IoPeopleSharp } from "react-icons/io5";
-import { HiClipboardDocumentList } from "react-icons/hi2";
-import { BiSolidDashboard } from "react-icons/bi";
+import Links from "../utils/Links";
 
 function Navigation({ button, setButton }) {
   const baseIMG =
     import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system/";
-  const links = [
-    {
-      role: "admin",
-      navigation: [
-        {
-          to: "/home",
-          title: "Home",
-          icon: <BiSolidDashboard className="w-full h-full" />,
-        },
-        {
-          to: "/home/reservations",
-          title: "Reservations",
-          icon: <GiBookmarklet className="w-full h-full" />,
-        },
-        {
-          to: "/home/availability",
-          title: "Availability",
-          icon: <FaMapMarkedAlt className="w-full h-full" />,
-        },
-        {
-          to: "/home/accounts",
-          title: "Accounts",
-          icon: <IoPeopleSharp className="w-full h-full" />,
-        },
-        {
-          to: "/home/reports",
-          title: "Reports",
-          icon: <FaFileMedicalAlt className="w-full h-full" />,
-        },
-      ],
-    },
-    {
-      role: "farmer",
-      navigation: [
-        {
-          to: "/home",
-          title: "Home",
-          icon: <BiSolidDashboard className="w-full h-full" />,
-        },
-        {
-          to: "/home/create-reservation",
-          title: "Create Reservation",
-          icon: <FaMapMarkedAlt className="w-full h-full" />,
-        },
-        {
-          to: "/home/reservation-history",
-          title: "Reservation History",
-          icon: <GiBookmarklet className="w-full h-full" />,
-        },
-        {
-          to: "/home/booking-information",
-          title: "Booking Information",
-          icon: <HiClipboardDocumentList className="w-full h-full" />,
-        },
-        {
-          to: "/home/about",
-          title: "About",
-          icon: <FaGlobe className="w-full h-full" />,
-        },
-      ],
-    },
-    {
-      role: "owner",
-      navigation: [
-        {
-          to: "/home",
-          title: "Home",
-          icon: <BiSolidDashboard className="w-full h-full" />,
-        },
-        {
-          to: "/home/update-dryer-status",
-          title: "Update Dryer Status",
-          icon: <FaEdit className="w-full h-full" />,
-        },
-        {
-          to: "/home/booking-requests",
-          title: "Booking Requests",
-          icon: <GiBookmarklet className="w-full h-full" />,
-        },
-        {
-          to: "/home/dryer-information",
-          title: "Dryer Information",
-          icon: <HiClipboardDocumentList className="w-full h-full" />,
-        },
-      ],
-    },
-  ];
   return (
     <>
       <div
@@ -131,25 +35,25 @@ function Navigation({ button, setButton }) {
           </div>
         )}
 
-        {links.map(
+        {Links.map(
           (link) =>
             link.role === localStorage.getItem("role") &&
-            link.navigation.map((nav, index) => (
+            link.list.map((route, index) => (
               <NavLink
                 key={index}
                 onClick={() => setButton(false)}
-                to={nav.to}
+                to={route.to}
                 className="bg-[rgba(255,255,255,0.2)] w-full flex !ps-5 !py-3 transition-all duration-300 hover:bg-[rgba(255,255,255,0.3)]"
               >
                 <div className={`w-5 me-5 text-white ${!button && "h-[30px]"}`}>
-                  {nav.icon}
+                  {route.icon}
                 </div>
                 <h1
-                  className={`bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent transition-all duration-300 ${
+                  className={`bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent transition-all duration-300 capitalize ${
                     button ? "md:w-auto" : "md:w-0"
                   }`}
                 >
-                  {button && nav.title}
+                  {button && route.title}
                 </h1>
               </NavLink>
             ))

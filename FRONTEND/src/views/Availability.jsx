@@ -4,7 +4,8 @@ import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
-import FilterModal from "../component/FilterModal";
+import Modal from "../component/Modal";
+import Loading from "../component/Loading";
 
 function Availability() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -15,23 +16,17 @@ function Availability() {
   const [modal, setModal] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const tableHeadings = ["Registered Dryer", "Location (Sablayan)", "Status"];
 
   const tableDataCell = ["dryer_name", "location", "status"];
 
-  function FakeFallbackData() {
-    return Array.from({ length: 6 }, (_, i) => ({
-      dryer_name: i % 2 === 0 ? "A" : "1",
-      location: i % 2 === 0 ? "B" : "2",
-      status: i % 2 === 0 ? "available" : "occupied",
-    }));
-  }
-
-  const filters = [
+  const fields = [
     {
       label: "Status",
-      id: "filter",
+      type: "select",
+      name: "status",
       option: [
         { value: "all", phrase: "All" },
         { value: "available", phrase: "Available" },
@@ -39,6 +34,20 @@ function Availability() {
       ],
     },
   ];
+
+  const handleSubmit = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const Myalert = `
+      Status: ${data.status}`;
+    alert(Myalert);
+    // setData((prev) => [...prev, data]);
+    setFilter(data.status);
+    setLoading(false);
+    setModal(false);
+  };
 
   const Endpoint = "";
 
@@ -71,6 +80,13 @@ function Availability() {
       } catch (error) {
         console.log(error);
         // setIsError(true);
+        function FakeFallbackData() {
+          return Array.from({ length: 6 }, (_, i) => ({
+            dryer_name: `Dryer ${i + 1}`,
+            location: `Location ${i + 1}`,
+            status: i % 2 === 0 ? "available" : "occupied",
+          }));
+        }
         setData(FakeFallbackData());
       } finally {
         setIsLoading(false);
@@ -88,7 +104,7 @@ function Availability() {
     const filterBySearch = search
       ? Object.entries(info)
           .filter(([key]) => key !== "status")
-          .some(([_, value]) =>
+          .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;
@@ -107,11 +123,14 @@ function Availability() {
     );
   return (
     <>
+      {loading && <Loading />}
       {modal && (
-        <FilterModal
+        <Modal
           setModal={setModal}
-          setFilter={setFilter}
-          filters={filters}
+          handleSubmit={handleSubmit}
+          fields={fields}
+          title={"Filters"}
+          button_name={"Apply Status"}
         />
       )}
       <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
@@ -129,9 +148,22 @@ function Availability() {
                   tableDataCell={tableDataCell}
                 />
                 {FilteredData?.length === 0 && (
-                  <div className="flex justify-center items-center font-bold py-5">
-                    No Available Solar Dryers Found.
-                  </div>
+                  <>
+                    <div className="hidden lg:flex justify-center items-center font-bold py-5">
+                      No Available Solar Dryers Found.
+                    </div>
+
+                    <div className="rounded-md flex flex-col">
+                      <div className="bg-[rgb(138,183,45)] p-2 flex justify-end rounded-t-md">
+                        <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] font-bold rounded-full bg-white">
+                          0
+                        </div>
+                      </div>
+                      <div className="lg:hidden p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
+                        No Available Solar Dryers Found.
+                      </div>
+                    </div>
+                  </>
                 )}
               </>
             )}

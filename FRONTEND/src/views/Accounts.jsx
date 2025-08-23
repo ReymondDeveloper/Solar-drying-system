@@ -4,9 +4,9 @@ import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
-import FilterModal from "../component/FilterModal";
-import AddModal from "../component/AddModal";
+import Modal from "../component/Modal";
 import Button from "../component/Button";
+import Loading from "../component/Loading";
 
 function Accounts() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -14,10 +14,11 @@ function Accounts() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [modal, setModal] = useState(false);
-  const [addModal, setAddModal] = useState(false);
+  const [modalFilter, setModalFilter] = useState(false);
+  const [modalAdd, setModalAdd] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const tableHeadings = [
     "First Name",
@@ -35,20 +36,11 @@ function Accounts() {
     "role",
   ];
 
-  function FakeFallbackData() {
-    return Array.from({ length: 4 }, (_, i) => ({
-      first_name: i % 2 === 0 ? "A" : "1",
-      middle_initial: i % 2 === 0 ? "B" : "2",
-      last_name: i % 2 === 0 ? "C" : "3",
-      email: i % 2 === 0 ? "D" : "4",
-      role: i % 2 === 0 ? "Owner" : "Farmer",
-    }));
-  }
-
-  const filters = [
+  const fieldsFilter = [
     {
       label: "Role",
-      id: "filter",
+      type: "select",
+      name: "role",
       option: [
         { value: "all", phrase: "All" },
         { value: "owner", phrase: "Owner" },
@@ -57,7 +49,20 @@ function Accounts() {
     },
   ];
 
-  const adds = [
+  const handleSubmitFilter = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const Myalert = `
+      Role: ${data.role}`;
+    alert(Myalert);
+    setFilter(data.role);
+    setLoading(false);
+    setModalFilter(false);
+  };
+
+  const fieldsAdd = [
     {
       label: "First Name",
       type: "text",
@@ -75,8 +80,8 @@ function Accounts() {
     {
       label: "Password",
       type: "password",
-      min: 6,
-      max: 16,
+      minLength: 6,
+      maxLength: 16,
       placeholder: "Enter 8-16 characters",
       required: true,
       name: "password",
@@ -98,6 +103,23 @@ function Accounts() {
       name: "email",
     },
   ];
+
+  const handleSubmitAdd = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const Myalert = `
+      First Name: ${data.first_name}\n
+      Last Name: ${data.last_name}\n
+      Password: ${data.password}\n
+      Role: ${data.role}\n
+      Email: ${data.email}`;
+    alert(Myalert);
+    setData((prevData) => [...prevData, data]);
+    setLoading(false);
+    setModalAdd(false);
+  };
 
   const Endpoint = "";
 
@@ -132,6 +154,15 @@ function Accounts() {
       } catch (error) {
         console.log(error);
         // setIsError(true);
+        function FakeFallbackData() {
+          return Array.from({ length: 4 }, (_, i) => ({
+            first_name: `First Name ${i + 1}`,
+            middle_initial: `Middle Initial ${i + 1}`,
+            last_name: `Last Name ${i + 1}`,
+            email: `Email ${i + 1}`,
+            role: i % 2 === 0 ? "Owner" : "Farmer",
+          }));
+        }
         setData(FakeFallbackData());
       } finally {
         setIsLoading(false);
@@ -149,7 +180,7 @@ function Accounts() {
     const filterBySearch = search
       ? Object.entries(info)
           .filter(([key]) => key !== "role")
-          .some(([_, value]) =>
+          .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;
@@ -168,20 +199,34 @@ function Accounts() {
     );
   return (
     <>
-      {modal && (
-        <FilterModal
-          setModal={setModal}
-          setFilter={setFilter}
-          filters={filters}
+      {loading && <Loading />}
+      {modalFilter && (
+        <Modal
+          setModal={setModalFilter}
+          handleSubmit={handleSubmitFilter}
+          fields={fieldsFilter}
+          title={"Filters"}
+          button_name={"Apply Role"}
         />
       )}
-      {addModal && (
-        <AddModal setAddModal={setAddModal} setData={setData} adds={adds} />
+      {modalAdd && (
+        <Modal
+          setModal={setModalAdd}
+          handleSubmit={handleSubmitAdd}
+          fields={fieldsAdd}
+          title={"Registration"}
+          button_name={"Register"}
+        />
       )}
       <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
-        <Search setSearch={setSearch} setModal={setModal} />
+        <Search setSearch={setSearch} setModal={setModalFilter} />
         <div className="w-full text-right mt-5">
-          <Button onClick={() => setAddModal(true)}>Add Account</Button>
+          <Button
+            onClick={() => setModalAdd(true)}
+            className={"bg-green-600 hover:bg-green-700 text-white"}
+          >
+            Create Account
+          </Button>
         </div>
         <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
           <div className="overflow-auto max-h-[400px]">
@@ -196,9 +241,22 @@ function Accounts() {
                   tableDataCell={tableDataCell}
                 />
                 {FilteredData?.length === 0 && (
-                  <div className="flex justify-center items-center font-bold py-5">
-                    No Accounts Found.
-                  </div>
+                  <>
+                    <div className="hidden lg:flex justify-center items-center font-bold py-5">
+                      No Accounts Found.
+                    </div>
+
+                    <div className="rounded-md flex flex-col">
+                      <div className="bg-[rgb(138,183,45)] p-2 flex justify-end rounded-t-md">
+                        <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] font-bold rounded-full bg-white">
+                          0
+                        </div>
+                      </div>
+                      <div className="lg:hidden p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
+                        No Accounts Found.
+                      </div>
+                    </div>
+                  </>
                 )}
               </>
             )}

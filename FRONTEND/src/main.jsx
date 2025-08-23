@@ -14,6 +14,10 @@ import Availability from "./views/Availability";
 import Reports from "./views/Reports";
 import Accounts from "./views/Accounts";
 import Sample from "./views/Sample";
+import CreateReservation from "./views/CreateReservation";
+import Authentication from "./component/Authentication";
+import ReservationHistory from "./views/ReservationHistory";
+import BookingRequests from "./views/BookingRequests";
 
 const baseName =
   import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system";
@@ -46,47 +50,91 @@ const router = createBrowserRouter(
             },
             {
               path: "reservations",
-              element: <Reservations />,
+              element: (
+                <Authentication role={"admin"}>
+                  <Reservations />
+                </Authentication>
+              ),
             },
             {
               path: "availability",
-              element: <Availability />,
+              element: (
+                <Authentication role={"admin"}>
+                  <Availability />
+                </Authentication>
+              ),
             },
             {
               path: "accounts",
-              element: <Accounts />,
+              element: (
+                <Authentication role={"admin"}>
+                  <Accounts />
+                </Authentication>
+              ),
             },
             {
               path: "reports",
-              element: <Reports />,
+              element: (
+                <Authentication role={"admin"}>
+                  <Reports />
+                </Authentication>
+              ),
             },
             {
               path: "create-reservation",
-              element: <Sample />,
+              element: (
+                <Authentication role={"farmer"}>
+                  <CreateReservation />
+                </Authentication>
+              ),
             },
             {
               path: "reservation-history",
-              element: <Sample />,
+              element: (
+                <Authentication role={"farmer"}>
+                  <ReservationHistory />
+                </Authentication>
+              ),
             },
             {
               path: "booking-information",
-              element: <Sample />,
+              element: (
+                <Authentication role={"farmer"}>
+                  <Sample />
+                </Authentication>
+              ),
             },
             {
               path: "about",
-              element: <Sample />,
+              element: (
+                <Authentication role={"farmer"}>
+                  <Sample />
+                </Authentication>
+              ),
             },
             {
               path: "update-dryer-status",
-              element: <Sample />,
+              element: (
+                <Authentication role={"owner"}>
+                  <Sample />
+                </Authentication>
+              ),
             },
             {
               path: "booking-requests",
-              element: <Sample />,
+              element: (
+                <Authentication role={"owner"}>
+                  <BookingRequests />
+                </Authentication>
+              ),
             },
             {
               path: "dryer-information",
-              element: <Sample />,
+              element: (
+                <Authentication role={"owner"}>
+                  <Sample />
+                </Authentication>
+              ),
             },
             {
               path: "settings",

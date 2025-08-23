@@ -4,38 +4,33 @@ import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
+import Loading from "../component/Loading";
 import Modal from "../component/Modal";
 import Button from "../component/Button";
-import Loading from "../component/Loading";
 
-function Reservations() {
+function ReservationHistory() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [modal, setModal] = useState(false);
+  const [modalFilter, setModalFilter] = useState(false);
+  const [modalView, setModalView] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
   const tableHeadings = [
-    "Account Name",
     "Booked Dryer",
+    "Location (Sablayan)",
     "Date",
     "Status",
     "Action",
   ];
 
-  const tableDataCell = [
-    "account_name",
-    "dryer_name",
-    "date",
-    "status",
-    "action",
-  ];
+  const tableDataCell = ["dryer_name", "location", "date", "status", "action"];
 
-  const fields = [
+  const fieldsFilter = [
     {
       label: "Status",
       type: "select",
@@ -48,7 +43,7 @@ function Reservations() {
     },
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmitFilter = (e) => {
     setLoading(true);
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -56,11 +51,31 @@ function Reservations() {
     const Myalert = `
       Status: ${data.status}`;
     alert(Myalert);
-    // setData((prev) => [...prev, data]);
     setFilter(data.status);
     setLoading(false);
-    setModal(false);
+    setModalFilter(false);
   };
+
+  const datasView = [{ crop_type: "Rice", quantity: "50", payment: "gcash" }];
+
+  const handleSubmitView = (e) => {
+    setLoading(true);
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const Myalert = `
+      Crop Type: ${data.crop_type}\n
+      Quantity (Cavans): ${data.quantity}\n
+      Payment Type: ${data.payment}`;
+    alert(Myalert);
+    setLoading(false);
+    setModalView(false);
+  };
+
+  function handleView(i) {
+    alert(`id: ${i + 1}`);
+    setModalView(true);
+  }
 
   const Endpoint = "";
 
@@ -80,7 +95,7 @@ function Reservations() {
         const { Results } = res.data;
         setData(
           Array.isArray(Results)
-            ? Results.map((data) => {
+            ? Results.map((data, index) => {
                 return {
                   account_name: data.account_name,
                   dryer_name: data.dryer_name,
@@ -88,10 +103,10 @@ function Reservations() {
                   status: data.status,
                   action: (
                     <Button
-                      onClick={() => alert(data.id)}
+                      onClick={() => handleView(index)}
                       className={"bg-blue-400 hover:bg-blue-500 text-white"}
                     >
-                      Print
+                      View
                     </Button>
                   ),
                 };
@@ -104,16 +119,16 @@ function Reservations() {
         // setIsError(true);
         function FakeFallbackData() {
           return Array.from({ length: 6 }, (_, i) => ({
-            account_name: `Name ${i + 1}`,
             dryer_name: `Dryer ${i + 1}`,
+            location: `Location ${i + 1}`,
             date: `Date ${i + 1}`,
             status: i % 2 === 0 ? "approved" : "denied",
             action: (
               <Button
-                onClick={() => alert(i + 1)}
+                onClick={() => handleView(i)}
                 className={"bg-blue-400 hover:bg-blue-500 text-white"}
               >
-                Print
+                View
               </Button>
             ),
           }));
@@ -156,17 +171,26 @@ function Reservations() {
   return (
     <>
       {loading && <Loading />}
-      {modal && (
+      {modalFilter && (
         <Modal
-          setModal={setModal}
-          handleSubmit={handleSubmit}
-          fields={fields}
+          setModal={setModalFilter}
+          handleSubmit={handleSubmitFilter}
+          fields={fieldsFilter}
           title={"Filters"}
           button_name={"Apply Status"}
         />
       )}
+      {modalView && (
+        <Modal
+          setModal={setModalView}
+          handleSubmit={handleSubmitView}
+          datas={datasView}
+          title={"Reservation Details"}
+          button_name={"Edit"}
+        />
+      )}
       <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
-        <Search setSearch={setSearch} setModal={setModal} />
+        <Search setSearch={setSearch} setModal={setModalFilter} />
         <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
           <div className="overflow-auto max-h-[400px]">
             {isLoading ? (
@@ -182,7 +206,7 @@ function Reservations() {
                 {FilteredData?.length === 0 && (
                   <>
                     <div className="hidden lg:flex justify-center items-center font-bold py-5">
-                      No Reservations Found.
+                      No History Found.
                     </div>
 
                     <div className="rounded-md flex flex-col">
@@ -192,7 +216,7 @@ function Reservations() {
                         </div>
                       </div>
                       <div className="lg:hidden p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
-                        No Reservations Found.
+                        No History Found.
                       </div>
                     </div>
                   </>
@@ -215,4 +239,4 @@ function Reservations() {
   );
 }
 
-export default Reservations;
+export default ReservationHistory;

@@ -38,6 +38,8 @@ function Registration() {
       id: "password",
       type: "password",
       name: "password",
+      minLength: 8,
+      maxLength: 16,
       required: true,
     },
   ];
@@ -119,6 +121,8 @@ function Registration() {
                         name={data.name}
                         type={data.type}
                         required={data.required}
+                        minLength={data.minLength}
+                        maxLength={data.maxLength}
                       />
                     </div>
                   )
@@ -126,7 +130,7 @@ function Registration() {
               )}
 
               <div>
-                <Button type={"submit"} className={"w-full"}>
+                <Button type={"submit"} className={"w-full bg-green-600 hover:bg-green-700 text-white"}>
                   Register
                 </Button>
               </div>

@@ -1,6 +1,6 @@
+import Button from "../component/Button";
 
 const Pagination = ({ limit, setLimit, setCurrentPage, currentPageSafe, currentPage, totalPages }) => {
-  const style = 'rounded-md border border-gray-300 !px-2 !py-1 text-white font-semibold bg-green-600 hover:bg-green-700 transform-all duration-300';
   return (
     <>
       <div className="flex-col justify-end items-center !p-5 md:hidden">
@@ -9,7 +9,7 @@ const Pagination = ({ limit, setLimit, setCurrentPage, currentPageSafe, currentP
             <b className="text-sm">Rows Per Page:</b>
           </label>
 
-          <div className={style}>
+          <Button className={'bg-green-600 hover:bg-green-700 text-white text-white'}>
             <b className="text-sm">
               <select
                 className="outline-0"
@@ -33,49 +33,49 @@ const Pagination = ({ limit, setLimit, setCurrentPage, currentPageSafe, currentP
                 </option>
               </select>
             </b>
-          </div>
+          </Button>
         </div>
 
         <div className="flex flex-col gap-1">
-          <button className={style}>
+          <Button className={'bg-green-600 hover:bg-green-700 text-white text-white'}>
             <b className="text-sm">
               {currentPage} / {totalPages}
             </b>
-          </button>
+          </Button>
           <div className="flex w-full items-center gap-1">
-            <button
-              className={`w-1/4 ${style}`}
+            <Button
+              className={`w-1/4 bg-green-600 hover:bg-green-700 text-white text-white}`}
               onClick={() => setCurrentPage(1)}
               disabled={currentPageSafe === 1}
             >
               {'<<'}
-            </button>
+            </Button>
 
-            <button
-              className={`w-1/4 ${style}`}
+            <Button
+              className={`w-1/4 bg-green-600 hover:bg-green-700 text-white text-white}`}
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPageSafe === 1}
             >
               {'<'}
-            </button>
+            </Button>
 
-            <button
-              className={`w-1/4 ${style}`}
+            <Button
+              className={`w-1/4 bg-green-600 hover:bg-green-700 text-white text-white}`}
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
               disabled={currentPageSafe === totalPages}
             >
               {'>'}
-            </button>
+            </Button>
 
-            <button
-              className={`w-1/4 ${style}`}
+            <Button
+              className={`w-1/4 bg-green-600 hover:bg-green-700 text-white text-white}`}
               onClick={() => setCurrentPage(totalPages)}
               disabled={currentPageSafe === totalPages}
             >
               {'>>'}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -84,7 +84,7 @@ const Pagination = ({ limit, setLimit, setCurrentPage, currentPageSafe, currentP
           <b className="text-sm">Rows Per Page:</b>
         </label>
 
-        <div className={style}>
+        <Button className={'bg-green-600 hover:bg-green-700 text-white text-white'}>
           <b className="text-sm">
             <select
               className="outline-0"
@@ -108,49 +108,49 @@ const Pagination = ({ limit, setLimit, setCurrentPage, currentPageSafe, currentP
               </option>
             </select>
           </b>
-        </div>
+        </Button>
 
-        <button
-          className={`md:w-1/10 lg:w-1/20 ${style}`}
+        <Button
+          className={'md:w-1/10 lg:w-1/20 bg-green-600 hover:bg-green-700 text-white text-white'}
           onClick={() => setCurrentPage(1)}
           disabled={currentPageSafe === 1}
         >
           {'<<'}
-        </button>
+        </Button>
 
-        <button
-          className={`md:w-1/10 lg:w-1/20 ${style}`}
+        <Button
+          className={'md:w-1/10 lg:w-1/20 bg-green-600 hover:bg-green-700 text-white text-white'}
           onClick={() =>
             setCurrentPage((prev) => Math.max(prev - 1, 1))
           }
           disabled={currentPageSafe === 1}
         >
           {'<'}
-        </button>
+        </Button>
 
-        <button className={`md:w-1/10 ${style}`}>
+        <Button className={'md:w-1/10 bg-green-600 hover:bg-green-700 text-white text-white'}>
           <b className="text-sm">
             {currentPage} / {totalPages}
           </b>
-        </button>
+        </Button>
 
-        <button
-          className={`md:w-1/10 lg:w-1/20 ${style}`}
+        <Button
+          className={'md:w-1/10 lg:w-1/20 bg-green-600 hover:bg-green-700 text-white text-white'}
           onClick={() =>
             setCurrentPage((prev) => Math.min(prev + 1, totalPages))
           }
           disabled={currentPageSafe === totalPages}
         >
           {'>'}
-        </button>
+        </Button>
 
-        <button
-          className={`md:w-1/10 lg:w-1/20 ${style}`}
+        <Button
+          className={'md:w-1/10 lg:w-1/20 bg-green-600 hover:bg-green-700 text-white text-white'}
           onClick={() => setCurrentPage(totalPages)}
           disabled={currentPageSafe === totalPages}
         >
           {'>>'}
-        </button>
+        </Button>
       </div>
     </>
   );

@@ -84,7 +84,9 @@ const handleSubmit = async (e) => {
       name: "password",
       required: true,
       autoComplete: "password",
-      onChange: (e) => setPassword(e.target.value)
+      onChange: (e) => setPassword(e.target.value),
+      minLength: 6,
+      maxLength: 16
     },
   ];
   return (
@@ -118,7 +120,7 @@ const handleSubmit = async (e) => {
                   </div>
                 ))}
 
-                <Button type={`submit`} className={`w-full`}>
+                <Button type={`submit`} className={`w-full bg-green-600 hover:bg-green-700 text-white`}>
                   Sign In
                 </Button>
 

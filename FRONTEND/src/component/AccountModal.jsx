@@ -18,7 +18,7 @@ function AccountModal({ setAccountModal }) {
       >
         <div
           onClick={(e) => e.stopPropagation()}
-          className="w-[320px] max-h-1/2 bg-gray-300 backdrop-filter-[6px] rounded-bl-lg rounded-br-lg rounded-tl-lg p-5 flex flex-col gap-5 justify-between items-start"
+          className="w-[320px] max-h-1/2 bg-gray-300 rounded-b-md rounded-tl-md p-5 flex flex-col gap-5 justify-between items-start"
         >
           <div className="bg-gray-200 rounded-md p-5 w-full">
             <span className="font-bold">
@@ -29,13 +29,17 @@ function AccountModal({ setAccountModal }) {
             <div className="content-[''] bg-gray-300 h-[2px] my-2"></div>
             <NavLink
               to={"/home/settings"}
+              onClick={() => setAccountModal(false)}
               className="bg-gray-300 p-2 font-bold rounded-md w-full hover:bg-gray-400 flex gap-1 items-center justify-center"
             >
               <IoSettingsSharp />
               Settings
             </NavLink>
           </div>
-          <Button onClick={handleLogOut} className={"w-full"}>
+          <Button
+            onClick={handleLogOut}
+            className={"w-full bg-green-600 hover:bg-green-700 text-white"}
+          >
             Logout
           </Button>
         </div>
