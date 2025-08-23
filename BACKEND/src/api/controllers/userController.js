@@ -46,9 +46,7 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const result = await Account.findByEmail({ email });
-
-    const user = result.rows[0];
+    const user = await Account.findByEmail(email);
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -61,7 +59,6 @@ export const loginUser = async (req, res) => {
       full_name: user.first_name + " " + user.last_name,
       first_name: user.first_name,
       last_name: user.last_name,
-      email: user.email,
       role: user.role,
     });
   } catch (err) {
