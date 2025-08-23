@@ -9,6 +9,7 @@ function AccountModal({ setAccountModal }) {
     e.preventDefault();
     navigate("/");
     localStorage.removeItem("role");
+    localStorage.removeItem("full_name");
   };
   return (
     <>
@@ -21,10 +22,10 @@ function AccountModal({ setAccountModal }) {
           className="w-[320px] max-h-1/2 bg-gray-300 rounded-b-md rounded-tl-md p-5 flex flex-col gap-5 justify-between items-start"
         >
           <div className="bg-gray-200 rounded-md p-5 w-full">
-            <span className="font-bold">
-              Role:{" "}
-              {localStorage.getItem("role").toUpperCase().substring(0, 1) +
-                localStorage.getItem("role").substring(1)}
+            <span className="font-bold capitalize">
+              Account Name: {localStorage.getItem("full_name")}
+              <br />
+              Role: {localStorage.getItem("role")}
             </span>
             <div className="content-[''] bg-gray-300 h-[2px] my-2"></div>
             <NavLink

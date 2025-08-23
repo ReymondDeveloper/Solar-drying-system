@@ -8,64 +8,36 @@ function SignIn() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
 
   const handleRegister = (e) => {
     e.preventDefault();
     navigate("/registration");
   };
- 
-  console.log("🔥 handleSubmit Start");
- 
-const handleSubmit = async (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    console.log("🔥 handleSubmit triggered");
-    console.log("Frontend sending:", { email, password }); 
-    
     try {
-      const res = await axios.post("http://localhost:3000/api/users/login", {
+      const res = await axios.post(`${import.meta.env.VITE_API}/login`, {
         email,
         password,
       });
-
-      const { isAdmin, isFarmers, isOwner } = res.data;
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ id, email, isAdmin, isFarmers, isOwner })
-      );
-  
-      if (isAdmin && !isFarmers && !isOwner) {
-        setRole("Admin");
-        localStorage.setItem("role", "admin");
-        alert("Welcome Admin!");
-        navigate("/home");
-      } else if (isFarmers && !isAdmin && !isOwner) {
-        setRole("Farmer");
-        localStorage.setItem("role", "farmer");
-        alert("Welcome Farmer!");
-        navigate("/home");
-      } else if (isOwner && !isAdmin && !isFarmers) {
-        setRole("Owner");
-        localStorage.setItem("role", "owner");
-        alert("Welcome Owner!");
-        navigate("/home");
-      } else {
-        setRole("Unknown");
-        alert("Role not recognized.");
-      }
+      const { role, full_name, first_name, last_name, email } = res.data;
+      localStorage.setItem("role", role);
+      localStorage.setItem("full_name", full_name);
+      localStorage.setItem("first_name", first_name);
+      localStorage.setItem("last_name", last_name);
+      localStorage.setItem("email", email);
+      navigate("/home");
     } catch (err) {
       console.error("❌ Login failed:", err.response?.data || err.message);
       alert("Invalid login credentials Try Again");
     } finally {
       setLoading(false);
-    } 
+    }
   };
-  console.log("Frontend sending:", { email, password });
 
   const formField = [
     {
@@ -75,7 +47,9 @@ const handleSubmit = async (e) => {
       name: "email",
       required: true,
       autoComplete: "email",
-      onChange: (e) => setEmail(e.target.value)
+      onChange: (e) => setEmail(e.target.value),
+      value: email,
+      defaultValue: "admin@gmail.com",
     },
     {
       label: "Password",
@@ -84,7 +58,9 @@ const handleSubmit = async (e) => {
       name: "password",
       required: true,
       autoComplete: "password",
-      onChange: (e) => setPassword(e.target.value)
+      onChange: (e) => setPassword(e.target.value),
+      value: password,
+      defaultValue: "123456",
     },
   ];
   return (
@@ -111,14 +87,18 @@ const handleSubmit = async (e) => {
                         name={field.name}
                         required={field.required}
                         autoComplete={field.autoComplete}
-                        value={field.id === "email" ? email : password}
+                        value={field.value}
                         onChange={field.onChange}
+                        defaultValue={field.defaultValue}
                       />
                     </div>
                   </div>
                 ))}
 
-                <Button type={`submit`} className={`w-full`}>
+                <Button
+                  type={`submit`}
+                  className={`w-full bg-green-600 hover:bg-green-700 text-white`}
+                >
                   Sign In
                 </Button>
 
