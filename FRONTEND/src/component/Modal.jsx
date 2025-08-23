@@ -14,7 +14,9 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
           className="w-[320px] min-h-1/2 bg-gray-300 gap-5 rounded-lg p-5 flex flex-col justify-between items-start"
         >
           <div className="w-full flex justify-between items-center">
-            <h1 className="font-bold text-2xl text-[rgba(0,100,0,255)]">{title}</h1>
+            <h1 className="font-bold text-2xl text-[rgba(0,100,0,255)]">
+              {title}
+            </h1>
             <div
               onClick={() => setModal(false)}
               className="p-3 cursor-pointer rounded-full hover:bg-[rgba(0,0,0,0.2)] transition-all duration-300"
@@ -61,47 +63,107 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
 
             {datas?.map((data, index) => (
               <div key={index} className="w-full flex flex-col gap-3">
-                <div className="flex flex-col">
-                  <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                    <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                      1
+                {data.crop_type && (
+                  <div className="flex flex-col">
+                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                        1
+                      </div>
+                      Crop Type
                     </div>
-                    Crop Type
-                  </div>
-                  <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                    {data.crop_type}
-                  </div>
-                </div>
-
-                <div className="flex flex-col">
-                  <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                    <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                      2
+                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
+                      {data.crop_type}
                     </div>
-                    Quantity
                   </div>
-                  <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                    {data.quantity} (Cavans)
-                  </div>
-                </div>
-
-                <div className="flex flex-col">
-                  <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                    <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                      3
+                )}
+                {data.quantity && (
+                  <div className="flex flex-col">
+                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                        2
+                      </div>
+                      Quantity
                     </div>
-                    Payment Type
+                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
+                      {data.quantity} (Cavans)
+                    </div>
                   </div>
-                  <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                    {data.payment}
+                )}
+                {data.payment && (
+                  <div className="flex flex-col">
+                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                        3
+                      </div>
+                      Payment Type
+                    </div>
+                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
+                      {data.payment}
+                    </div>
                   </div>
-                </div>
+                )}
+                {data.capacity && (
+                  <div className="flex flex-col">
+                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                        4
+                      </div>
+                      Available Capacity
+                    </div>
+                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
+                      {data.capacity} (Cavans)
+                    </div>
+                  </div>
+                )}
+                {data.status && (
+                  <div className="flex flex-col">
+                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                        5
+                      </div>
+                      Status
+                    </div>
+                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
+                      <div className="bg-gray-200 w-full rounded-md p-2">
+                        <select
+                          name="status"
+                          value={data.status}
+                          className="outline-0 w-full text-[rgba(0,100,0,255)]"
+                        >
+                          <option className="bg-gray-200" value="pending">
+                            Pending
+                          </option>
+                          <option className="bg-gray-200" value="approved">
+                            Approved
+                          </option>
+                          <option className="bg-gray-200" value="denied">
+                            Denied
+                          </option>
+                          <option className="bg-gray-200" value="completed">
+                            Completed
+                          </option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
           <div className="w-full flex gap-3 justify-end items-center">
-            <Button type={'button'} className={'hover:bg-[rgba(0,0,0,0.2)] text-black'} onClick={() => setModal(false)}>Cancel</Button>
-            <Button type={'submit'} className={'bg-green-600 hover:bg-green-700 text-white'}>{button_name}</Button>
+            <Button
+              type={"button"}
+              className={"hover:bg-[rgba(0,0,0,0.2)] text-black"}
+              onClick={() => setModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type={"submit"}
+              className={"bg-green-600 hover:bg-green-700 text-white"}
+            >
+              {button_name}
+            </Button>
           </div>
         </form>
       </div>

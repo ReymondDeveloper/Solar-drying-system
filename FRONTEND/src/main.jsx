@@ -17,6 +17,7 @@ import Sample from "./views/Sample";
 import CreateReservation from "./views/CreateReservation";
 import Authentication from "./component/Authentication";
 import ReservationHistory from "./views/ReservationHistory";
+import BookingRequests from "./views/BookingRequests";
 
 const baseName =
   import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system";
@@ -123,7 +124,7 @@ const router = createBrowserRouter(
               path: "booking-requests",
               element: (
                 <Authentication role={"owner"}>
-                  <Sample />
+                  <BookingRequests />
                 </Authentication>
               ),
             },
