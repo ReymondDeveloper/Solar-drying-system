@@ -1,39 +1,71 @@
 import { useNavigate } from "react-router-dom";
-import { FaCaretRight, FaArrowLeft } from "react-icons/fa6";
 import { useState } from "react";
 import Button from "../component/Button";
 import Loading from "../component/Loading";
+import axios from "axios";
 
 function SignIn() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
+
   const handleRegister = (e) => {
     e.preventDefault();
     navigate("/registration");
   };
-
-  const handleSubmit = (e) => {
+ 
+  console.log("🔥 handleSubmit Start");
+ 
+const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    console.log("🔥 handleSubmit triggered");
+    console.log("Frontend sending:", { email, password }); 
+    
+    try {
+      const res = await axios.post("http://localhost:3000/api/users/login", {
+        email,
+        password,
+      });
 
-    const formData = new FormData(e.target);
-    const { email } = Object.fromEntries(formData.entries());
+      const { isAdmin, isFarmers, isOwner } = res.data;
 
-    let role = "";
-
-    if (email === "admin@gmail.com") {
-      role = "admin";
-    } else if (email === "farmer@gmail.com") {
-      role = "farmer";
-    } else if (email === "owner@gmail.com") {
-      role = "owner";
-    }
-
-    localStorage.setItem("role", role);
-    setLoading(false);
-    navigate("/home");
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ id, email, isAdmin, isFarmers, isOwner })
+      );
+  
+      if (isAdmin && !isFarmers && !isOwner) {
+        setRole("Admin");
+        localStorage.setItem("role", "admin");
+        alert("Welcome Admin!");
+        navigate("/home");
+      } else if (isFarmers && !isAdmin && !isOwner) {
+        setRole("Farmer");
+        localStorage.setItem("role", "farmer");
+        alert("Welcome Farmer!");
+        navigate("/home");
+      } else if (isOwner && !isAdmin && !isFarmers) {
+        setRole("Owner");
+        localStorage.setItem("role", "owner");
+        alert("Welcome Owner!");
+        navigate("/home");
+      } else {
+        setRole("Unknown");
+        alert("Role not recognized.");
+      }
+    } catch (err) {
+      console.error("❌ Login failed:", err.response?.data || err.message);
+      alert("Invalid login credentials Try Again");
+    } finally {
+      setLoading(false);
+    } 
   };
+  console.log("Frontend sending:", { email, password });
 
   const formField = [
     {
@@ -43,7 +75,7 @@ function SignIn() {
       name: "email",
       required: true,
       autoComplete: "email",
-      defaultValue: "admin@gmail.com",
+      onChange: (e) => setEmail(e.target.value)
     },
     {
       label: "Password",
@@ -52,7 +84,7 @@ function SignIn() {
       name: "password",
       required: true,
       autoComplete: "password",
-      defaultValue: "admin123",
+      onChange: (e) => setPassword(e.target.value)
     },
   ];
   return (
@@ -79,7 +111,8 @@ function SignIn() {
                         name={field.name}
                         required={field.required}
                         autoComplete={field.autoComplete}
-                        defaultValue={field.defaultValue}
+                        value={field.id === "email" ? email : password}
+                        onChange={field.onChange}
                       />
                     </div>
                   </div>
