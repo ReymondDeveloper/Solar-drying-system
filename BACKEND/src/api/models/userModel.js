@@ -4,11 +4,11 @@ import { v4 as uuidv4 } from "uuid";
 const User = {
   // Get all users
   findAll: async () => {
-    const { data, error } = await supabase.from("users") // your table name in Supabase
-      .select(`
-        id, created_at, first_name, middle_name, last_name, email,
-        is_admin, is_farmer, is_owner, created_by_id, deleted_at, deleted_by_id, user_profile
-      `);
+    const { data, error } = await supabase
+      .from("users") // your table name in Supabase
+      .select(
+        `id, first_name, middle_name, last_name, email, address, role, user_profile`
+      );
     if (error) throw error;
     return data;
   },

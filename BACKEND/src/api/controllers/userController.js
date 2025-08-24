@@ -115,7 +115,7 @@ export const loginUser = async (req, res) => {
 
       res.json({
         full_name: [
-          user.last_name + ", " + user.middle_name + " " + user.last_name,
+          user.last_name + ", " + user.first_name + " " + user.middle_name,
         ],
         first_name: user.first_name,
         middle_name: user.middle_name,

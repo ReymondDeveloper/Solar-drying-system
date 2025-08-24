@@ -7,6 +7,8 @@ import Search from "../component/Search";
 import Modal from "../component/Modal";
 import Button from "../component/Button";
 import Loading from "../component/Loading";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Accounts() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,19 +21,19 @@ function Accounts() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-
   const tableHeadings = [
     "First Name",
-    "Middle Initial",
+    "Middle Name",
     "Last Name",
+    "Address",
     "Email",
     "Role",
   ];
-
   const tableDataCell = [
     "first_name",
-    "middle_initial",
+    "middle_name",
     "last_name",
+    "address",
     "email",
     "role",
   ];
@@ -42,9 +44,10 @@ function Accounts() {
       type: "select",
       name: "role",
       option: [
-        { value: "all", phrase: "All" },
-        { value: "owner", phrase: "Owner" },
-        { value: "farmer", phrase: "Farmer" },
+        { value: "all" },
+        { value: "admin" },
+        { value: "owner" },
+        { value: "farmer" },
       ],
     },
   ];
@@ -54,9 +57,6 @@ function Accounts() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    const Myalert = `
-      Role: ${data.role}`;
-    alert(Myalert);
     setFilter(data.role);
     setLoading(false);
     setModalFilter(false);
@@ -66,62 +66,89 @@ function Accounts() {
     {
       label: "First Name",
       type: "text",
-      placeholder: "ex. First Name",
-      required: true,
       name: "first_name",
+      required: true,
+      colspan: 1,
+    },
+    {
+      label: "Middle Name",
+      type: "text",
+      name: "middle_name",
+      required: false,
+      colspan: 1,
     },
     {
       label: "Last Name",
       type: "text",
-      placeholder: "ex. Last Name",
-      required: true,
       name: "last_name",
+      required: true,
+      colspan: 1,
     },
     {
-      label: "Password",
-      type: "password",
-      minLength: 6,
-      maxLength: 16,
-      placeholder: "Enter 8-16 characters",
+      label: "Email address",
+      type: "email",
+      name: "email",
       required: true,
-      name: "password",
+      colspan: 1,
+    },
+    {
+      label: "Address",
+      type: "text",
+      name: "address",
+      required: true,
+      colspan: 2,
     },
     {
       label: "Role",
       type: "select",
       name: "role",
-      option: [
-        { value: "farmer", phrase: "Farmer" },
-        { value: "owner", phrase: "Solar-Dryer Owner" },
-      ],
+      options: [{ value: "owner" }, { value: "farmer" }],
+      colspan: 2,
     },
     {
-      label: "Email",
-      type: "email",
-      placeholder: "Enter a valid email address",
+      label: "Password",
+      type: "password",
+      name: "password",
+      minLength: 8,
+      maxLength: 16,
       required: true,
-      name: "email",
+      colspan: 2,
     },
   ];
 
-  const handleSubmitAdd = (e) => {
-    setLoading(true);
+  const handleSubmitAdd = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    const Myalert = `
-      First Name: ${data.first_name}\n
-      Last Name: ${data.last_name}\n
-      Password: ${data.password}\n
-      Role: ${data.role}\n
-      Email: ${data.email}`;
-    alert(Myalert);
-    setData((prevData) => [...prevData, data]);
-    setLoading(false);
-    setModalAdd(false);
+    const {
+      first_name,
+      middle_name,
+      last_name,
+      address,
+      email,
+      role,
+      password,
+    } = Object.fromEntries(formData.entries());
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API}/register`, {
+        first_name,
+        middle_name,
+        last_name,
+        address,
+        email,
+        password,
+        role,
+      });
+      toast.success(res.data.message);
+      setTimeout(() => {
+        setModalAdd(false);
+      }, 2000);
+    } catch (err) {
+      toast.error(err.response.data.message);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const Endpoint = "";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -129,41 +156,29 @@ function Accounts() {
       setIsError(false);
       const offset = (currentPage - 1) * limit;
       try {
-        const res = await axios.get(Endpoint, {
+        const res = await axios.get(`${import.meta.env.VITE_API}/`, {
           params: {
             offset,
             limit,
           },
         });
-
-        const { Results } = res.data;
         setData(
-          Array.isArray(Results)
-            ? Results.map((data) => {
-                return {
-                  first_name: data.first_name,
-                  middle_initial: data.middle_initial,
-                  last_name: data.last_name,
-                  email: data.email,
-                  role: data.role,
-                };
-              })
+          Array.isArray(res.data)
+            ? res.data.map((data) => ({
+                id: data.id,
+                first_name: data.first_name,
+                middle_name: data.middle_name,
+                last_name: data.last_name,
+                address: data.address,
+                email: data.email,
+                role: data.role,
+                user_profile: data.user_profile,
+              }))
             : []
         );
-        throw new Error("Simulated error for testing purposes.");
-      } catch (error) {
-        console.log(error);
-        // setIsError(true);
-        function FakeFallbackData() {
-          return Array.from({ length: 4 }, (_, i) => ({
-            first_name: `First Name ${i + 1}`,
-            middle_initial: `Middle Initial ${i + 1}`,
-            last_name: `Last Name ${i + 1}`,
-            email: `Email ${i + 1}`,
-            role: i % 2 === 0 ? "Owner" : "Farmer",
-          }));
-        }
-        setData(FakeFallbackData());
+      } catch (err) {
+        toast.error(err.response.data.message);
+        setIsError(true);
       } finally {
         setIsLoading(false);
       }
@@ -200,6 +215,7 @@ function Accounts() {
   return (
     <>
       {loading && <Loading />}
+      <ToastContainer position="top-center" autoClose={3000} />
       {modalFilter && (
         <Modal
           setModal={setModalFilter}
@@ -214,7 +230,7 @@ function Accounts() {
           setModal={setModalAdd}
           handleSubmit={handleSubmitAdd}
           fields={fieldsAdd}
-          title={"Registration"}
+          title={"Create Account"}
           button_name={"Register"}
         />
       )}
@@ -250,13 +266,13 @@ function Accounts() {
                       No Accounts Found.
                     </div>
 
-                    <div className="rounded-md flex flex-col">
+                    <div className="lg:hidden rounded-md flex flex-col">
                       <div className="bg-[rgb(138,183,45)] p-2 flex justify-end rounded-t-md">
                         <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] font-bold rounded-full bg-white">
                           0
                         </div>
                       </div>
-                      <div className="lg:hidden p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
+                      <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
                         No Accounts Found.
                       </div>
                     </div>

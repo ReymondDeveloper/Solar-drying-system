@@ -59,6 +59,7 @@ function Registration() {
       type: "select",
       name: "role",
       options: [{ value: "owner" }, { value: "farmer" }],
+      colspan: 2,
     },
     {
       label: "Password",

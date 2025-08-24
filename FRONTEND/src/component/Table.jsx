@@ -37,11 +37,14 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                     <td
                       key={index}
                       data-cell={`${tableHeadings[index]}: `}
-                      className={`text-sm whitespace-nowrap hover:underline hover:decoration-red-500 capitalize ${
-                        dataCell === "status" || dataCell === "action"
-                          ? "text-center"
-                          : "text-start"
-                      }`}
+                      className={`text-sm whitespace-nowrap hover:underline hover:decoration-red-500
+                        ${
+                          dataCell === "status" || dataCell === "action"
+                            ? "text-center"
+                            : "text-start"
+                        }
+                        ${dataCell === "email" ? "" : "capitalize"}
+                      `}
                     >
                       {dataCell === "status" ? (
                         el.status?.toLowerCase().includes("available") ? (
@@ -79,13 +82,14 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                     <div
                       key={index}
                       data-cell={`${tableHeadings[index]}: `}
-                      className={`whitespace-nowrap hover:underline hover:decoration-red-500 capitalize
+                      className={`whitespace-wrap hover:underline hover:decoration-red-500
                             ${
                               index === tableDataCell.length - 1
                                 ? "absolute bottom-0 right-0 m-3 text-end lg:text-center lg:flex lg:justify-center"
                                 : "text-start"
                             }
                             ${index === 0 ? "text-md font-bold" : "text-sm"}
+                            ${dataCell === "email" ? "" : "capitalize"}
                           `}
                     >
                       {dataCell === "status" ? (

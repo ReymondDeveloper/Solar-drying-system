@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { CiSearch, CiFilter } from "react-icons/ci";
 
 function Search({ setSearch, setModal }) {
@@ -7,18 +7,20 @@ function Search({ setSearch, setModal }) {
   const handleSearchIcon = () => {
     const input = inputRef.current;
     if (!input) return;
-
     if (input.value.trim() === "") {
       input.focus();
     } else {
-      handleSearch(input.value);
+      setSearch(input.value);
     }
   };
 
-  const handleSearch = (query) => {
-    setSearch(query);
-    alert(`Search: ${query}`);
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setTimeout(() => {
+      setSearch(e.target.value);
+    }, 500);
   };
+
   return (
     <div
       className="bg-gray-200 rounded-full w-full border border-5 border-gray-300 p-1 flex items-center gap-3
@@ -35,9 +37,10 @@ function Search({ setSearch, setModal }) {
         type="search"
         className="bg-transparent outline-0 w-full"
         placeholder="Search..."
+        onChange={(e) => handleSearch(e)}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
-            handleSearch(e.target.value);
+            setSearch(e.target.value);
           }
         }}
       />
