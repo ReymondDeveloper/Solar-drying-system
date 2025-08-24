@@ -27,14 +27,11 @@ function SignIn() {
         password,
       });
       const { role, full_name, first_name, last_name } = res.data;
-      if (!role) {
-        throw new Error("No role returned from server");
-      }
-      localStorage.setItem("role", role);
-      localStorage.setItem("full_name", full_name);
-      localStorage.setItem("first_name", first_name);
-      localStorage.setItem("last_name", last_name);
-      localStorage.setItem("email", email);
+      if (!role) throw new Error("No role returned from server");
+
+      const user = { role, full_name, first_name, last_name, email };
+      localStorage.setItem("currentUser", JSON.stringify(user)); 
+
       toast.success("Login successful, redirecting you to home page.");
       setTimeout(() => {
         navigate("/home");

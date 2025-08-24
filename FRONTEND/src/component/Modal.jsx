@@ -6,17 +6,15 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
     <>
       <div
         onClick={() => setModal(false)}
-        className="absolute z-1 top-0 left-0 flex items-start justify-center h-full w-full backdrop-blur-[6px]"
+        className="absolute z-10 top-0 left-0 flex items-start justify-center h-full w-full backdrop-blur-[6px]"
       >
         <form
           onSubmit={handleSubmit}
           onClick={(e) => e.stopPropagation()}
-          className="w-[320px] bg-gray-300 gap-5 rounded-lg p-5 flex flex-col justify-between items-start my-auto"
+          className="w-[700px] bg-gray-300 gap-5 rounded-lg p-5 flex flex-col justify-between items-start my-auto"
         >
           <div className="w-full flex justify-between items-center">
-            <h1 className="font-bold text-2xl text-[rgba(0,100,0,255)]">
-              {title}
-            </h1>
+            <h1 className="font-bold text-2xl text-[rgba(0,100,0,255)]">{title}</h1>
             <div
               onClick={() => setModal(false)}
               className="p-3 cursor-pointer rounded-full hover:bg-[rgba(0,0,0,0.2)] transition-all duration-300"
@@ -24,9 +22,11 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
               <RiCloseLargeLine />
             </div>
           </div>
-          <div className="w-full flex flex-col gap-3">
+
+          <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Form Inputs */}
             {fields?.map((field, index) => (
-              <div key={index} className="w-full flex flex-col gap-1">
+              <div key={index} className="flex flex-col gap-1">
                 <label className="text-[rgba(0,100,0,255)] font-bold text-md">
                   {field.label}
                 </label>
@@ -35,14 +35,10 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     <select
                       name={field.name}
                       className="outline-0 w-full text-[rgba(0,100,0,255)]"
-                      defaultValue={field.defaultValue}
+                      defaultValue={field.defaultValue || ""}
                     >
-                      {field.option.map((option, index) => (
-                        <option
-                          key={index}
-                          className="bg-gray-200"
-                          value={option.value}
-                        >
+                      {field.option.map((option, idx) => (
+                        <option key={idx} value={option.value} className="bg-gray-200">
                           {option.phrase}
                         </option>
                       ))}
@@ -57,165 +53,41 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     name={field.name}
                     minLength={field.minLength}
                     maxLength={field.maxLength}
-                    defaultValue={field.defaultValue}
+                    defaultValue={field.defaultValue || ""}
                     step={field.step}
                   />
                 )}
               </div>
             ))}
 
-            {datas?.map((data, index) => (
-              <div key={index} className="w-full flex flex-col gap-3">
-                {data.crop_type && (
-                  <div className="flex flex-col">
-                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                        1
-                      </div>
-                      Crop Type
+            {datas?.map((data, idx) =>
+              Object.keys(data).map((key, i) => (
+                <div key={`${idx}-${i}`} className="flex flex-col gap-1">
+                  <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                    <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                      {i + 1}
                     </div>
-                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                      {data.crop_type}
-                    </div>
+                    {key.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase())}
                   </div>
-                )}
-                {data.dryer_name && (
-                  <div className="flex flex-col">
-                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                        1
-                      </div>
-                      Dryer Name
-                    </div>
-                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                      {data.dryer_name}
-                    </div>
+                  <div className="p-2 bg-[rgba(255,255,255,0.9)] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
+                    {data[key]}
                   </div>
-                )}
-                {data.quantity && (
-                  <div className="flex flex-col">
-                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                        2
-                      </div>
-                      Quantity
-                    </div>
-                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                      {data.quantity} (Cavans)
-                    </div>
-                  </div>
-                )}
-                {data.location && (
-                  <div className="flex flex-col">
-                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                        2
-                      </div>
-                      Location
-                    </div>
-                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                      {data.location} (Sablayan)
-                    </div>
-                  </div>
-                )}
-                {data.payment && (
-                  <div className="flex flex-col">
-                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                        3
-                      </div>
-                      Payment Type
-                    </div>
-                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                      {data.payment}
-                    </div>
-                  </div>
-                )}
-                {data.capacity && (
-                  <div className="flex flex-col">
-                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                        3
-                      </div>
-                      Capacity
-                    </div>
-                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                      {data.capacity} (Cavans)
-                    </div>
-                  </div>
-                )}
-                {data.capacity && (
-                  <div className="flex flex-col">
-                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                        4
-                      </div>
-                      Available Capacity
-                    </div>
-                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                      {data.capacity} (Cavans)
-                    </div>
-                  </div>
-                )}
-                {data.status && (
-                  <div className="flex flex-col">
-                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                        5
-                      </div>
-                      Status
-                    </div>
-                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                      <div className="bg-gray-200 w-full rounded-md p-2">
-                        <select
-                          name="status"
-                          className="outline-0 w-full text-[rgba(0,100,0,255)]"
-                          defaultValue={data.status}
-                        >
-                          <option className="bg-gray-200" value="pending">
-                            Pending
-                          </option>
-                          <option className="bg-gray-200" value="approved">
-                            Approved
-                          </option>
-                          <option className="bg-gray-200" value="denied">
-                            Denied
-                          </option>
-                          <option className="bg-gray-200" value="completed">
-                            Completed
-                          </option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {data.rate && (
-                  <div className="flex flex-col">
-                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                        5
-                      </div>
-                      Rate
-                    </div>
-                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                      {data.rate} (PHP)
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                </div>
+              ))
+            )}
           </div>
-          <div className="w-full flex gap-3 justify-end items-center">
+
+          <div className="w-full flex gap-3 justify-end items-center mt-3">
             <Button
-              type={"button"}
-              className={"hover:bg-[rgba(0,0,0,0.2)] text-black"}
+              type="button"
+              className="hover:bg-[rgba(0,0,0,0.2)] text-black"
               onClick={() => setModal(false)}
             >
               Cancel
             </Button>
             <Button
-              type={"submit"}
-              className={"bg-green-600 hover:bg-green-700 text-white"}
+              type="submit"
+              className="bg-green-600 hover:bg-green-700 text-white"
             >
               {button_name}
             </Button>
