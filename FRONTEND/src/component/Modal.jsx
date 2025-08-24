@@ -35,6 +35,7 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     <select
                       name={field.name}
                       className="outline-0 w-full text-[rgba(0,100,0,255)]"
+                      defaultValue={field.defaultValue}
                     >
                       {field.option.map((option, index) => (
                         <option
@@ -56,6 +57,8 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     name={field.name}
                     minLength={field.minLength}
                     maxLength={field.maxLength}
+                    defaultValue={field.defaultValue}
+                    step={field.step}
                   />
                 )}
               </div>
@@ -76,6 +79,19 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     </div>
                   </div>
                 )}
+                {data.dryer_name && (
+                  <div className="flex flex-col">
+                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                        1
+                      </div>
+                      Dryer Name
+                    </div>
+                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
+                      {data.dryer_name}
+                    </div>
+                  </div>
+                )}
                 {data.quantity && (
                   <div className="flex flex-col">
                     <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
@@ -89,6 +105,19 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     </div>
                   </div>
                 )}
+                {data.location && (
+                  <div className="flex flex-col">
+                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                        2
+                      </div>
+                      Location
+                    </div>
+                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
+                      {data.location} (Sablayan)
+                    </div>
+                  </div>
+                )}
                 {data.payment && (
                   <div className="flex flex-col">
                     <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
@@ -99,6 +128,19 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     </div>
                     <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
                       {data.payment}
+                    </div>
+                  </div>
+                )}
+                {data.capacity && (
+                  <div className="flex flex-col">
+                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                        3
+                      </div>
+                      Capacity
+                    </div>
+                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
+                      {data.capacity} (Cavans)
                     </div>
                   </div>
                 )}
@@ -144,6 +186,19 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                           </option>
                         </select>
                       </div>
+                    </div>
+                  </div>
+                )}
+                {data.rate && (
+                  <div className="flex flex-col">
+                    <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                      <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                        5
+                      </div>
+                      Rate
+                    </div>
+                    <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
+                      {data.rate} (PHP)
                     </div>
                   </div>
                 )}

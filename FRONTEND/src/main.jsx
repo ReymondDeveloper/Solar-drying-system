@@ -19,6 +19,7 @@ import Authentication from "./component/Authentication";
 import ReservationHistory from "./views/ReservationHistory";
 import BookingRequests from "./views/BookingRequests";
 import Settings from "./views/Settings";
+import DryerInformation from "./views/DryerInformation";
 
 const baseName =
   import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system";
@@ -137,7 +138,7 @@ const router = createBrowserRouter(
               path: "dryer-information",
               element: (
                 <Authentication role={"owner"}>
-                  <Sample />
+                  <DryerInformation />
                 </Authentication>
               ),
             },

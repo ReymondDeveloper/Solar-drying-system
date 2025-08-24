@@ -24,7 +24,7 @@ function AccountModal({ setAccountModal }) {
           <div className="bg-gray-300 p-5 rounded-md flex flex-col gap-5 justify-between items-start">
             <div className="bg-gray-200 rounded-md p-5 w-full">
               <span className="font-bold capitalize">
-                Account Name: {localStorage.getItem("full_name")}
+                Name: {localStorage.getItem("full_name")}
                 <br />
                 Role: {localStorage.getItem("role")}
               </span>
