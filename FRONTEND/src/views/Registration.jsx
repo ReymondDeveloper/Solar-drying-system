@@ -3,128 +3,237 @@ import { useState } from "react";
 import Button from "../component/Button";
 import Loading from "../component/Loading";
 import OTP from "../component/Otp";
-import { toast } from "react-toastify";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Registration() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState(false);
-  const [emailForOtp, setEmailForOtp] = useState(null);
-
+  const [email, setEmail] = useState(null);
+  const [address, setAddress] = useState("");
   const handleSignIn = (e) => {
     e.preventDefault();
     navigate("/sign-in");
   };
 
   const formField = [
-    { id: "full_name" },
-    { label: "Address", id: "address", type: "text", name: "address", required: true },
-    { label: "Email address", id: "email", type: "email", name: "email", required: true },
-    { label: "Password", id: "password", type: "password", name: "password", minLength: 8, maxLength: 16, required: true },
+    {
+      label: "First Name",
+      type: "text",
+      name: "first_name",
+      required: true,
+      colspan: 1,
+    },
+    {
+      label: "Middle Name",
+      type: "text",
+      name: "middle_name",
+      required: false,
+      colspan: 1,
+    },
+    {
+      label: "Last Name",
+      type: "text",
+      name: "last_name",
+      required: true,
+      colspan: 1,
+    },
+    {
+      label: "Email address",
+      type: "email",
+      name: "email",
+      required: true,
+      colspan: 1,
+    },
+    {
+      label: "Address",
+      type: "text",
+      name: "address",
+      required: true,
+      colspan: 2,
+    },
+    {
+      label: "Role",
+      type: "select",
+      name: "role",
+      options: [{ value: "owner" }, { value: "farmer" }],
+    },
+    {
+      label: "Password",
+      type: "password",
+      name: "password",
+      minLength: 8,
+      maxLength: 16,
+      required: true,
+      colspan: 2,
+    },
   ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     const formData = new FormData(e.target);
-    const { first_name, last_name, address, email, password } =
-    Object.fromEntries(formData.entries());
-
+    const {
+      first_name,
+      middle_name,
+      last_name,
+      address,
+      email,
+      role,
+      password,
+    } = Object.fromEntries(formData.entries());
     try {
-      const res = await axios.post("http://localhost:3000/api/users/register", {
+      const res = await axios.post(`${import.meta.env.VITE_API}/register`, {
         first_name,
+        middle_name,
         last_name,
         address,
         email,
         password,
-        is_owner: true,
+        role,
       });
-      toast.success(res.data.message || "Registered successfully");
       toast.success(res.data.message);
-      setEmailForOtp(email);
-      setOtp(true); 
+      setTimeout(() => {
+        setEmail(email);
+        setOtp(true);
+      }, 2000);
     } catch (err) {
-      toast.error(err.response?.data?.error || "Registration failed");
+      toast.error(err.response.data.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }; 
+  };
+
+  const handleLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            const reversed = [...data.localityInfo.administrative].reverse();
+            const address = reversed
+              .map((level) => level.name.replace(/\s\(\w+?\)/, ""))
+              .join(", ");
+            setAddress(`${address}`);
+          })
+          .catch((err) =>
+            toast.error("Failed to get address. ", err.response?.data?.message)
+          );
+      },
+      (err) => {
+        toast.error(
+          "Permission denied or location error. ",
+          err.response?.data?.message
+        );
+      }
+    );
+  };
 
   return (
     <>
       {loading && <Loading />}
-      {otp && <OTP 
-          setOtp={setOtp} 
-          email={emailForOtp} 
-          onVerified={() => navigate("/sign-in")} 
-      />}
+      <ToastContainer position="top-center" autoClose={3000} />
+      {otp && (
+        <OTP
+          setOtp={setOtp}
+          email={email}
+          onVerified={() => navigate("/sign-in")}
+          loading={loading}
+          setLoading={setLoading}
+        />
+      )}
       <div className="h-full bg-gray-200 flex flex-col gap-1">
-        <div className="flex min-h-full flex-col justify-center py-12 lg:px-8 bg-gradient-to-t from-[rgba(0,100,0,255)] via-green-600 to-[rgba(0,100,0,255)]">
-          <div className="bg-white p-8 rounded-2xl shadow-lg min-w-[320px] mx-auto">
-            <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="flex min-h-full flex-col justify-start overflow-auto lg:px-8 bg-gradient-to-t from-[rgba(0,100,0,255)] via-green-600 to-[rgba(0,100,0,255)]">
+          <div className="bg-white p-8 rounded-2xl shadow-lg min-w-[320px] m-auto">
+            <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-5">
               {formField.map((data, index) =>
-                data.id === "full_name" ? (
-                  <div key={index} className="flex flex-col sm:flex-row gap-4">
-                    <div className="w-full sm:w-3/5">
+                data.type === "select" ? (
+                  <div
+                    key={index}
+                    className={`col-span-2 ${
+                      data.colspan === 1 ? "md:col-span-1" : "md:col-span-2"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
                       <label
-                        htmlFor="first_name"
+                        htmlFor={data.name}
                         className="block text-sm font-medium text-gray-700"
                       >
-                        First Name
+                        {data.label}
                       </label>
-                      <input
-                        className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-                        id="first_name"
-                        name="first_name"
-                        type="text"
-                        required
-                      />
                     </div>
-
-                    <div className="w-full sm:w-3/5">
-                      <label
-                        htmlFor="last_name"
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Last Name
-                      </label>
-                      <input
-                        className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-                        id="last_name"
-                        name="last_name"
-                        type="text"
-                        required
-                      />
-                    </div>
+                    <select
+                      required={data.required}
+                      name={data.name}
+                      className="outline-0 capitalize mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                    >
+                      {data.options.map((option, i) => (
+                        <option key={i} value={option.value}>
+                          {option.value}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 ) : (
-                  data.id !== "full_name" && (
-                    <div key={index}>
-                      <div className="flex items-center justify-between">
-                        <label
-                          htmlFor={data.id}
-                          className="block text-sm font-medium text-gray-700"
+                  <div
+                    key={index}
+                    className={`col-span-2 ${
+                      data.colspan === 1 ? "md:col-span-1" : "md:col-span-2"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <label
+                        htmlFor={data.name}
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        {data.label}
+                      </label>
+                    </div>
+                    {data.name === "address" ? (
+                      <>
+                        <input
+                          className="outline-0 mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                          name={data.name}
+                          type={data.type}
+                          required={data.required}
+                          minLength={data.minLength}
+                          maxLength={data.maxLength}
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                        />
+                        <span
+                          onClick={(e) => handleLocation(e)}
+                          className="text-sm font-bold text-gray-400 hover:text-blue-400 cursor-pointer"
                         >
-                          {data.label}
-                        </label>
-                      </div>
+                          Use Current Location
+                        </span>
+                      </>
+                    ) : (
                       <input
-                        className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-                        id={data.id}
+                        className="outline-0 mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
                         name={data.name}
                         type={data.type}
                         required={data.required}
                         minLength={data.minLength}
                         maxLength={data.maxLength}
                       />
-                    </div>
-                  )
+                    )}
+                  </div>
                 )
               )}
 
-              <div>
-                <Button type={"submit"} className={"w-full bg-green-600 hover:bg-green-700 text-white"}>
+              <div className="col-span-2">
+                <Button
+                  type={"submit"}
+                  className={
+                    "w-full bg-green-600 hover:bg-green-700 text-white"
+                  }
+                >
                   Register
                 </Button>
               </div>

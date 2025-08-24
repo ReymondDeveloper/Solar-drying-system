@@ -4,8 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 const User = {
   // Get all users
   findAll: async () => {
-    const { data, error } = await supabase
-      .from("users") // your table name in Supabase
+    const { data, error } = await supabase.from("users") // your table name in Supabase
       .select(`
         id, created_at, first_name, middle_name, last_name, email,
         is_admin, is_farmer, is_owner, created_by_id, deleted_at, deleted_by_id, user_profile
@@ -18,10 +17,12 @@ const User = {
   findById: async (id) => {
     const { data, error } = await supabase
       .from("users")
-      .select(`
+      .select(
+        `
         id, created_at, first_name, middle_name, last_name, email,
         is_admin, is_farmer, is_owner, created_by_id, deleted_at, deleted_by_id, user_profile
-      `)
+      `
+      )
       .eq("id", id)
       .single();
     if (error) throw error;
@@ -69,21 +70,23 @@ const User = {
           user_profile,
         },
       ])
-      .select(`
+      .select(
+        `
         id, first_name, middle_name, last_name, email,
         is_admin, is_farmer, is_owner, created_by_id, user_profile
-      `)
+      `
+      )
       .single();
     if (error) throw error;
     return data;
   },
 
   // Update password
-  updatePassword: async (id, hashedPassword) => {
+  updatePassword: async (email, hashedPassword) => {
     const { error } = await supabase
       .from("users")
       .update({ password: hashedPassword })
-      .eq("id", id);
+      .eq("email", email);
     if (error) throw error;
   },
 };

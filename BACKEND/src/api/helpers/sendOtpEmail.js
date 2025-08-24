@@ -3,22 +3,22 @@ import nodemailer from "nodemailer";
 export async function sendOtpEmail(toEmail, otp) {
   try {
     const transporter = nodemailer.createTransport({
-        host: process.env.MAIL_HOST,
-        port: process.env.MAIL_PORT,
-        secure: true,  
-        auth: {
-          user: process.env.MAIL_USERNAME,
-          pass: process.env.MAIL_PASSWORD,
-        },
-      });
-      
+      host: process.env.MAIL_HOST,
+      port: process.env.MAIL_PORT,
+      secure: true,
+      auth: {
+        user: process.env.MAIL_USERNAME,
+        pass: process.env.MAIL_PASSWORD,
+      },
+    });
 
     await transporter.sendMail({
       from: `"Solar Drying System" <${process.env.EMAIL_USER}>`,
       to: toEmail,
-      subject: "Your OTP Code",
+      subject:
+        "Verify your newly created account at Solar Drying System using this OTP",
       text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
-      html: `<h3>Your OTP code is <b>${otp}</b></h3><p>This code will expire in 5 minutes.</p>`,
+      html: `<h6>Your OTP is <b>${otp}</b>. It will expire in 5 minutes.</h6>`,
     });
 
     console.log(`✅ OTP email sent to ${toEmail}`);
