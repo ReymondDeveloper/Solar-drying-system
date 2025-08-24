@@ -127,8 +127,8 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                       <div className="bg-gray-200 w-full rounded-md p-2">
                         <select
                           name="status"
-                          value={data.status}
                           className="outline-0 w-full text-[rgba(0,100,0,255)]"
+                          defaultValue={data.status}
                         >
                           <option className="bg-gray-200" value="pending">
                             Pending
