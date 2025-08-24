@@ -48,6 +48,9 @@ function SignIn() {
             const role = email.substring(0, email.indexOf("@"));
             localStorage.setItem("role", role);
             localStorage.setItem("full_name", `Super ${role}`);
+            localStorage.setItem("email", email);
+            localStorage.setItem("first_name", "Super");
+            localStorage.setItem("last_name", role);
             navigate("/home");
           }, 2000))
         : toast.error("Invalid login credentials!");

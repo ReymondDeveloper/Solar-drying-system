@@ -218,7 +218,11 @@ function Accounts() {
           button_name={"Register"}
         />
       )}
-      <div className="w-full h-[calc(100%-56px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
+      <div
+        className={`w-full lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${
+          modalFilter || modalAdd ? "overflow-hidden" : "overflow-auto"
+        }`}
+      >
         <Search setSearch={setSearch} setModal={setModalFilter} />
         <div className="w-full text-right mt-5">
           <Button

@@ -25,7 +25,7 @@ function HomeLayout() {
           />
           <div
             className="
-              flex-grow flex flex-col gap-3 relative p-3
+              flex-grow flex flex-col gap-3 relative p-3 overflow-auto
               md:flex-row md:flex-grow-0 md:flex-wrap
             "
           >

@@ -83,11 +83,7 @@ const router = createBrowserRouter(
             },
             {
               path: "settings",
-              element: (
-                <Authentication role={"admin"}>
-                  <Settings />
-                </Authentication>
-              ),
+              element: <Settings />,
             },
             {
               path: "create-reservation",
