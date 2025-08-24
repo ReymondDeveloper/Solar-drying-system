@@ -219,7 +219,7 @@ function Accounts() {
         />
       )}
       <div
-        className={`w-full lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${
+        className={`w-full h-[calc(100dvh-160px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${
           modalFilter || modalAdd ? "overflow-hidden" : "overflow-auto"
         }`}
       >

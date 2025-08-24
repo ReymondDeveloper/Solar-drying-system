@@ -6,12 +6,12 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
     <>
       <div
         onClick={() => setModal(false)}
-        className="absolute z-1 top-0 left-0 flex items-center justify-center h-[calc(100dvh-56px)] w-full bg-[rgba(0,0,0,0.75)] backdrop-blur-[6px]"
+        className="absolute z-1 top-0 left-0 flex items-start justify-center h-full w-full backdrop-blur-[6px]"
       >
         <form
           onSubmit={handleSubmit}
           onClick={(e) => e.stopPropagation()}
-          className="w-[320px] min-h-1/2 bg-gray-300 gap-5 rounded-lg p-5 flex flex-col justify-between items-start"
+          className="w-[320px] bg-gray-300 gap-5 rounded-lg p-5 flex flex-col justify-between items-start my-auto"
         >
           <div className="w-full flex justify-between items-center">
             <h1 className="font-bold text-2xl text-[rgba(0,100,0,255)]">
