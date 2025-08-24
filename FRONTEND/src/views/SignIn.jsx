@@ -10,8 +10,8 @@ function SignIn() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const [email, setEmail] = useState("admin@gmail.com");
-  const [password, setPassword] = useState("123456");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleRegister = (e) => {
     e.preventDefault();
@@ -22,11 +22,14 @@ function SignIn() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API}/login`, {
+      const res = await axios.post("http://localhost:3000/api/users/login", {
         email,
         password,
       });
       const { role, full_name, first_name, last_name } = res.data;
+      if (!role) {
+        throw new Error("No role returned from server");
+      }
       localStorage.setItem("role", role);
       localStorage.setItem("full_name", full_name);
       localStorage.setItem("first_name", first_name);
@@ -54,6 +57,7 @@ function SignIn() {
             navigate("/home");
           }, 2000))
         : toast.error("Invalid login credentials!");
+      toast.error("Invalid login credentials!");
     } finally {
       setLoading(false);
     }

@@ -1,14 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { FaCaretRight, FaArrowLeft } from "react-icons/fa6";
 import Button from "../component/Button";
 import Loading from "../component/Loading";
 import OTP from "../component/Otp";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 function Registration() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState(false);
+  const [emailForOtp, setEmailForOtp] = useState(null);
 
   const handleSignIn = (e) => {
     e.preventDefault();
@@ -16,55 +18,47 @@ function Registration() {
   };
 
   const formField = [
-    {
-      id: "full_name",
-    },
-    {
-      label: "Address",
-      id: "address",
-      type: "text",
-      name: "address",
-      required: true,
-    },
-    {
-      label: "Email address",
-      id: "email",
-      type: "email",
-      name: "email",
-      required: true,
-    },
-    {
-      label: "Password",
-      id: "password",
-      type: "password",
-      name: "password",
-      minLength: 8,
-      maxLength: 16,
-      required: true,
-    },
+    { id: "full_name" },
+    { label: "Address", id: "address", type: "text", name: "address", required: true },
+    { label: "Email address", id: "email", type: "email", name: "email", required: true },
+    { label: "Password", id: "password", type: "password", name: "password", minLength: 8, maxLength: 16, required: true },
   ];
 
-  const handleSubmit = (e) => {
-    setLoading(true);
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    const Myalert = `
-      First Name: ${data.first_name}\n
-      Last Name: ${data.last_name}\n
-      Address: ${data.address}\n
-      Email: ${data.email}\n
-      Password: ${data.password}\n
-      Email: ${data.email}`;
-    alert(Myalert);
+    const { first_name, last_name, address, email, password } =
+    Object.fromEntries(formData.entries());
+
+    try {
+      const res = await axios.post("http://localhost:3000/api/users/register", {
+        first_name,
+        last_name,
+        address,
+        email,
+        password,
+        is_owner: true,
+      });
+      toast.success(res.data.message || "Registered successfully");
+      toast.success(res.data.message);
+      setEmailForOtp(email);
+      setOtp(true); 
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Registration failed");
+    }
     setLoading(false);
-    setOtp(true);
-  };
+  }; 
 
   return (
     <>
       {loading && <Loading />}
-      {otp && <OTP setOtp={setOtp} />}
+      {otp && <OTP 
+          setOtp={setOtp} 
+          email={emailForOtp} 
+          onVerified={() => navigate("/sign-in")} 
+      />}
       <div className="h-full bg-gray-200 flex flex-col gap-1">
         <div className="flex min-h-full flex-col justify-center py-12 lg:px-8 bg-gradient-to-t from-[rgba(0,100,0,255)] via-green-600 to-[rgba(0,100,0,255)]">
           <div className="bg-white p-8 rounded-2xl shadow-lg min-w-[320px] mx-auto">
@@ -81,7 +75,7 @@ function Registration() {
                       </label>
                       <input
                         className="mt-2 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-                        id="first_ame"
+                        id="first_name"
                         name="first_name"
                         type="text"
                         required
