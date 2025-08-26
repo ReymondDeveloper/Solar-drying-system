@@ -40,10 +40,10 @@ function Reservations() {
       label: "Status",
       type: "select",
       name: "status",
-      option: [
-        { value: "all", phrase: "All" },
-        { value: "approved", phrase: "Approved" },
-        { value: "denied", phrase: "Denied" },
+      options: [
+        { value: "all" },
+        { value: "approved" },
+        { value: "denied" },
       ],
     },
   ];
@@ -53,10 +53,6 @@ function Reservations() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    const Myalert = `
-      Status: ${data.status}`;
-    alert(Myalert);
-    // setData((prev) => [...prev, data]);
     setFilter(data.status);
     setLoading(false);
     setModal(false);
@@ -88,7 +84,7 @@ function Reservations() {
                   status: data.status,
                   action: (
                     <Button
-                      onClick={() => alert(data.id)}
+                      onClick={() => alert(data.id + 1)}
                       className={"bg-blue-400 hover:bg-blue-500 text-white"}
                     >
                       Print
@@ -189,14 +185,14 @@ function Reservations() {
                       No Reservations Found.
                     </div>
 
-                    <div className="rounded-md flex flex-col">
+                    <div className="lg:hidden rounded-md flex flex-col">
                       <div className="bg-[rgb(138,183,45)] p-2 flex justify-end rounded-t-md">
                         <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] font-bold rounded-full bg-white">
                           0
                         </div>
                       </div>
-                      <div className="lg:hidden p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
-                        No Reservations Found.
+                      <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
+                        No Available Solar Dryers Found.
                       </div>
                     </div>
                   </>

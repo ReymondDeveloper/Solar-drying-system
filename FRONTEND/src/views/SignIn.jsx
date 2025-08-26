@@ -12,8 +12,10 @@ function SignIn() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState(false);
+  const [otpVerify, setOtpVerify] = useState(false);
   const [email, setEmail] = useState(null);
   const [modalEdit, setModalEdit] = useState(false);
+  const [modalVerify, setModalVerify] = useState(false);
 
   const handleRegister = (e) => {
     e.preventDefault();
@@ -95,13 +97,39 @@ function SignIn() {
     },
   ];
 
-  const fieldsEdit = [
+  const fieldsVerify = [
     {
       label: "Email",
       type: "email",
       required: true,
       name: "email",
     },
+  ];
+
+  const handleSubmitVerify = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+      const { email } = data;
+      const res = await axios.post(`${import.meta.env.VITE_API}/verify`, {
+        email,
+      });
+      toast.success(res.data.message);
+      setModalVerify(false);
+      setTimeout(() => {
+        setEmail(email);
+        setOtpVerify(true);
+      }, 2000);
+    } catch (err) {
+      toast.error(err.response.data.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fieldsEdit = [
     {
       label: "Password",
       type: "password",
@@ -128,7 +156,7 @@ function SignIn() {
     try {
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
-      const { email, password, confirm_password } = data;
+      const { password, confirm_password } = data;
       if (password === confirm_password) {
         const res = await axios.put(`${import.meta.env.VITE_API}users/update`, {
           password,
@@ -136,7 +164,6 @@ function SignIn() {
         });
         toast.success(res.data.message);
         setTimeout(() => {
-          localStorage.setItem("email", email);
           setModalEdit(false);
         }, 2000);
       } else {
@@ -161,6 +188,15 @@ function SignIn() {
           setLoading={setLoading}
         />
       )}
+      {modalVerify && (
+        <Modal
+          setModal={setModalVerify}
+          handleSubmit={handleSubmitVerify}
+          fields={fieldsVerify}
+          title={"Email Verification"}
+          button_name={"Confirm Email"}
+        />
+      )}
       {modalEdit && (
         <Modal
           setModal={setModalEdit}
@@ -168,6 +204,15 @@ function SignIn() {
           fields={fieldsEdit}
           title={"Forgot Password"}
           button_name={"Update Password"}
+        />
+      )}
+      {otpVerify && (
+        <OTP
+          setOtp={setOtp}
+          email={email}
+          onVerified={() => (setOtpVerify(false), setModalEdit(true))}
+          loading={loading}
+          setLoading={setLoading}
         />
       )}
       <div className="h-full bg-gray-200 flex flex-col gap-1">
@@ -206,7 +251,7 @@ function SignIn() {
 
                 <Button
                   type={`button`}
-                  onClick={() => setModalEdit(true)}
+                  onClick={() => setModalVerify(true)}
                   className={`w-full hover:bg-[rgba(0,0,0,0.3)] hover:text-white text-green-400`}
                 >
                   Forgot password?

@@ -117,7 +117,7 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
 
             {datas?.map((data, index) =>
               Object.keys(data).map((key, i) => (
-                <div key={`${index}-${i}`} className="flex flex-col gap-1">
+                <div key={`${index}-${i}`} className="col-span-2">
                   <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
                     <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
                       {i + 1}

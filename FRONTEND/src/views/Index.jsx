@@ -32,7 +32,7 @@ function Index() {
             </div>
 
             <div
-                className="fixed bottom-0 right-0 m-5 rounded-lg p-[1em] bg-[rgba(0,0,0,.2)] backdrop-blur-[6px] pointer-events-none">
+                className="fixed bottom-0 right-0 m-5 rounded-lg p-[1em] bg-[rgba(255,255,255,0.2)] backdrop-blur-[6px] pointer-events-none">
                 <p className="text-xs text-white">{`Frontend version: ${currentVersion}`}</p>
             </div>
         </>

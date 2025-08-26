@@ -5,6 +5,7 @@ import {
   loginUser,
   updatePassword,
   verifyOtp,
+  verifyUser,
 } from "../controllers/userController.js";
 // import { protect } from "../middleware/authMiddleware.js"; // I comment auth Middleware for the min time
 
@@ -12,6 +13,7 @@ const router = express.Router();
 
 // router.get("/", protect, getUsers);   // protected route
 router.get("/", getUsers);
+router.post("/verify", verifyUser);
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/verify-otp", verifyOtp);

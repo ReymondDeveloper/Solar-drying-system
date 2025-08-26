@@ -43,7 +43,7 @@ function BookingRequests() {
       label: "Location (Sablayan)",
       type: "select",
       name: "location",
-      option: [
+      options: [
         { value: "all", phrase: "All" },
         { value: "location 1", phrase: "Location 1" },
         { value: "location 2", phrase: "Location 2" },
@@ -53,7 +53,7 @@ function BookingRequests() {
       label: "Status",
       type: "select",
       name: "status",
-      option: [
+      options: [
         { value: "all", phrase: "All" },
         { value: "pending", phrase: "Pending" },
         { value: "approved", phrase: "Approved" },
@@ -68,10 +68,6 @@ function BookingRequests() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    const Myalert = `
-      Status: ${data.status}\n
-      Location: ${data.location}`;
-    alert(Myalert);
     setFilter(data);
     setLoading(false);
     setModalFilter(false);
@@ -83,7 +79,12 @@ function BookingRequests() {
       quantity: "50",
       payment: "gcash",
       capacity: "100",
-      status: "pending",
+      status: 
+        <select className="w-full outline-0" name="status" defaultValue='pending'>
+          <option value='pending'>Pending</option>
+          <option value='approved'>Approved</option>
+          <option value='denied'>Denied</option>
+        </select>
     },
   ];
 
@@ -129,7 +130,7 @@ function BookingRequests() {
                   status: data.status,
                   action: (
                     <Button
-                      onClick={() => handleView(i)}
+                      onClick={() => handleView(index)}
                       className={"bg-blue-400 hover:bg-blue-500 text-white"}
                     >
                       View
@@ -249,13 +250,13 @@ function BookingRequests() {
                       No Available Solar Dryers Found.
                     </div>
 
-                    <div className="rounded-md flex flex-col">
+                    <div className="lg:hidden rounded-md flex flex-col">
                       <div className="bg-[rgb(138,183,45)] p-2 flex justify-end rounded-t-md">
                         <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] font-bold rounded-full bg-white">
                           0
                         </div>
                       </div>
-                      <div className="lg:hidden p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
+                      <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
                         No Available Solar Dryers Found.
                       </div>
                     </div>

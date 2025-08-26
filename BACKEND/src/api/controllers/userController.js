@@ -12,6 +12,31 @@ export const getUsers = async (req, res, next) => {
   }
 };
 
+export const verifyUser = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findByEmail(email);
+    if (!user)
+      return res.status(404).json({ message: "Account doesn`t exist." });
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
+    await supabase
+      .from("users")
+      .update({ otp_code: otp, otp_expires_at: expiresAt })
+      .eq("email", email.toLowerCase());
+
+    await sendOtpEmail(email, otp);
+
+    res.status(201).json({
+      message: "New OTP is Generated.",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const registerUser = async (req, res, next) => {
   try {
     const {
