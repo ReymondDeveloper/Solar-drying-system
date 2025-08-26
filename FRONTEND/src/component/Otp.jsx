@@ -23,8 +23,13 @@ function OTP({ setOtp, email, onVerified, loading, setLoading }) {
       }, 2000);
     } catch (err) {
       toast.error(err.response.data.message);
-      inputRefs.current.forEach((input) => (input.value = ""));
-      inputRefs.current[0]?.focus();
+      inputRefs.current.forEach((e) => {
+        if (e) e.value = "";
+      });
+      setOtpValues(["", "", "", ""]);
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 0);
     } finally {
       setLoading(false);
     }

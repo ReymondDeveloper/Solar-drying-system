@@ -10,8 +10,7 @@ function Settings() {
     middle_name: localStorage.getItem("middle_name") || "",
     last_name: localStorage.getItem("last_name") || "",
     mobile: localStorage.getItem("mobile") || "",
-    email: localStorage.getItem("email") || "",
-    password: "",
+    email: localStorage.getItem("email") || ""
   });
 
   const handleFileChange = (e) => {
@@ -31,20 +30,17 @@ function Settings() {
       Last Name: ${formData.last_name}
       Mobile: ${formData.mobile}
       Email: ${formData.email}
-      Password: ${formData.password}
-      Profile Image: ${profileImage ? profileImage.split("/").pop() : "None"}
     `;
     alert(alertMessage);
     setIsEditing(false);
   };
 
   const formFields = [
-    { label: "First Name", name: "first_name", type: "text", colSpan: 1 },
-    { label: "Middle Name", name: "middle_name", type: "text", colSpan: 1 },
-    { label: "Last Name", name: "last_name", type: "text", colSpan: 1 },
-    { label: "Mobile Number", name: "mobile", type: "text", colSpan: 1 },
-    { label: "Email", name: "email", type: "email", colSpan: 2 },
-    { label: "Password", name: "password", type: "password", colSpan: 2 },
+    { label: "First Name", name: "first_name", type: "text", colSpan: 1, required: true },
+    { label: "Middle Name", name: "middle_name", type: "text", colSpan: 1, required: false},
+    { label: "Last Name", name: "last_name", type: "text", colSpan: 1, required: true},
+    { label: "Mobile Number", name: "mobile", type: "text", colSpan: 1, required: true},
+    { label: "Email", name: "email", type: "email", colSpan: 2, required: true }
   ];
 
   return (
@@ -109,16 +105,14 @@ function Settings() {
                   }
                 `}
                 disabled={!isEditing}
-                required
+                required={field.required}
               />
             </div>
           ))}
 
           <Button
-            type={isEditing ? "submit" : "button"}
-            onClick={() => {
-              if (!isEditing) setIsEditing(true);
-            }}
+            type={isEditing ? "button" : "submit"}
+            onClick={() => setIsEditing((prev) => !prev)}
             className={`mt-6 w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-lg font-semibold transition duration-200 col-span-2`}
           >
             {isEditing ? "Save Profile" : "Edit Profile"}

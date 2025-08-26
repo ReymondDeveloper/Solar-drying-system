@@ -45,7 +45,7 @@ function DryerInformation() {
       label: "Location (Sablayan)",
       type: "select",
       name: "location",
-      option: [
+      options: [
         { value: "all", phrase: "All" },
         { value: "location 1", phrase: "Location 1" },
         { value: "location 2", phrase: "Location 2" },
@@ -61,9 +61,6 @@ function DryerInformation() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    const Myalert = `
-      Location: ${data.location}`;
-    alert(Myalert);
     setFilter(data);
     setLoading(false);
     setModalFilter(false);
@@ -105,13 +102,14 @@ function DryerInformation() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    const Myalert = `
-      Dryer Name: ${data.dryer_name}\n
-      Location: ${data.location}\n
-      Capacity: ${data.capacity}\n
-      Rate: ${data.rate}`;
-    alert(Myalert);
-    setData((prevData) => [...prevData, data]);
+    const formattedDate = {
+      dryer_name: data.dryer_name,
+      location: data.location,
+      capacity: data.capacity,
+      available_capacity: data.capacity,
+      rate: data.rate
+    };
+    setData((prevData) => [...prevData, formattedDate]);
     setLoading(false);
     setModalAdd(false);
   };
@@ -167,8 +165,7 @@ function DryerInformation() {
     setModalEdit(false);
   };
 
-  function handleEdit(i) {
-    alert(`id: ${i + 1}`);
+  function handleEdit() {
     setModalEdit(true);
   }
 
@@ -178,7 +175,7 @@ function DryerInformation() {
       location: "Location 1",
       capacity: "100",
       available_capacity: "100",
-      rate: "PHP 100.10",
+      rate: "100.10",
     },
   ];
 
@@ -189,8 +186,7 @@ function DryerInformation() {
     setModalView(false);
   };
 
-  function handleView(i) {
-    alert(`id: ${i + 1}`);
+  function handleView() {
     setModalView(true);
   }
 
@@ -218,12 +214,20 @@ function DryerInformation() {
                   location: data.location,
                   status: data.status,
                   action: (
-                    <Button
-                      onClick={() => handleView(i)}
-                      className={"bg-blue-400 hover:bg-blue-500 text-white"}
-                    >
-                      View
-                    </Button>
+                    <div className="flex justify-center gap-2">
+                      <Button
+                        onClick={() => handleEdit(index)}
+                        className={"bg-blue-400 hover:bg-blue-500 text-white"}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={() => handleView(index)}
+                        className={"bg-blue-400 hover:bg-blue-500 text-white"}
+                      >
+                        View
+                      </Button>
+                    </div>
                   ),
                 };
               })
@@ -243,13 +247,13 @@ function DryerInformation() {
             action: (
               <div className="flex justify-center gap-2">
                 <Button
-                  onClick={() => handleEdit(i)}
+                  onClick={() => handleEdit()}
                   className={"bg-blue-400 hover:bg-blue-500 text-white"}
                 >
                   Edit
                 </Button>
                 <Button
-                  onClick={() => handleView(i)}
+                  onClick={() => handleView()}
                   className={"bg-blue-400 hover:bg-blue-500 text-white"}
                 >
                   View
@@ -365,13 +369,13 @@ function DryerInformation() {
                       No Available Solar Dryers Found.
                     </div>
 
-                    <div className="rounded-md flex flex-col">
+                    <div className="lg:hidden rounded-md flex flex-col">
                       <div className="bg-[rgb(138,183,45)] p-2 flex justify-end rounded-t-md">
                         <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] font-bold rounded-full bg-white">
                           0
                         </div>
                       </div>
-                      <div className="lg:hidden p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
+                      <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
                         No Available Solar Dryers Found.
                       </div>
                     </div>

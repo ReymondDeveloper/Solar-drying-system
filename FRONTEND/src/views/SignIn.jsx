@@ -164,7 +164,6 @@ function SignIn() {
         });
         toast.success(res.data.message);
         setTimeout(() => {
-          localStorage.setItem("email", email);
           setModalEdit(false);
         }, 2000);
       } else {

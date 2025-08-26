@@ -43,7 +43,7 @@ function Accounts() {
       label: "Role",
       type: "select",
       name: "role",
-      option: [
+      options: [
         { value: "all" },
         { value: "admin" },
         { value: "owner" },
@@ -142,11 +142,45 @@ function Accounts() {
       toast.success(res.data.message);
       setTimeout(() => {
         setModalAdd(false);
+        fetchData();
       }, 2000);
     } catch (err) {
       toast.error(err.response.data.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    setIsError(false);
+    const offset = (currentPage - 1) * limit;
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API}/`, {
+        params: {
+          offset,
+          limit,
+        },
+      });
+      setData(
+        Array.isArray(res.data)
+          ? res.data.map((data) => ({
+              id: data.id,
+              first_name: data.first_name,
+              middle_name: data.middle_name,
+              last_name: data.last_name,
+              address: data.address,
+              email: data.email,
+              role: data.role,
+              user_profile: data.user_profile,
+            }))
+          : []
+      );
+    } catch (err) {
+      toast.error(err.response.data.message);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 

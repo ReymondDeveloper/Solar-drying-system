@@ -13,7 +13,6 @@ import HomeLayout from "./HomeLayout";
 import Availability from "./views/Availability";
 import Reports from "./views/Reports";
 import Accounts from "./views/Accounts";
-import Sample from "./views/Sample";
 import CreateReservation from "./views/CreateReservation";
 import Authentication from "./component/Authentication";
 import ReservationHistory from "./views/ReservationHistory";
@@ -99,30 +98,6 @@ const router = createBrowserRouter(
               element: (
                 <Authentication role={"farmer"}>
                   <ReservationHistory />
-                </Authentication>
-              ),
-            },
-            {
-              path: "booking-information",
-              element: (
-                <Authentication role={"farmer"}>
-                  <Sample />
-                </Authentication>
-              ),
-            },
-            {
-              path: "about",
-              element: (
-                <Authentication role={"farmer"}>
-                  <Sample />
-                </Authentication>
-              ),
-            },
-            {
-              path: "update-dryer-status",
-              element: (
-                <Authentication role={"owner"}>
-                  <Sample />
                 </Authentication>
               ),
             },
