@@ -21,6 +21,7 @@ function DryerInformation() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedDryer, setSelectedDryer] = useState(null);
 
   const tableHeadings = [
     "Dryer Name",
@@ -70,117 +71,122 @@ function DryerInformation() {
   };
 
   const fieldsAdd = [
-    {
-      label: "Dryer Name",
-      type: "text",
-      placeholder: "ex. Dryer Name",
-      required: true,
-      name: "dryer_name",
-    },
-    {
-      label: "Location (Sablayan)",
-      type: "text",
-      placeholder: "ex. Location",
-      required: true,
-      name: "location",
-    },
-    {
-      label: "Capacity (Cavans)",
-      type: "number",
-      placeholder: "ex. 100",
-      required: true,
-      name: "capacity",
-    },
-    {
-      label: "Rate (PHP)",
-      type: "number",
-      placeholder: "ex. 100.00",
-      required: true,
-      name: "rate",
-    },
+    { label: "Dryer Name", type: "text", name: "dryer_name", required: true },
+    { label: "Location (Sablayan)", type: "text", name: "location", required: true },
+    { label: "Capacity (Cavans)", type: "number", name: "capacity", required: true },
+    { label: "Rate (PHP)", type: "number", name: "rate", required: true },
   ];
 
-  const handleSubmitAdd = (e) => {
-    setLoading(true);
+
+  const handleSubmitAdd = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
+    const createdById = localStorage.getItem("id"); 
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    const Myalert = `
-      Dryer Name: ${data.dryer_name}\n
-      Location: ${data.location}\n
-      Capacity: ${data.capacity}\n
-      Rate: ${data.rate}`;
-    alert(Myalert);
-    setData((prevData) => [...prevData, data]);
-    setLoading(false);
-    setModalAdd(false);
+  
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API}dryers`, {
+        ...data,
+        created_by_id: createdById , 
+      });
+  
+      alert("Dryer created successfully!");
+  
+      setData((prev) => [...prev, res.data.dryer]); 
+
+      setModalAdd(false);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to create dryer: " + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const fieldsEdit = [
-    {
-      label: "Dryer Name",
-      type: "text",
-      placeholder: "ex. Dryer Name",
-      required: true,
-      name: "dryer_name",
-      defaultValue: "My Dryer 1",
-    },
-    {
-      label: "Location (Sablayan)",
-      type: "text",
-      placeholder: "ex. Location",
-      required: true,
-      name: "location",
-      defaultValue: "Location 1",
-    },
-    {
-      label: "Capacity (Cavans)",
-      type: "number",
-      placeholder: "ex. 100",
-      required: true,
-      name: "capacity",
-      defaultValue: "100",
-    },
-    {
-      label: "Rate (PHP)",
-      type: "number",
-      placeholder: "ex. 100.00",
-      required: true,
-      name: "rate",
-      defaultValue: "100.10",
-      step: "0.01",
-    },
-  ];
-
-  const handleSubmitEdit = (e) => {
-    setLoading(true);
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    const Myalert = `
-      Dryer Name: ${data.dryer_name}\n
-      Location: ${data.location}\n
-      Capacity: ${data.capacity}\n
-      Rate: ${data.rate}`;
-    alert(Myalert);
-    setLoading(false);
-    setModalEdit(false);
-  };
-
-  function handleEdit(i) {
-    alert(`id: ${i + 1}`);
+  
+  function handleEdit(dryer) {
+    setSelectedDryer(dryer);  
     setModalEdit(true);
   }
+  
+  const handleSubmitEdit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+  
+    const formData = new FormData(e.target);
+    const updatedData = Object.fromEntries(formData.entries());
+  
+    try {
+      const res = await axios.put(
+        `${import.meta.env.VITE_API}${selectedDryer.id}`,
+        updatedData
+      );
+  
+      alert("Dryer updated successfully!");
+  
+      // update local state
+      setData((prev) =>
+        prev.map((dryer) =>
+          dryer.id === selectedDryer.id ? res.data.dryer : dryer
+        )
+      );
+  
+      setModalEdit(false);
+      setSelectedDryer(null);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update dryer: " + (err.response?.data?.error || err.message));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const datasView = [
-    {
-      dryer_name: "My Dryer 1",
-      location: "Location 1",
-      capacity: "100",
-      available_capacity: "100",
-      rate: "PHP 100.10",
-    },
-  ];
+  const datasView = selectedDryer
+  ? [
+      {
+        dryer_name: selectedDryer.dryer_name,
+        location: selectedDryer.location,
+        capacity: selectedDryer.capacity,
+        available_capacity: selectedDryer.available_capacity,
+        rate: selectedDryer.rate,
+      },
+    ]
+  : [];
+
+  const fieldsEdit = selectedDryer
+  ? [
+      {
+        label: "Dryer Name",
+        type: "text",
+        name: "dryer_name",
+        required: true,
+        defaultValue: selectedDryer.dryer_name,
+      },
+      {
+        label: "Location (Sablayan)",
+        type: "text",
+        name: "location",
+        required: true,
+        defaultValue: selectedDryer.location,
+      },
+      {
+        label: "Capacity (Cavans)",
+        type: "number",
+        name: "capacity",
+        required: true,
+        defaultValue: selectedDryer.capacity,
+      },
+      {
+        label: "Rate (PHP)",
+        type: "number",
+        step: "0.01",
+        name: "rate",
+        required: true,
+        defaultValue: selectedDryer.rate,
+      },
+    ]
+  : [];
 
   const handleSubmitView = (e) => {
     setLoading(true);
@@ -189,80 +195,56 @@ function DryerInformation() {
     setModalView(false);
   };
 
-  function handleView(i) {
-    alert(`id: ${i + 1}`);
+  function handleView(dryer) {
+    setSelectedDryer(dryer);
     setModalView(true);
   }
 
-  const Endpoint = "";
+  const Endpoint = `${import.meta.env.VITE_API}dryers`;
 
-  useEffect(() => {
+  useEffect(() => { 
     const fetchData = async () => {
       setIsLoading(true);
       setIsError(false);
       const offset = (currentPage - 1) * limit;
+  
       try {
         const res = await axios.get(Endpoint, {
-          params: {
-            offset,
-            limit,
-          },
+          params: { offset, limit },
         });
-
-        const { Results } = res.data;
-        setData(
-          Array.isArray(Results)
-            ? Results.map((data, index) => {
-                return {
-                  dryer_name: data.dryer_name,
-                  location: data.location,
-                  status: data.status,
-                  action: (
-                    <Button
-                      onClick={() => handleView(i)}
-                      className={"bg-blue-400 hover:bg-blue-500 text-white"}
-                    >
-                      View
-                    </Button>
-                  ),
-                };
-              })
-            : []
-        );
-        throw new Error("Simulated error for testing purposes.");
+  
+        const dryers = res.data.Results || res.data;
+  
+        const formatted = dryers.map((dryer, index) => ({
+          ...dryer,
+          available_capacity: dryer.available_capacity ?? dryer.capacity,
+          action: (
+            <div className="flex justify-center gap-2">
+              <Button
+                onClick={() => handleEdit(dryer)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
+              >
+                Edit
+              </Button>
+              <Button
+                onClick={() => handleView(dryer)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
+              >
+                View
+              </Button>
+            </div>
+          ),
+        }));
+  
+        setData(formatted);
+  
       } catch (error) {
-        console.log(error);
-        // setIsError(true);
-        function FakeFallbackData() {
-          return Array.from({ length: 6 }, (_, i) => ({
-            dryer_name: `My Dryer ${i + 1}`,
-            location: `My Location ${i + 1}`,
-            capacity: "100",
-            available_capacity: "100",
-            rate: `PHP ${100 + i * 10}.${(i + 1) * 10}`,
-            action: (
-              <div className="flex justify-center gap-2">
-                <Button
-                  onClick={() => handleEdit(i)}
-                  className={"bg-blue-400 hover:bg-blue-500 text-white"}
-                >
-                  Edit
-                </Button>
-                <Button
-                  onClick={() => handleView(i)}
-                  className={"bg-blue-400 hover:bg-blue-500 text-white"}
-                >
-                  View
-                </Button>
-              </div>
-            ),
-          }));
-        }
-        setData(FakeFallbackData());
+        console.error(error);
+        setIsError(true);
       } finally {
         setIsLoading(false);
       }
-    };
+    };      
     fetchData();
   }, [limit, currentPage]);
 

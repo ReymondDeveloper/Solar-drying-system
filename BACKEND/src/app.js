@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import userRoutes from "../src/api/routes/userRoutes.js";
+import dryerRoutes from "../src/api/routes/dryersRoutes.js";
 import { errorHandler } from "../src/api/middleware/errorHandler.js";
 import cors from "cors";
 
@@ -13,6 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/dryers", dryerRoutes);
 
 // Error handling
 app.use(errorHandler);

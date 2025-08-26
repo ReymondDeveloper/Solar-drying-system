@@ -26,7 +26,7 @@ function SignIn() {
     const formData = new FormData(e.target);
     const { email, password } = Object.fromEntries(formData.entries());
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API}/login`, {
+      const res = await axios.post(`${import.meta.env.VITE_API}users/login`, {
         email,
         password,
       });
@@ -130,7 +130,7 @@ function SignIn() {
       const data = Object.fromEntries(formData.entries());
       const { email, password, confirm_password } = data;
       if (password === confirm_password) {
-        const res = await axios.put(`${import.meta.env.VITE_API}/update`, {
+        const res = await axios.put(`${import.meta.env.VITE_API}users/update`, {
           password,
           email,
         });

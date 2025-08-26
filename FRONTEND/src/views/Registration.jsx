@@ -86,7 +86,7 @@ function Registration() {
       password,
     } = Object.fromEntries(formData.entries());
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API}/register`, {
+      const res = await axios.post(`${import.meta.env.VITE_API}register`, {
         first_name,
         middle_name,
         last_name,

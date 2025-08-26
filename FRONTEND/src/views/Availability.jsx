@@ -76,7 +76,7 @@ function Availability() {
               })
             : []
         );
-        throw new Error("Simulated error for testing purposes.");
+        // throw new Error("Simulated error for testing purposes.");
       } catch (error) {
         console.log(error);
         // setIsError(true);

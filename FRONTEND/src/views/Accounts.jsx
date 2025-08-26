@@ -130,7 +130,7 @@ function Accounts() {
       password,
     } = Object.fromEntries(formData.entries());
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API}/register`, {
+      const res = await axios.post(`${import.meta.env.VITE_API}register`, {
         first_name,
         middle_name,
         last_name,
@@ -156,7 +156,7 @@ function Accounts() {
       setIsError(false);
       const offset = (currentPage - 1) * limit;
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API}/`, {
+        const res = await axios.get(`${import.meta.env.VITE_API}`, {
           params: {
             offset,
             limit,
