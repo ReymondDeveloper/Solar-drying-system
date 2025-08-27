@@ -86,15 +86,18 @@ function Registration() {
       password,
     } = Object.fromEntries(formData.entries());
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API}register`, {
-        first_name,
-        middle_name,
-        last_name,
-        address,
-        email,
-        password,
-        role,
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API}/users/register`,
+        {
+          first_name,
+          middle_name,
+          last_name,
+          address,
+          email,
+          password,
+          role,
+        }
+      );
       toast.success(res.data.message);
       setTimeout(() => {
         setEmail(email);
@@ -243,7 +246,7 @@ function Registration() {
             <p className="mt-6 text-center text-sm text-gray-400">
               Already have an account?{" "}
               <a
-                className="font-semibold text-green-400 hover:text-gray-400 underline"
+                className="font-semibold text-green-400 hover:text-gray-400 underline cursor-pointer"
                 onClick={handleSignIn}
               >
                 Click here to sign in.

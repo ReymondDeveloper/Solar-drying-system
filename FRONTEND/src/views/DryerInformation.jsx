@@ -7,6 +7,8 @@ import Search from "../component/Search";
 import Modal from "../component/Modal";
 import Loading from "../component/Loading";
 import Button from "../component/Button";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function DryerInformation() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,121 +71,118 @@ function DryerInformation() {
 
   const fieldsAdd = [
     { label: "Dryer Name", type: "text", name: "dryer_name", required: true },
-    { label: "Location (Sablayan)", type: "text", name: "location", required: true },
-    { label: "Capacity (Cavans)", type: "number", name: "capacity", required: true },
+    {
+      label: "Location (Sablayan)",
+      type: "text",
+      name: "location",
+      required: true,
+    },
+    {
+      label: "Capacity (Cavans)",
+      type: "number",
+      name: "capacity",
+      required: true,
+    },
     { label: "Rate (PHP)", type: "number", name: "rate", required: true },
   ];
-
 
   const handleSubmitAdd = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const createdById = localStorage.getItem("id"); 
+    const createdById = localStorage.getItem("id");
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-  
-    try {
-      const res = await axios.post(`${import.meta.env.VITE_API}dryers`, {
-        ...data,
-        created_by_id: createdById , 
-      });
-  
-      alert("Dryer created successfully!");
-  
-      setData((prev) => [...prev, res.data.dryer]); 
 
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API}/dryers`, {
+        ...data,
+        created_by_id: createdById,
+      });
+      toast.success(res.data.message);
+      fetchData();
       setModalAdd(false);
     } catch (err) {
-      console.error(err);
-      alert("Failed to create dryer: " + (err.response?.data?.error || err.message));
+      toast.error(err.response.data.message);
     } finally {
       setLoading(false);
     }
   };
-  
+
   function handleEdit(dryer) {
-    setSelectedDryer(dryer);  
+    setSelectedDryer(dryer);
     setModalEdit(true);
   }
-  
+
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
+
     const formData = new FormData(e.target);
     const updatedData = Object.fromEntries(formData.entries());
-  
+
     try {
       const res = await axios.put(
-        `${import.meta.env.VITE_API}${selectedDryer.id}`,
+        `${import.meta.env.VITE_API}/dryers/${selectedDryer.id}`,
         updatedData
       );
-  
-      alert("Dryer updated successfully!");
-  
-      // update local state
-      setData((prev) =>
-        prev.map((dryer) =>
-          dryer.id === selectedDryer.id ? res.data.dryer : dryer
-        )
-      );
-  
+
+      toast.success(res.data.message);
+      fetchData();
       setModalEdit(false);
       setSelectedDryer(null);
     } catch (err) {
-      console.error(err);
-      alert("Failed to update dryer: " + (err.response?.data?.error || err.message));
+      toast.error(err.response.data.message);
     } finally {
       setLoading(false);
     }
   };
 
   const datasView = selectedDryer
-  ? [
-      {
-        dryer_name: selectedDryer.dryer_name,
-        location: selectedDryer.location,
-        capacity: selectedDryer.capacity,
-        available_capacity: selectedDryer.available_capacity,
-        rate: selectedDryer.rate,
-      },
-    ]
-  : [];
+    ? [
+        {
+          dryer_name: selectedDryer.dryer_name,
+          location: selectedDryer.location,
+          capacity: selectedDryer.capacity,
+          available_capacity: selectedDryer.available_capacity,
+          rate: selectedDryer.rate,
+        },
+      ]
+    : [];
 
   const fieldsEdit = selectedDryer
-  ? [
-      {
-        label: "Dryer Name",
-        type: "text",
-        name: "dryer_name",
-        required: true,
-        defaultValue: selectedDryer.dryer_name,
-      },
-      {
-        label: "Location (Sablayan)",
-        type: "text",
-        name: "location",
-        required: true,
-        defaultValue: selectedDryer.location,
-      },
-      {
-        label: "Capacity (Cavans)",
-        type: "number",
-        name: "capacity",
-        required: true,
-        defaultValue: selectedDryer.capacity,
-      },
-      {
-        label: "Rate (PHP)",
-        type: "number",
-        step: "0.01",
-        name: "rate",
-        required: true,
-        defaultValue: selectedDryer.rate,
-      },
-    ]
-  : [];
+    ? [
+        {
+          label: "Dryer Name",
+          type: "text",
+          name: "dryer_name",
+          required: true,
+          defaultValue: selectedDryer.dryer_name,
+        },
+        {
+          label: "Location (Sablayan)",
+          type: "text",
+          name: "location",
+          required: true,
+          defaultValue: selectedDryer.location,
+        },
+        {
+          label: "Capacity (Cavans)",
+          type: "number",
+          name: "capacity",
+          required: true,
+          defaultValue: selectedDryer.capacity,
+        },
+        {
+          label: "Rate (PHP)",
+          type: "number",
+          step: "0.01",
+          name: "rate",
+          required: true,
+          defaultValue: selectedDryer.rate,
+        },
+      ]
+    : [];
 
   const handleSubmitView = (e) => {
     setLoading(true);
@@ -197,21 +196,62 @@ function DryerInformation() {
     setModalView(true);
   }
 
-  const Endpoint = `${import.meta.env.VITE_API}dryers`;
+  const Endpoint = `${import.meta.env.VITE_API}/dryers`;
 
-  useEffect(() => { 
+  const fetchData = async () => {
+    setIsLoading(true);
+    setIsError(false);
+    const offset = (currentPage - 1) * limit;
+
+    try {
+      const res = await axios.get(Endpoint, {
+        params: { offset, limit },
+      });
+
+      const dryers = res.data.Results || res.data;
+
+      const formatted = dryers.map((dryer, index) => ({
+        ...dryer,
+        available_capacity: dryer.available_capacity ?? dryer.capacity,
+        action: (
+          <div className="flex justify-center gap-2">
+            <Button
+              onClick={() => handleEdit(dryer)}
+              className="bg-blue-400 hover:bg-blue-500 text-white"
+            >
+              Edit
+            </Button>
+            <Button
+              onClick={() => handleView(dryer)}
+              className="bg-blue-400 hover:bg-blue-500 text-white"
+            >
+              View
+            </Button>
+          </div>
+        ),
+      }));
+
+      setData(formatted);
+    } catch (error) {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setIsError(false);
       const offset = (currentPage - 1) * limit;
-  
+
       try {
         const res = await axios.get(Endpoint, {
           params: { offset, limit },
         });
-  
+
         const dryers = res.data.Results || res.data;
-  
+
         const formatted = dryers.map((dryer, index) => ({
           ...dryer,
           available_capacity: dryer.available_capacity ?? dryer.capacity,
@@ -232,16 +272,15 @@ function DryerInformation() {
             </div>
           ),
         }));
-  
+
         setData(formatted);
-  
       } catch (error) {
         console.error(error);
         setIsError(true);
       } finally {
         setIsLoading(false);
       }
-    };      
+    };
     fetchData();
   }, [limit, currentPage]);
 
@@ -276,6 +315,7 @@ function DryerInformation() {
   return (
     <>
       {loading && <Loading />}
+      <ToastContainer position="top-center" autoClose={3000} />
       {modalFilter && (
         <Modal
           setModal={setModalFilter}

@@ -28,7 +28,7 @@ function SignIn() {
     const formData = new FormData(e.target);
     const { email, password } = Object.fromEntries(formData.entries());
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API}users/login`, {
+      const res = await axios.post(`${import.meta.env.VITE_API}/users/login`, {
         email,
         password,
       });
@@ -113,7 +113,7 @@ function SignIn() {
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
       const { email } = data;
-      const res = await axios.post(`${import.meta.env.VITE_API}/verify`, {
+      const res = await axios.post(`${import.meta.env.VITE_API}/users/verify`, {
         email,
       });
       toast.success(res.data.message);
@@ -158,10 +158,13 @@ function SignIn() {
       const data = Object.fromEntries(formData.entries());
       const { password, confirm_password } = data;
       if (password === confirm_password) {
-        const res = await axios.put(`${import.meta.env.VITE_API}users/update`, {
-          password,
-          email,
-        });
+        const res = await axios.put(
+          `${import.meta.env.VITE_API}/users/update`,
+          {
+            password,
+            email,
+          }
+        );
         toast.success(res.data.message);
         setTimeout(() => {
           setModalEdit(false);
@@ -261,7 +264,7 @@ function SignIn() {
               <p className="mt-6 text-center text-sm text-gray-400">
                 Don't have an account yet?{" "}
                 <a
-                  className="font-semibold text-green-400 hover:text-gray-400 underline"
+                  className="font-semibold text-green-400 hover:text-gray-400 underline cursor-pointer"
                   onClick={handleRegister}
                 >
                   Click here to register
