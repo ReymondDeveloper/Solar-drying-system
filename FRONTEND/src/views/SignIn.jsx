@@ -28,7 +28,7 @@ function SignIn() {
     const formData = new FormData(e.target);
     const { email, password } = Object.fromEntries(formData.entries());
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API}users/login`, {
+      const res = await axios.post(`${import.meta.env.VITE_API}/users/login`, {
         email,
         password,
       });
@@ -261,7 +261,7 @@ function SignIn() {
               <p className="mt-6 text-center text-sm text-gray-400">
                 Don't have an account yet?{" "}
                 <a
-                  className="font-semibold text-green-400 hover:text-gray-400 underline"
+                  className="font-semibold text-green-400 hover:text-gray-400 underline cursor-pointer"
                   onClick={handleRegister}
                 >
                   Click here to register
