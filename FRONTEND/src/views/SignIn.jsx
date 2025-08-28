@@ -41,18 +41,26 @@ function SignIn() {
         middle_name,
         last_name,
       } = res.data;
-      localStorage.setItem("role", role);
-      localStorage.setItem("full_name", full_name);
-      localStorage.setItem("first_name", first_name);
-      localStorage.setItem("middle_name", middle_name);
-      localStorage.setItem("last_name", last_name);
-      localStorage.setItem("email", email);
-      localStorage.setItem("address", address);
-      localStorage.setItem("id", id);
-      toast.success(res.data.message);
-      setTimeout(() => {
-        navigate("/home");
-      }, 2000);
+      if (res.data.message === "Account is not yet verified.") {
+        toast.error(res.data.message);
+        setTimeout(() => {
+          setEmail(email);
+          setOtp(true);
+        }, 2000);
+      } else {
+        localStorage.setItem("role", role);
+        localStorage.setItem("full_name", full_name);
+        localStorage.setItem("first_name", first_name);
+        localStorage.setItem("middle_name", middle_name);
+        localStorage.setItem("last_name", last_name);
+        localStorage.setItem("email", email);
+        localStorage.setItem("address", address);
+        localStorage.setItem("id", id);
+        toast.success(res.data.message);
+        setTimeout(() => {
+          navigate("/home");
+        }, 2000);
+      }
     } catch (err) {
       email === "admin@gmail.com" ||
       email === "owner@gmail.com" ||
@@ -66,12 +74,6 @@ function SignIn() {
             localStorage.setItem("first_name", "Super");
             localStorage.setItem("last_name", role);
             navigate("/home");
-          }, 2000))
-        : err.response.data.message === "Account is not yet verified."
-        ? (toast.error(err.response.data.message),
-          setTimeout(() => {
-            setEmail(email);
-            setOtp(true);
           }, 2000))
         : toast.error(err.response.data.message);
     } finally {
@@ -113,7 +115,7 @@ function SignIn() {
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
       const { email } = data;
-      const res = await axios.post(`${import.meta.env.VITE_API}/verify`, {
+      const res = await axios.post(`${import.meta.env.VITE_API}/users/verify`, {
         email,
       });
       toast.success(res.data.message);
@@ -158,7 +160,7 @@ function SignIn() {
       const data = Object.fromEntries(formData.entries());
       const { password, confirm_password } = data;
       if (password === confirm_password) {
-        const res = await axios.put(`${import.meta.env.VITE_API}users/update`, {
+        const res = await axios.put(`${import.meta.env.VITE_API}/users/update`, {
           password,
           email,
         });

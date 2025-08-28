@@ -210,7 +210,7 @@ function DryerInformation() {
 
       const dryers = res.data.Results || res.data;
 
-      const formatted = dryers.map((dryer, index) => ({
+      const formatted = dryers.map((dryer) => ({
         ...dryer,
         available_capacity: dryer.available_capacity ?? dryer.capacity,
         action: (
@@ -232,7 +232,8 @@ function DryerInformation() {
       }));
 
       setData(formatted);
-    } catch (error) {
+    } catch (err) {
+      console.log(err.response.data.message)
       setIsError(true);
     } finally {
       setIsLoading(false);
@@ -252,7 +253,7 @@ function DryerInformation() {
 
         const dryers = res.data.Results || res.data;
 
-        const formatted = dryers.map((dryer, index) => ({
+        const formatted = dryers.map((dryer) => ({
           ...dryer,
           available_capacity: dryer.available_capacity ?? dryer.capacity,
           action: (
@@ -274,15 +275,15 @@ function DryerInformation() {
         }));
 
         setData(formatted);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err.response.data.message);
         setIsError(true);
       } finally {
         setIsLoading(false);
       }
     };
     fetchData();
-  }, [limit, currentPage]);
+  }, [limit, currentPage, Endpoint]);
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =

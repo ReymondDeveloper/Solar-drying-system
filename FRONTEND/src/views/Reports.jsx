@@ -7,7 +7,6 @@ function Reports() {
     { label: "Registered Farmer", value: 25, bg: "from-red-400 to-red-500" },
   ];
 
-  // Example user data
   const users = [
     { id: 1, name: "John Doe", status: "Registered" },
     { id: 2, name: "Jane Smith", status: "Verified" },

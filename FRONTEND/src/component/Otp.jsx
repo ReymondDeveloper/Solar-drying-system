@@ -12,7 +12,7 @@ function OTP({ setOtp, email, onVerified, loading, setLoading }) {
   const handleOTP = async (otpCode) => {
     setLoading(true);
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API}/verify-otp`, {
+      const res = await axios.post(`${import.meta.env.VITE_API}/users/verify-otp`, {
         email,
         otp: otpCode,
       });
