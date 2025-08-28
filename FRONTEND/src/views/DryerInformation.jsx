@@ -245,14 +245,18 @@ function DryerInformation() {
       setIsLoading(true);
       setIsError(false);
       const offset = (currentPage - 1) * limit;
-
+    
       try {
         const res = await axios.get(Endpoint, {
           params: { offset, limit },
         });
-
+    
         const dryers = res.data.Results || res.data;
-
+    
+        const sorted = [...dryers].sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+    
         const formatted = dryers.map((dryer) => ({
           ...dryer,
           available_capacity: dryer.available_capacity ?? dryer.capacity,
@@ -273,9 +277,9 @@ function DryerInformation() {
             </div>
           ),
         }));
-
+    
         setData(formatted);
-      } catch (err) {
+      } catch (error) {
         console.error(err.response.data.message);
         setIsError(true);
       } finally {

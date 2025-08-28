@@ -9,6 +9,7 @@ import Loading from "../component/Loading";
 import Button from "../component/Button";
 
 function CreateReservation() {
+  const farmerId = localStorage.getItem("id");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
@@ -19,6 +20,8 @@ function CreateReservation() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedDryerId, setSelectedDryerId] = useState(null);
+  const [selectedOwnerId, setSelectedOwnerId] = useState(null); 
 
   const tableHeadings = [
     "Registered Dryer",
@@ -75,89 +78,109 @@ function CreateReservation() {
       options: [{ value: "gcash" }, {value: "cash"}],
     },
   ];
-
-  const handleSubmitAdd = (e) => {
-    setLoading(true);
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    const Myalert = `
-      Crop Type: ${data.crop_type}\n
-      Quantity (Cavans): ${data.quantity}\n
-      Payment Type: ${data.payment}`;
-    alert(Myalert);
-    setLoading(false);
-    setModalAdd(false);
+ 
+  const handleSubmitAdd = async (dryerId, ownerId, formData) => {
+    if (!farmerId) {
+      alert("You must be logged in!");
+      return;
+    }
+  
+    try {
+      setLoading(true);
+  
+      const check = await axios.get(
+        `${import.meta.env.VITE_API}/reservations`,
+        { params: { farmer_id: farmerId, dryer_id: dryerId } }
+      );
+  
+      if (check.data.exists) {
+        alert("You have already reserved this dryer.");
+        return;
+      }
+  
+      const res = await axios.post(`${import.meta.env.VITE_API}/reservations`, {
+        farmer_id: farmerId,
+        dryer_id: dryerId,
+        owner_id: ownerId,  
+        status: "pending",
+        crop_type: formData.crop_type,
+        quantity: formData.quantity,
+        payment: formData.payment,
+      });
+  
+      alert("Reservation created successfully!");
+      console.log(res.data);
+      setModalAdd(false);
+  
+    } catch (error) {
+      console.error("Reservation error:", error.response?.data || error.message);
+      alert(error.response?.data?.message || "Failed to create reservation.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  function handleView(i, status) {
-    alert(`id: ${i + 1}\nStatus: ${status}`);
-    status === "available" && setModalAdd(true);
+  function handleView(dryer) {
+    if (dryer.status !== "available") {
+      alert("This dryer is occupied.");
+      return;
+    }
+    setSelectedDryerId(dryer.id);
+    setSelectedOwnerId(dryer.owner_id);  
+    setModalAdd(true);
   }
 
-  const Endpoint = "";
+  const handleAddFormSubmit = (e) => {
+    e.preventDefault();
+    const formData = Object.fromEntries(new FormData(e.target).entries());
+    handleSubmitAdd(selectedDryerId, selectedOwnerId, formData);
+  };
+
+  const Endpoint = `${import.meta.env.VITE_API}/dryers`;  
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setIsError(false);
-      const offset = (currentPage - 1) * limit;
+  
       try {
         const res = await axios.get(Endpoint, {
           params: {
-            offset,
+            offset: (currentPage - 1) * limit,
             limit,
           },
         });
-
-        const { Results } = res.data;
+  
+        if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
+  
         setData(
-          Array.isArray(Results)
-            ? Results.map((data, index) => {
-                return {
-                  dryer_name: data.dryer_name,
-                  location: data.location,
-                  status: data.status,
-                  action: (
-                    <Button
-                      onClick={() => handleView(index, data.status)}
-                      className={"bg-blue-400 hover:bg-blue-500 text-white"}
-                    >
-                      Reserve
-                    </Button>
-                  ),
-                };
-              })
-            : []
-        );
-        throw new Error("Simulated error for testing purposes.");
-      } catch (error) {
-        console.log(error);
-        // setIsError(true);
-        function FakeFallbackData() {
-          return Array.from({ length: 6 }, (_, i) => ({
-            dryer_name: `Dryer ${i + 1}`,
-            location: `Location ${i + 1}`,
-            status: i % 2 === 0 ? "available" : "occupied",
+          res.data.map((dryer) => ({
+            id: dryer.id,            
+            owner_id: dryer.owner_id,  
+            dryer_name: dryer.dryer_name,
+            location: dryer.location,
+            status: dryer.status && dryer.status.trim() !== "" ? dryer.status : "available",
             action: (
               <Button
-                onClick={() =>
-                  handleView(i, i % 2 === 0 ? "available" : "occupied")
-                }
-                className={"bg-blue-400 hover:bg-blue-500 text-white"}
+                onClick={() => handleView(dryer)}  
+                className="bg-blue-400 hover:bg-blue-500 text-white"
               >
                 Reserve
               </Button>
             ),
-          }));
-        }
-        setData(FakeFallbackData());
+          }))
+        );
+      } catch (error) {
+        console.error(error);
+        setIsError(true);
+        setData([]);  
       } finally {
         setIsLoading(false);
       }
     };
+  
     fetchData();
-  }, [limit, currentPage]);
+  }, [currentPage, limit]);
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =
@@ -198,13 +221,13 @@ function CreateReservation() {
         />
       )}
       {modalAdd && (
-        <Modal
-          setModal={setModalAdd}
-          handleSubmit={handleSubmitAdd}
-          fields={fieldsAdd}
-          title={"Reservation"}
-          button_name={"Reserve"}
-        />
+         <Modal
+         setModal={setModalAdd}
+         handleSubmit={handleAddFormSubmit}
+         fields={fieldsAdd}
+         title={"Reservation"}
+         button_name={"Reserve"}
+       />
       )}
       <div
         className={`w-full h-[calc(100dvh-160px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${

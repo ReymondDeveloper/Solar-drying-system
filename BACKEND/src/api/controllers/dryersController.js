@@ -2,15 +2,41 @@ import supabase from "../../database/supabase.db.js";
 
 export const getDryers = async (req, res) => {
   try {
-    const { data, error } = await supabase.from("dryers").select("*");
+    const { offset = 0, limit = 10 } = req.query;
+
+    const { data: dryers, error } = await supabase
+      .from("dryers")
+      .select("id, dryer_name, location, created_by_id")
+      .order("created_at", { ascending: false })
+      .range(Number(offset), Number(offset) + Number(limit) - 1);
 
     if (error) throw error;
 
-    res.json(data);
+    const dryersWithStatus = await Promise.all(
+      dryers.map(async (dryer) => {
+        const { data: reservations, error: resError } = await supabase
+          .from("reservations")
+          .select("id")
+          .eq("dryer_id", dryer.id)
+          .in("status", ["pending", "active"]);
+
+        if (resError) throw resError;
+
+        return {
+          ...dryer,
+          owner_id: dryer.created_by_id,
+          status: reservations.length > 0 ? "occupied" : "available",
+        };
+      })
+    );
+
+    res.json(dryersWithStatus);
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch dryers.", error: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Error fetching dryers", error: err.message });
   }
 };
+
 
 export const getDryerById = async (req, res) => {
   try {

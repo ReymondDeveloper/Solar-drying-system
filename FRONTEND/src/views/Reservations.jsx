@@ -19,21 +19,8 @@ function Reservations() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const tableHeadings = [
-    "Account Name",
-    "Booked Dryer",
-    "Date",
-    "Status",
-    "Action",
-  ];
-
-  const tableDataCell = [
-    "account_name",
-    "dryer_name",
-    "date",
-    "status",
-    "action",
-  ];
+  const tableHeadings = ["Booked Dryer", "Location","Date", "Status", "Action"];
+  const tableDataCell = ["dryer_name", "location","date", "status", "action"];
 
   const fields = [
     {
@@ -49,93 +36,64 @@ function Reservations() {
   ];
 
   const handleSubmit = (e) => {
-    setLoading(true);
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    setFilter(data.status);
-    setLoading(false);
+    const formData = Object.fromEntries(new FormData(e.target).entries());
+    setFilter(formData.status);
     setModal(false);
   };
 
-  const Endpoint = "";
+  const Endpoint = `${import.meta.env.VITE_API}/reservations`;
+
+  const fetchReservations = async () => {
+    setIsLoading(true);
+    setIsError(false);
+
+    try {
+      const res = await axios.get(Endpoint, {
+        params: { offset: (currentPage - 1) * limit, limit },
+      });
+
+      const results = res.data;
+
+      setData(
+        results.map((reservation) => ({
+          dryer_name: reservation.dryer_name,
+          location: reservation.dryer_location || reservation.location || "N/A",  
+          date: reservation.created_at
+            ? new Date(reservation.created_at).toLocaleDateString()
+            : "",
+          status: reservation.status,
+          action: (
+            <Button
+              onClick={() => alert(`Reservation ID: ${reservation.id}`)}
+              className="bg-blue-400 hover:bg-blue-500 text-white"
+            >
+              Print
+            </Button>
+          ),
+        }))
+      );
+    } catch (err) {
+      console.error(err);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setIsError(false);
-      const offset = (currentPage - 1) * limit;
-      try {
-        const res = await axios.get(Endpoint, {
-          params: {
-            offset,
-            limit,
-          },
-        });
-
-        const { Results } = res.data;
-        setData(
-          Array.isArray(Results)
-            ? Results.map((data) => {
-                return {
-                  account_name: data.account_name,
-                  dryer_name: data.dryer_name,
-                  date: data.date,
-                  status: data.status,
-                  action: (
-                    <Button
-                      onClick={() => alert(data.id + 1)}
-                      className={"bg-blue-400 hover:bg-blue-500 text-white"}
-                    >
-                      Print
-                    </Button>
-                  ),
-                };
-              })
-            : []
-        );
-        throw new Error("Simulated error for testing purposes.");
-      } catch (error) {
-        console.log(error);
-        // setIsError(true);
-        function FakeFallbackData() {
-          return Array.from({ length: 6 }, (_, i) => ({
-            account_name: `Name ${i + 1}`,
-            dryer_name: `Dryer ${i + 1}`,
-            date: `Date ${i + 1}`,
-            status: i % 2 === 0 ? "approved" : "denied",
-            action: (
-              <Button
-                onClick={() => alert(i + 1)}
-                className={"bg-blue-400 hover:bg-blue-500 text-white"}
-              >
-                Print
-              </Button>
-            ),
-          }));
-        }
-        setData(FakeFallbackData());
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [limit, currentPage]);
+    fetchReservations();
+  }, [currentPage, limit]);
 
   const FilteredData = data.filter((info) => {
-    const filterByFilters =
-      filter && filter !== "all"
-        ? info.status.toLowerCase().includes(filter.toLowerCase())
-        : true;
-
+    const filterByStatus = filter !== "all" ? info.status.toLowerCase() === filter.toLowerCase() : true;
     const filterBySearch = search
       ? Object.entries(info)
-          .filter(([key]) => key !== "action" && key !== "status")
-          .some(([, value]) =>
-            String(value).toLowerCase().includes(search.toLowerCase())
-          )
+          .filter(([key]) => key !== "status" && key !== "action")
+          .some(([, value]) => String(value).toLowerCase().includes(search.toLowerCase()))
       : true;
-    return filterByFilters && filterBySearch;
+
+    return filterByStatus && filterBySearch;
   });
 
   const totalPages = Math.max(1, Math.ceil(FilteredData.length / limit));
@@ -144,7 +102,7 @@ function Reservations() {
 
   if (isError)
     return (
-      <div className="absolute top-0 left-0 w-full h-[calc(100dvh-56px)] text-5xl flex justify-center items-center font-bold py-5">
+      <div className="absolute top-0 left-0 w-full h-[calc(100dvh-56px)] flex justify-center items-center font-bold text-3xl">
         Error while fetching the data
       </div>
     );
@@ -152,20 +110,8 @@ function Reservations() {
   return (
     <>
       {loading && <Loading />}
-      {modal && (
-        <Modal
-          setModal={setModal}
-          handleSubmit={handleSubmit}
-          fields={fields}
-          title={"Filters"}
-          button_name={"Apply Status"}
-        />
-      )}
-      <div
-        className={`w-full h-[calc(100dvh-160px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${
-          modal ? "overflow-hidden" : "overflow-auto"
-        }`}
-      >
+      {modal && <Modal setModal={setModal} handleSubmit={handleSubmit} fields={fields} title="Filters" button_name="Apply Status" />}
+      <div className={`w-full h-[calc(100dvh-160px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${modal ? "overflow-hidden" : "overflow-auto"}`}>
         <Search setSearch={setSearch} setModal={setModal} />
         <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
           <div className="overflow-auto max-h-[400px]">
@@ -179,37 +125,14 @@ function Reservations() {
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}
                 />
-                {FilteredData?.length === 0 && (
-                  <>
-                    <div className="hidden lg:flex justify-center items-center font-bold py-5">
-                      No Reservations Found.
-                    </div>
-
-                    <div className="lg:hidden rounded-md flex flex-col">
-                      <div className="bg-[rgb(138,183,45)] p-2 flex justify-end rounded-t-md">
-                        <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] font-bold rounded-full bg-white">
-                          0
-                        </div>
-                      </div>
-                      <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
-                        No Available Solar Dryers Found.
-                      </div>
-                    </div>
-                  </>
+                {FilteredData.length === 0 && (
+                  <div className="flex justify-center items-center font-bold py-5">No Reservations Found.</div>
                 )}
               </>
             )}
           </div>
         </div>
-
-        <Pagination
-          limit={limit}
-          setLimit={setLimit}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          currentPageSafe={currentPageSafe}
-          totalPages={totalPages}
-        />
+        <Pagination limit={limit} setLimit={setLimit} currentPage={currentPage} setCurrentPage={setCurrentPage} currentPageSafe={currentPageSafe} totalPages={totalPages} />
       </div>
     </>
   );

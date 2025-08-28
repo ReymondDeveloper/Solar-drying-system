@@ -9,6 +9,8 @@ import Modal from "../component/Modal";
 import Button from "../component/Button";
 
 function ReservationHistory() {
+  const farmerId =
+  localStorage.getItem("farmer_id") || localStorage.getItem("id") || null;
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
@@ -19,8 +21,10 @@ function ReservationHistory() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const [datasView, setDatasView] = useState([]);
 
   const tableHeadings = [
+    "Farmer",
     "Booked Dryer",
     "Location (Sablayan)",
     "Date",
@@ -28,8 +32,7 @@ function ReservationHistory() {
     "Action",
   ];
 
-  const tableDataCell = ["dryer_name", "location", "date", "status", "action"];
-
+  const tableDataCell = ["farmer_name", "dryer_name", "location", "date", "status", "action"];
   const fieldsFilter = [
     {
       label: "Status",
@@ -53,8 +56,6 @@ function ReservationHistory() {
     setModalFilter(false);
   };
 
-  const datasView = [{ crop_type: "Rice", quantity: "50", payment: "gcash" }];
-
   const handleSubmitView = (e) => {
     setLoading(true);
     e.preventDefault();
@@ -62,74 +63,93 @@ function ReservationHistory() {
     setModalView(false);
   };
 
-  function handleView(i) {
-    alert(`id: ${i + 1}`);
+  function parseNotes(notes) {
+    if (!notes) return null;
+
+    if (typeof notes === "object") return notes;
+
+    try {
+      const parsed = JSON.parse(notes);
+      if (typeof parsed === "object") return parsed;
+    } catch (err) {
+    }
+
+    const obj = {};
+    notes.split(",").forEach((part) => {
+      const [k, ...rest] = part.split(":");
+      if (!k || rest.length === 0) return;
+      const v = rest.join(":").trim();
+      const key = k.trim().toLowerCase().replace(/\s+/g, "_");
+      obj[key] = v;
+    });
+
+    return Object.keys(obj).length ? obj : { notes: String(notes) };
+  }
+
+  function handleView(reservation) {
+    if (reservation?.notes) {
+      const parsed = parseNotes(reservation.notes);
+      setDatasView([parsed]);
+    } else {
+      setDatasView([]);
+    }
     setModalView(true);
   }
 
-  const Endpoint = "";
+  const Endpoint = `${import.meta.env.VITE_API}/reservations`;
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchHistory = async () => {
+      console.log("ReservationHistory: farmerId from localStorage =", farmerId);
+
+      if (!farmerId) {
+        console.warn("No farmer id found in localStorage. Skipping fetch.");
+        setData([]);
+        setIsLoading(false);
+        return;
+      }
+ 
+  
       setIsLoading(true);
       setIsError(false);
-      const offset = (currentPage - 1) * limit;
-      try {
+  
+      try { 
         const res = await axios.get(Endpoint, {
-          params: {
-            offset,
-            limit,
-          },
-        });
+          params: { farmer_id: farmerId },
+        }); 
 
-        const { Results } = res.data;
+        if (!Array.isArray(res.data)) throw new Error("Invalid API response");
+  
         setData(
-          Array.isArray(Results)
-            ? Results.map((data, index) => {
-                return {
-                  account_name: data.account_name,
-                  dryer_name: data.dryer_name,
-                  date: data.date,
-                  status: data.status,
-                  action: (
-                    <Button
-                      onClick={() => handleView(index)}
-                      className={"bg-blue-400 hover:bg-blue-500 text-white"}
-                    >
-                      View
-                    </Button>
-                  ),
-                };
-              })
-            : []
-        );
-        throw new Error("Simulated error for testing purposes.");
-      } catch (error) {
-        console.log(error);
-        // setIsError(true);
-        function FakeFallbackData() {
-          return Array.from({ length: 6 }, (_, i) => ({
-            dryer_name: `Dryer ${i + 1}`,
-            location: `Location ${i + 1}`,
-            date: `Date ${i + 1}`,
-            status: i % 2 === 0 ? "approved" : "denied",
+          res.data.map((reservation) => ({
+            farmer_name: reservation.farmer_name || "N/A",
+            dryer_name: reservation.dryer_name || "N/A",
+            location: reservation.location || "N/A",
+            date: reservation.created_at
+              ? new Date(reservation.created_at).toLocaleDateString()
+              : "N/A",
+            status: reservation.status || "pending",
             action: (
               <Button
-                onClick={() => handleView(i)}
-                className={"bg-blue-400 hover:bg-blue-500 text-white"}
+                onClick={() => handleView(reservation)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
               >
                 View
               </Button>
             ),
-          }));
-        }
-        setData(FakeFallbackData());
+          }))
+        );
+      } catch (error) {
+        console.error(error);
+        setData([]);
+        setIsError(true);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchData();
-  }, [limit, currentPage]);
+  
+    fetchHistory();
+  }, [farmerId, currentPage, limit]); 
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =

@@ -9,6 +9,7 @@ import Loading from "../component/Loading";
 import Button from "../component/Button";
 
 function BookingRequests() {
+  const ownerId = localStorage.getItem("owner_id"); 
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
@@ -16,13 +17,14 @@ function BookingRequests() {
   const [isError, setIsError] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
   const [modalView, setModalView] = useState(false);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState({ status: "all", location: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   const tableHeadings = [
-    "Name",
-    "Location (Sablayan)",
+    "Farmer Name",
+    "Dryer Location",
     "Crop Type",
     "Quantity (Cavans)",
     "Status",
@@ -30,7 +32,7 @@ function BookingRequests() {
   ];
 
   const tableDataCell = [
-    "name",
+    "farmer_name",
     "location",
     "crop_type",
     "quantity",
@@ -40,16 +42,6 @@ function BookingRequests() {
 
   const fieldsFilter = [
     {
-      label: "Location (Sablayan)",
-      type: "select",
-      name: "location",
-      options: [
-        { value: "all", phrase: "All" },
-        { value: "location 1", phrase: "Location 1" },
-        { value: "location 2", phrase: "Location 2" },
-      ],
-    },
-    {
       label: "Status",
       type: "select",
       name: "status",
@@ -58,7 +50,6 @@ function BookingRequests() {
         { value: "pending", phrase: "Pending" },
         { value: "approved", phrase: "Approved" },
         { value: "denied", phrase: "Denied" },
-        { value: "completed", phrase: "Completed" },
       ],
     },
   ];
@@ -68,131 +59,95 @@ function BookingRequests() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    setFilter(data);
+    setFilter((prev) => ({ ...prev, ...data }));
     setLoading(false);
     setModalFilter(false);
   };
 
-  const datasView = [
-    {
-      crop_type: "Rice",
-      quantity: "50",
-      payment: "gcash",
-      capacity: "100",
-      status: 
-        <select className="w-full outline-0" name="status" defaultValue='pending'>
-          <option value='pending'>Pending</option>
-          <option value='approved'>Approved</option>
-          <option value='denied'>Denied</option>
-        </select>
-    },
-  ];
-
-  const handleSubmitView = (e) => {
-    setLoading(true);
+  const handleSubmitView = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    const Myalert = `
-      Status: ${data.status}`;
-    alert(Myalert);
-    setLoading(false);
-    setModalView(false);
+    const updated = Object.fromEntries(formData.entries());
+
+    try {
+      setLoading(true);
+      await axios.put(`http://localhost:3000/api/reservations/${selectedBooking.id}`, {
+        status: updated.status,
+      });
+      alert("Status updated successfully!");
+      setModalView(false);
+      fetchData(); // refresh list
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update status");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  function handleView(i) {
-    alert(`id: ${i + 1}`);
+  function handleView(booking) {
+    setSelectedBooking(booking);
     setModalView(true);
   }
+ 
+  const Endpoint = `${import.meta.env.VITE_API}/reservations`;
 
-  const Endpoint = "";
+  const fetchData = async () => {
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const res = await axios.get(Endpoint, {
+        params: { offset: (currentPage - 1) * limit, limit },
+      });
+
+      if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
+
+      setData(
+        res.data.map((r) => ({
+          id: r.id,
+          farmer_name: r.farmer_name || "N/A",
+          location: r.dryer_location || "N/A",
+          crop_type: r.crop_type || "N/A",
+          quantity: r.quantity || "N/A",
+          status: r.status || "pending",
+          action: (
+            <Button
+              onClick={() => handleView(r)}
+              className="bg-blue-400 hover:bg-blue-500 text-white"
+            >
+              View
+            </Button>
+          ),
+        }))
+      );
+    } catch (error) {
+      console.error(error);
+      setIsError(true);
+      setData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setIsError(false);
-      const offset = (currentPage - 1) * limit;
-      try {
-        const res = await axios.get(Endpoint, {
-          params: {
-            offset,
-            limit,
-          },
-        });
-
-        const { Results } = res.data;
-        setData(
-          Array.isArray(Results)
-            ? Results.map((data, index) => {
-                return {
-                  dryer_name: data.dryer_name,
-                  location: data.location,
-                  status: data.status,
-                  action: (
-                    <Button
-                      onClick={() => handleView(index)}
-                      className={"bg-blue-400 hover:bg-blue-500 text-white"}
-                    >
-                      View
-                    </Button>
-                  ),
-                };
-              })
-            : []
-        );
-        throw new Error("Simulated error for testing purposes.");
-      } catch (error) {
-        console.log(error);
-        // setIsError(true);
-        function FakeFallbackData() {
-          return Array.from({ length: 6 }, (_, i) => ({
-            name: `Name ${i + 1}`,
-            location: i % 2 === 0 ? "Location 1" : "Location 2",
-            crop_type: i % 2 === 0 ? "Rice" : "Corn",
-            quantity: (i + 1) * 10,
-            status: i % 2 === 0 ? "pending" : "approved",
-            action: (
-              <Button
-                onClick={() => handleView(i)}
-                className={"bg-blue-400 hover:bg-blue-500 text-white"}
-              >
-                View
-              </Button>
-            ),
-          }));
-        }
-        setData(FakeFallbackData());
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [limit, currentPage]);
+    if (ownerId) fetchData();
+  }, [currentPage, limit]);
 
   const FilteredData = data.filter((info) => {
-    const filterByFilters =
-      (!filter.location ||
-        filter.location === "all" ||
-        info.location
-          .toLowerCase()
-          .includes(String(filter.location).toLowerCase())) &&
-      (!filter.status ||
-        filter.status === "all" ||
-        info.status
-          .toLowerCase()
-          .includes(String(filter.status).toLowerCase()));
+    const filterByStatus =
+      filter.status && filter.status !== "all"
+        ? info.status.toLowerCase() === filter.status.toLowerCase()
+        : true;
 
     const filterBySearch = search
       ? Object.entries(info)
-          .filter(
-            ([key]) =>
-              key !== "status" && key !== "action" && key !== "location"
-          )
+          .filter(([key]) => key !== "status" && key !== "action")
           .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;
-    return filterByFilters && filterBySearch;
+
+    return filterByStatus && filterBySearch;
   });
 
   const totalPages = Math.max(1, Math.ceil(FilteredData.length / limit));
@@ -205,6 +160,7 @@ function BookingRequests() {
         Error while fetching the data
       </div>
     );
+
   return (
     <>
       {loading && <Loading />}
@@ -217,13 +173,30 @@ function BookingRequests() {
           button_name={"Apply Status"}
         />
       )}
-      {modalView && (
+      {modalView && selectedBooking && (
         <Modal
           setModal={setModalView}
           handleSubmit={handleSubmitView}
-          datas={datasView}
-          title={"Booking Details"}
-          button_name={"Apply Changes"}
+          datas={[
+            {
+              crop_type: selectedBooking.crop_type,
+              quantity: selectedBooking.quantity,
+              payment: selectedBooking.payment,
+              status: (
+                <select
+                  className="w-full outline-0"
+                  name="status"
+                  defaultValue={selectedBooking.status}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="denied">Denied</option>
+                </select>
+              ),
+            },
+          ]}
+          title={`Booking by ${selectedBooking.farmer_name}`}
+          button_name={"Update"}
         />
       )}
       <div
@@ -245,22 +218,9 @@ function BookingRequests() {
                   tableDataCell={tableDataCell}
                 />
                 {FilteredData?.length === 0 && (
-                  <>
-                    <div className="hidden lg:flex justify-center items-center font-bold py-5">
-                      No Available Solar Dryers Found.
-                    </div>
-
-                    <div className="lg:hidden rounded-md flex flex-col">
-                      <div className="bg-[rgb(138,183,45)] p-2 flex justify-end rounded-t-md">
-                        <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] font-bold rounded-full bg-white">
-                          0
-                        </div>
-                      </div>
-                      <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
-                        No Available Solar Dryers Found.
-                      </div>
-                    </div>
-                  </>
+                  <div className="text-center font-bold py-5">
+                    No Booking Requests Found.
+                  </div>
                 )}
               </>
             )}

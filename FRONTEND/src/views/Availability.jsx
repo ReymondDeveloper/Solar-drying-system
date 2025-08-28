@@ -19,7 +19,6 @@ function Availability() {
   const [loading, setLoading] = useState(false);
 
   const tableHeadings = ["Registered Dryer", "Location (Sablayan)", "Status"];
-
   const tableDataCell = ["dryer_name", "location", "status"];
 
   const fields = [
@@ -45,49 +44,39 @@ function Availability() {
     setModal(false);
   };
 
-  const Endpoint = "";
+  // 👉 Point this to your backend API
+  const Endpoint = `${import.meta.env.VITE_API}/dryers`;
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setIsError(false);
+
       const offset = (currentPage - 1) * limit;
       try {
         const res = await axios.get(Endpoint, {
-          params: {
-            offset,
-            limit,
-          },
+          params: { offset, limit },
         });
 
-        const { Results } = res.data;
-        setData(
-          Array.isArray(Results)
-            ? Results.map((data) => {
-                return {
-                  dryer_name: data.dryer_name,
-                  location: data.location,
-                  status: data.status,
-                };
-              })
-            : []
-        );
-        throw new Error("Simulated error for testing purposes.");
+        // your backend may return res.data.Results or res.data directly
+        const dryers = res.data.Results || res.data;
+
+        // format to match table
+        const formatted = dryers.map((dryer) => ({
+          dryer_name: dryer.dryer_name,
+          location: dryer.location,
+          status: dryer.status ?? "available", // default if no status in DB
+        }));
+
+        setData(formatted);
       } catch (error) {
-        console.log(error);
-        // setIsError(true);
-        function FakeFallbackData() {
-          return Array.from({ length: 6 }, (_, i) => ({
-            dryer_name: `Dryer ${i + 1}`,
-            location: `Location ${i + 1}`,
-            status: i % 2 === 0 ? "available" : "occupied",
-          }));
-        }
-        setData(FakeFallbackData());
+        console.error("Error fetching dryers:", error);
+        setIsError(true);
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchData();
   }, [limit, currentPage]);
 
@@ -104,6 +93,7 @@ function Availability() {
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;
+
     return filterByFilters && filterBySearch;
   });
 
@@ -117,6 +107,7 @@ function Availability() {
         Error while fetching the data
       </div>
     );
+
   return (
     <>
       {loading && <Loading />}
@@ -152,7 +143,6 @@ function Availability() {
                     <div className="hidden lg:flex justify-center items-center font-bold py-5">
                       No Available Solar Dryers Found.
                     </div>
-
                     <div className="lg:hidden rounded-md flex flex-col">
                       <div className="bg-[rgb(138,183,45)] p-2 flex justify-end rounded-t-md">
                         <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] font-bold rounded-full bg-white">
@@ -169,7 +159,6 @@ function Availability() {
             )}
           </div>
         </div>
-
         <Pagination
           limit={limit}
           setLimit={setLimit}

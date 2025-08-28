@@ -62,25 +62,12 @@ function SignIn() {
         }, 2000);
       }
     } catch (err) {
-      email === "admin@gmail.com" ||
-      email === "owner@gmail.com" ||
-      email === "farmer@gmail.com"
-        ? (toast.error("Login failed successfully."),
-          setTimeout(() => {
-            const role = email.substring(0, email.indexOf("@"));
-            localStorage.setItem("role", role);
-            localStorage.setItem("full_name", `Super ${role}`);
-            localStorage.setItem("email", email);
-            localStorage.setItem("first_name", "Super");
-            localStorage.setItem("last_name", role);
-            navigate("/home");
-          }, 2000))
-        : toast.error(err.response.data.message);
+      toast.error(err.response.data.message);
     } finally {
       setLoading(false);
     }
   };
-
+ 
   const formField = [
     {
       label: "Email address",
