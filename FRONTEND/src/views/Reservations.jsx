@@ -19,8 +19,14 @@ function Reservations() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const tableHeadings = ["Booked Dryer", "Location","Date", "Status", "Action"];
-  const tableDataCell = ["dryer_name", "location","date", "status", "action"];
+  const tableHeadings = [
+    "Booked Dryer",
+    "Location",
+    "Date",
+    "Status",
+    "Action",
+  ];
+  const tableDataCell = ["dryer_name", "location", "date", "status", "action"];
 
   const fields = [
     {
@@ -29,6 +35,7 @@ function Reservations() {
       name: "status",
       options: [
         { value: "all" },
+        { value: "pending" },
         { value: "approved" },
         { value: "denied" },
       ],
@@ -58,7 +65,7 @@ function Reservations() {
       setData(
         results.map((reservation) => ({
           dryer_name: reservation.dryer_name,
-          location: reservation.dryer_location || reservation.location || "N/A",  
+          location: reservation.dryer_location || reservation.location || "N/A",
           date: reservation.created_at
             ? new Date(reservation.created_at).toLocaleDateString()
             : "",
@@ -86,11 +93,16 @@ function Reservations() {
   }, [currentPage, limit]);
 
   const FilteredData = data.filter((info) => {
-    const filterByStatus = filter !== "all" ? info.status.toLowerCase() === filter.toLowerCase() : true;
+    const filterByStatus =
+      filter !== "all"
+        ? info.status.toLowerCase() === filter.toLowerCase()
+        : true;
     const filterBySearch = search
       ? Object.entries(info)
           .filter(([key]) => key !== "status" && key !== "action")
-          .some(([, value]) => String(value).toLowerCase().includes(search.toLowerCase()))
+          .some(([, value]) =>
+            String(value).toLowerCase().includes(search.toLowerCase())
+          )
       : true;
 
     return filterByStatus && filterBySearch;
@@ -110,8 +122,20 @@ function Reservations() {
   return (
     <>
       {loading && <Loading />}
-      {modal && <Modal setModal={setModal} handleSubmit={handleSubmit} fields={fields} title="Filters" button_name="Apply Status" />}
-      <div className={`w-full h-[calc(100dvh-160px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${modal ? "overflow-hidden" : "overflow-auto"}`}>
+      {modal && (
+        <Modal
+          setModal={setModal}
+          handleSubmit={handleSubmit}
+          fields={fields}
+          title="Filters"
+          button_name="Apply Status"
+        />
+      )}
+      <div
+        className={`w-full h-[calc(100dvh-160px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${
+          modal ? "overflow-hidden" : "overflow-auto"
+        }`}
+      >
         <Search setSearch={setSearch} setModal={setModal} />
         <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
           <div className="overflow-auto max-h-[400px]">
@@ -126,13 +150,22 @@ function Reservations() {
                   tableDataCell={tableDataCell}
                 />
                 {FilteredData.length === 0 && (
-                  <div className="flex justify-center items-center font-bold py-5">No Reservations Found.</div>
+                  <div className="flex justify-center items-center font-bold py-5">
+                    No Reservations Found.
+                  </div>
                 )}
               </>
             )}
           </div>
         </div>
-        <Pagination limit={limit} setLimit={setLimit} currentPage={currentPage} setCurrentPage={setCurrentPage} currentPageSafe={currentPageSafe} totalPages={totalPages} />
+        <Pagination
+          limit={limit}
+          setLimit={setLimit}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          currentPageSafe={currentPageSafe}
+          totalPages={totalPages}
+        />
       </div>
     </>
   );

@@ -3,8 +3,11 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
   const columnWidth = `${100 / columnCount}%`;
 
   return (
-    <div className="max-w-full overflow-x-auto">  
-      <table className="w-full border-collapse rounded-xl shadow-sm overflow-hidden" role="table">
+    <div className="max-w-full overflow-x-auto">
+      <table
+        className="w-full border-collapse rounded-xl shadow-sm overflow-hidden"
+        role="table"
+      >
         <thead>
           <tr>
             <th className="max-[1023px]:hidden bg-[rgb(138,183,45)] text-white text-sm font-semibold py-3 px-4 text-center">
@@ -38,7 +41,11 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                   key={i}
                   style={{ width: columnWidth }}
                   className={`text-sm py-3 px-4 whitespace-nowrap 
-                    ${dataCell === "status" || dataCell === "action" ? "text-center" : "text-center"}
+                    ${
+                      dataCell === "status" || dataCell === "action"
+                        ? "text-center"
+                        : "text-center"
+                    }
                     ${dataCell === "email" ? "lowercase" : "capitalize"}
                   `}
                 >
@@ -46,20 +53,26 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                     el.status?.toLowerCase().includes("available") ? (
                       <span className="flex items-center gap-2 justify-center">
                         <span className="w-3.5 h-3.5 rounded-full bg-blue-500" />
-                        <span className="hidden md:inline text-blue-600 font-medium">Available</span>
+                        <span className="hidden md:inline text-blue-600 font-medium">
+                          Available
+                        </span>
                       </span>
                     ) : el.status?.toLowerCase().includes("occupied") ? (
                       <span className="flex items-center gap-2 justify-center">
                         <span className="w-3.5 h-3.5 rounded-full bg-red-500" />
-                        <span className="hidden md:inline text-red-600 font-medium">Occupied</span>
+                        <span className="hidden md:inline text-red-600 font-medium">
+                          Occupied
+                        </span>
                       </span>
                     ) : (
                       el[dataCell]
                     )
                   ) : dataCell === "location" || dataCell === "address" ? (
-                    el[dataCell]?.length > 24
-                      ? el[dataCell].slice(0, 24) + "..."
-                      : el[dataCell]
+                    el[dataCell]?.length > 24 ? (
+                      el[dataCell].slice(0, 24) + "..."
+                    ) : (
+                      el[dataCell]
+                    )
                   ) : (
                     el[dataCell]
                   )}
@@ -77,7 +90,7 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
             className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
           >
             <div className="bg-[rgb(138,183,45)] p-3 flex justify-between items-center">
-              <span className="text-white text-sm font-medium">
+              <span className="text-white text-sm font-medium capitalize">
                 {tableHeadings[0]}: {el[tableDataCell[0]]}
               </span>
               <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] font-bold rounded-full bg-white">
@@ -89,9 +102,17 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
               {tableDataCell.map((dataCell, i) => (
                 <div
                   key={i}
-                  className={`text-sm ${
-                    dataCell === "status" ? "font-semibold" : ""
-                  }`}
+                  className={`text-sm 
+                    ${dataCell === "status" ? "font-semibold capitalize" : ""}
+                    ${
+                      dataCell === "dryer_name" ||
+                      dataCell === "location" ||
+                      dataCell === "role" ||
+                      dataCell === "farmer_name"
+                        ? "capitalize"
+                        : ""
+                    }
+                  `}
                 >
                   <span className="font-medium text-gray-500">
                     {tableHeadings[i]}:
@@ -111,9 +132,11 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                       el[dataCell]
                     )
                   ) : dataCell === "location" || dataCell === "address" ? (
-                    el[dataCell]?.length > 11
-                      ? el[dataCell].slice(0, 11) + "..."
-                      : el[dataCell]
+                    el[dataCell]?.length > 11 ? (
+                      el[dataCell].slice(0, 11) + "..."
+                    ) : (
+                      el[dataCell]
+                    )
                   ) : (
                     el[dataCell]
                   )}

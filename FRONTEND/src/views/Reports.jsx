@@ -15,15 +15,15 @@ function Reports() {
       try {
         setLoading(true);
         const base = import.meta.env.VITE_API;
- 
+
         const usersRes = await axios.get(`${base}/users`);
         setUsers(usersRes.data || []);
- 
+
         const farmersRes = await axios.get(`${base}/users`, {
           params: { role: "farmer" },
         });
         setFarmers(farmersRes.data || []);
- 
+
         const dryersRes = await axios.get(`${base}/dryers`);
         setDryers(dryersRes.data || []);
       } catch (err) {
@@ -34,7 +34,7 @@ function Reports() {
     };
     fetchData();
   }, []);
- 
+
   const cards = [
     {
       label: "Registered Users",
@@ -51,7 +51,7 @@ function Reports() {
       value: farmers.length,
       bg: "from-red-400 to-red-500",
     },
-  ]; 
+  ];
 
   const filteredUsers =
     filter === "All"
@@ -59,12 +59,12 @@ function Reports() {
       : users.filter((u) => u.role?.toLowerCase() === filter.toLowerCase());
 
   return (
-    <div className="w-full min-h-screen p-6 bg-gray-100 flex flex-col">
+    <div className="w-full min-h-screen md:p-6 bg-gray-100 flex flex-col">
       <div className="w-full bg-white p-8 rounded-xl shadow-lg">
         <h2 className="text-2xl font-bold text-gray-700 mb-6">
           Reports Dashboard
         </h2>
- 
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10 w-full">
           {cards.map((card, idx) => (
             <div
@@ -78,7 +78,7 @@ function Reports() {
             </div>
           ))}
         </div>
- 
+
         <div className="bg-gray-50 p-6 rounded-xl shadow-md w-full">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold text-gray-700">
@@ -101,10 +101,7 @@ function Reports() {
               <thead className="bg-[rgb(138,183,45)] text-white">
                 <tr>
                   {tableHeadings.map((heading, idx) => (
-                    <th
-                      key={idx}
-                      className="py-3 px-4 text-left font-semibold"
-                    >
+                    <th key={idx} className="py-3 px-4 text-left font-semibold">
                       {heading}
                     </th>
                   ))}
