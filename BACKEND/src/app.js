@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import userRoutes from "../src/api/routes/userRoutes.js";
 import dryerRoutes from "../src/api/routes/dryersRoutes.js";
 import reservationRoutes from "../src/api/routes/reservationsRoutes.js";
+import uploadRoutes from "../src/api/routes/uploadRoutes.js"
+import path from "path"; 
 import { errorHandler } from "../src/api/middleware/errorHandler.js";
 import cors from "cors";
 
@@ -17,6 +19,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", userRoutes);
 app.use("/api/dryers", dryerRoutes);
 app.use("/api/reservations", reservationRoutes);
+app.use("/api/upload", uploadRoutes);  
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Error handling
 app.use(errorHandler);

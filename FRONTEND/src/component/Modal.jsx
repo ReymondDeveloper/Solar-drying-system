@@ -4,6 +4,7 @@ import { RiCloseLargeLine } from "react-icons/ri";
 
 function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
   const [address, setAddress] = useState("");
+  const [previewUrls, setPreviewUrls] = useState({});
   const handleLocation = () => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -65,23 +66,72 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                 <label className="text-[rgba(0,100,0,255)] font-bold text-md">
                   {field.label}
                 </label>
-                {field.type === "select" ? (
+                  {field.name === "image_url" ? (
+                    <div className="flex flex-col gap-2">
+                      <input
+                        type="file"
+                        name={field.name}
+                        accept="image/*"
+                        className="bg-gray-200 w-full rounded-md p-2 outline-0"
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+
+                          const localPreview = URL.createObjectURL(file);
+                          setPreviewUrls((prev) => ({ ...prev, [field.name]: localPreview }));
+
+                          const formData = new FormData();
+                          formData.append("file", file);
+
+                          try {
+                            const res = await fetch(`${import.meta.env.VITE_API}/upload`, {
+                              method: "POST",
+                              body: formData,
+                            });
+                            const data = await res.json();
+                            if (data.url) {
+                              setPreviewUrls((prev) => ({ ...prev, [field.name]: data.url }));
+                            }
+                          } catch (err) {
+                            console.error("Image upload failed:", err);
+                          }
+                        }}
+                      />
+                        {(previewUrls[field.name] || field.defaultValue) && (
+                          <img
+                            src={
+                              (previewUrls[field.name] || field.defaultValue).startsWith("http")
+                                ? (previewUrls[field.name] || field.defaultValue)
+                                : `${import.meta.env.VITE_API.replace("/api", "")}${previewUrls[field.name] || field.defaultValue}`
+                            }
+                            alt="Preview"
+                            className="mt-2 w-32 h-32 object-cover rounded-md border"
+                          />
+                        )}
+                    </div>
+                  ) : field.type === "select" ? (
                   <div className="bg-gray-200 w-full rounded-md p-2">
-                    <select
-                      name={field.name}
-                      className="outline-0 w-full text-[rgba(0,100,0,255)] capitalize"
-                      defaultValue={field.defaultValue || ""}
+                    <div
+                      className={`max-h-48 overflow-y-auto rounded-md ${
+                        field.options.length >= 5 ? "scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100" : ""
+                      }`}
                     >
-                      {field.options.map((option, idx) => (
-                        <option
-                          key={idx}
-                          value={option.value}
-                          className="bg-gray-200"
-                        >
-                          {option.value}
-                        </option>
-                      ))}
-                    </select>
+                      <select
+                        name={field.name}
+                        className="outline-0 w-full text-[rgba(0,100,0,255)] capitalize bg-gray-200"
+                        defaultValue={field.defaultValue || ""}
+                      >
+                        {field.options.map((option, idx) => (
+                          <option
+                            key={idx}
+                            value={option.value}
+                            className="bg-gray-200 capitalize"
+                          >
+                            {option.value}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 ) : field.name === "address" ? (
                   <>
@@ -114,8 +164,51 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                 )}
               </div>
             ))}
+            {datas?.map((data, index) => (
+              <div
+                key={index}
+                className="col-span-2 flex flex-row gap-5 border border-[rgb(138,183,45)] rounded-md bg-white p-3"
+              >
+                <div className="flex-shrink-0">
+                  {(data.image_url || data.user_profile) && (
+                    <img
+                      src={
+                        (data.image_url || data.user_profile).startsWith("http")
+                          ? (data.image_url || data.user_profile)
+                          : `${import.meta.env.VITE_API.replace("/api", "")}${
+                              data.image_url || data.user_profile
+                            }`
+                      }
+                      alt="Preview"
+                      className="w-64 h-64 object-cover rounded-md border border-gray-400"
+                    />
+                  )}
+                </div>
 
-            {datas?.map((data, index) =>
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {Object.keys(data).map(
+                    (key, i) =>
+                      key !== "image_url" &&
+                      key !== "user_profile" && (
+                        <div key={`${index}-${i}`} className="rounded-md border">
+                          <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
+                            <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
+                              {i + 1}
+                            </div>
+                            {key.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+                          </div>
+                          <div className="p-2 bg-[rgba(255,255,255,0.9)] text-sm rounded-b-md capitalize">
+                            {data[key]}
+                          </div>
+                        </div>
+                      )
+                  )}
+                </div>
+              </div>
+            ))}
+
+
+            {/* {datas?.map((data, index) =>
               Object.keys(data).map((key, i) => (
                 <div key={`${index}-${i}`} className="col-span-2">
                   <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
@@ -127,11 +220,25 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                       .replace(/\b\w/g, (l) => l.toUpperCase())}
                   </div>
                   <div className="p-2 bg-[rgba(255,255,255,0.9)] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                    {data[key]}
+                    {key === "image_url" ? (
+                      <img
+                        src={
+                          data[key]
+                            ? data[key].startsWith("http")
+                              ? data[key]  
+                              : `${import.meta.env.VITE_API.replace("/api", "")}${data[key]}`
+                            : "/placeholder.png"
+                        }
+                        alt="Dryer"
+                        className="w-40 h-40 object-cover rounded-md border border-gray-400"
+                      /> 
+                    ) : (
+                      data[key]
+                    )}
                   </div>
                 </div>
               ))
-            )}
+            )} */}
           </div>
 
           <div className="w-full flex gap-3 justify-end items-center mt-3">

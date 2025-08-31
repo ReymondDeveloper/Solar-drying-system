@@ -3,7 +3,7 @@ import axios from "axios";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
-import Search from "../component/Search";
+import Search from "../component/Search"; 
 import Modal from "../component/Modal";
 import Loading from "../component/Loading";
 import Button from "../component/Button";
@@ -43,6 +43,15 @@ function DryerInformation() {
     "action",
   ];
 
+  const locationOptions = [
+    { value: "location 1", phrase: "Location 1" },
+    { value: "location 2", phrase: "Location 2" },
+    { value: "location 3", phrase: "Location 3" },
+    { value: "location 4", phrase: "Location 4" },
+    { value: "location 5", phrase: "Location 5" },
+  ];
+  
+
   const fieldsFilter = [
     {
       label: "Location (Sablayan)",
@@ -73,72 +82,100 @@ function DryerInformation() {
     { label: "Dryer Name", type: "text", name: "dryer_name", required: true },
     {
       label: "Location (Sablayan)",
-      type: "text",
+      type: "select",
       name: "location",
       required: true,
+      options: locationOptions,
     },
-    {
-      label: "Capacity (Cavans)",
-      type: "number",
-      name: "capacity",
-      required: true,
-    },
+    { label: "Capacity (Cavans)", type: "number", name: "capacity", required: true },
     { label: "Rate (PHP)", type: "number", name: "rate", required: true },
+    { label: "Dryer Image", type: "file", name: "image_url" }, 
   ];
-
+  
   const handleSubmitAdd = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    const createdById = localStorage.getItem("id");
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-
+  
     try {
+      const createdById = localStorage.getItem("id");
+      const formData = new FormData(e.target);
+      let dryerData = Object.fromEntries(formData.entries());
+  
+      const file = formData.get("image_url");
+      if (file && file.size > 0) {
+        const uploadForm = new FormData();
+        uploadForm.append("file", file);
+  
+  
+        const uploadRes = await axios.post(`${import.meta.env.VITE_API}/upload`, uploadForm, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        
+  
+        dryerData.image_url = uploadRes.data.url;  
+      }
+  
       const res = await axios.post(`${import.meta.env.VITE_API}/dryers`, {
-        ...data,
+        ...dryerData,
         created_by_id: createdById,
       });
+  
       toast.success(res.data.message);
       fetchData();
       setModalAdd(false);
     } catch (err) {
-      toast.error(err.response.data.message);
+      toast.error(err.response?.data?.message || "Failed to create dryer");
     } finally {
       setLoading(false);
     }
   };
+  
 
   function handleEdit(dryer) {
     setSelectedDryer(dryer);
     setModalEdit(true);
   }
-
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+  
     const formData = new FormData(e.target);
-    const updatedData = Object.fromEntries(formData.entries());
-
+    let updatedData = Object.fromEntries(formData.entries());
+  
     try {
+      const imageFile = formData.get("image_url");
+      if (imageFile && imageFile instanceof File && imageFile.size > 0) {
+        const uploadData = new FormData();
+        uploadData.append("file", imageFile);
+  
+        const uploadRes = await axios.post(
+          `${import.meta.env.VITE_API}/upload`,
+          uploadData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+  
+        updatedData.image_url = uploadRes.data.url;  
+      } else {
+        updatedData.image_url = selectedDryer.image_url;  
+      }
+  
       const res = await axios.put(
         `${import.meta.env.VITE_API}/dryers/${selectedDryer.id}`,
         updatedData
       );
-
+  
       toast.success(res.data.message);
       fetchData();
       setModalEdit(false);
       setSelectedDryer(null);
     } catch (err) {
-      toast.error(err.response.data.message);
+      toast.error(err.response?.data?.message || "Failed to update dryer");
     } finally {
       setLoading(false);
     }
   };
 
-  const datasView = selectedDryer
+    const datasView = selectedDryer
     ? [
         {
           dryer_name: selectedDryer.dryer_name,
@@ -146,43 +183,21 @@ function DryerInformation() {
           capacity: selectedDryer.capacity,
           available_capacity: selectedDryer.available_capacity,
           rate: selectedDryer.rate,
+          image_url: selectedDryer.image_url, 
         },
       ]
     : [];
 
-  const fieldsEdit = selectedDryer
-    ? [
-        {
-          label: "Dryer Name",
-          type: "text",
-          name: "dryer_name",
-          required: true,
-          defaultValue: selectedDryer.dryer_name,
-        },
-        {
-          label: "Location (Sablayan)",
-          type: "text",
-          name: "location",
-          required: true,
-          defaultValue: selectedDryer.location,
-        },
-        {
-          label: "Capacity (Cavans)",
-          type: "number",
-          name: "capacity",
-          required: true,
-          defaultValue: selectedDryer.capacity,
-        },
-        {
-          label: "Rate (PHP)",
-          type: "number",
-          step: "0.01",
-          name: "rate",
-          required: true,
-          defaultValue: selectedDryer.rate,
-        },
-      ]
-    : [];
+
+  const fieldsEdit = [
+    { label: "Dryer Name", type: "text", name: "dryer_name", required: true, defaultValue: selectedDryer?.dryer_name || "" },
+    { label: "Location", type: "text", name: "location", required: true, defaultValue: selectedDryer?.location || "" },
+    { label: "Capacity", type: "number", name: "capacity", required: true, defaultValue: selectedDryer?.capacity || "" },
+    { label: "Rate", type: "number", name: "rate", required: true, defaultValue: selectedDryer?.rate || "" },
+    { label: "Available Capacity", type: "number", name: "available_capacity", required: true, defaultValue: selectedDryer?.available_capacity || "" },
+    { label: "Dryer Image", type: "file", name: "image_url", defaultValue: selectedDryer?.image_url || "" },  
+  ];
+    
 
   const handleSubmitView = (e) => {
     setLoading(true);

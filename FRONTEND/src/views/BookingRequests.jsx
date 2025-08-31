@@ -219,7 +219,8 @@ function BookingRequests() {
                 />
                 {FilteredData?.length === 0 && (
                   <div className="text-center font-bold py-5">
-                    No Booking Requests Found.
+                    Under Maintenance
+                    {/* No Booking Requests Found. */}
                   </div>
                 )}
               </>

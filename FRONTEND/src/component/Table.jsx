@@ -1,15 +1,19 @@
 function Table({ data, tableHeadings, tableDataCell, startIndex }) {
+  const columnCount = tableHeadings.length;
+  const columnWidth = `${100 / columnCount}%`;
+
   return (
-    <div className="max-w-full overflow-x-auto">
+    <div className="max-w-full overflow-x-auto">  
       <table className="w-full border-collapse rounded-xl shadow-sm overflow-hidden" role="table">
         <thead>
           <tr>
-            <th className="max-[1023px]:hidden bg-[rgb(138,183,45)] text-white text-sm font-semibold py-3 px-4">
+            <th className="max-[1023px]:hidden bg-[rgb(138,183,45)] text-white text-sm font-semibold py-3 px-4 text-center">
               #
             </th>
             {tableHeadings.map((el, index) => (
               <th
                 key={index}
+                style={{ width: columnWidth }}
                 className="max-[1023px]:hidden bg-[rgb(138,183,45)] text-white text-sm font-semibold py-3 px-4 text-center"
               >
                 {el}
@@ -32,8 +36,9 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
               {tableDataCell.map((dataCell, i) => (
                 <td
                   key={i}
+                  style={{ width: columnWidth }}
                   className={`text-sm py-3 px-4 whitespace-nowrap 
-                    ${dataCell === "status" || dataCell === "action" ? "text-center" : "text-left"}
+                    ${dataCell === "status" || dataCell === "action" ? "text-center" : "text-center"}
                     ${dataCell === "email" ? "lowercase" : "capitalize"}
                   `}
                 >
@@ -51,6 +56,10 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                     ) : (
                       el[dataCell]
                     )
+                  ) : dataCell === "location" || dataCell === "address" ? (
+                    el[dataCell]?.length > 24
+                      ? el[dataCell].slice(0, 24) + "..."
+                      : el[dataCell]
                   ) : (
                     el[dataCell]
                   )}
@@ -101,6 +110,10 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                     ) : (
                       el[dataCell]
                     )
+                  ) : dataCell === "location" || dataCell === "address" ? (
+                    el[dataCell]?.length > 11
+                      ? el[dataCell].slice(0, 11) + "..."
+                      : el[dataCell]
                   ) : (
                     el[dataCell]
                   )}

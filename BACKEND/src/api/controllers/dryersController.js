@@ -6,10 +6,9 @@ export const getDryers = async (req, res) => {
 
     const { data: dryers, error } = await supabase
       .from("dryers")
-      .select("id, dryer_name, location, created_by_id")
+      .select("id, dryer_name, location, capacity, rate, available_capacity, created_by_id, image_url")
       .order("created_at", { ascending: false })
       .range(Number(offset), Number(offset) + Number(limit) - 1);
-
     if (error) throw error;
 
     const dryersWithStatus = await Promise.all(
@@ -86,8 +85,7 @@ export const createDryer = async (req, res) => {
 export const updateDryer = async (req, res) => {
   try {
     const { id } = req.params;
-    const { dryer_name, location, capacity, rate, image_url } = req.body;
-
+    const { dryer_name, location, capacity, rate, available_capacity, image_url } = req.body;
     const { data, error } = await supabase
       .from("dryers")
       .update({
@@ -95,12 +93,12 @@ export const updateDryer = async (req, res) => {
         location,
         capacity,
         rate,
+        available_capacity,
         image_url,
       })
       .eq("id", id)
       .select()
       .single();
-
     if (error) throw error;
 
     res.json({ message: "Dryer updated successfully.", dryer: data });
