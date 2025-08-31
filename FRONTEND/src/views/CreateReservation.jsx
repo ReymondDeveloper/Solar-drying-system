@@ -80,46 +80,59 @@ function CreateReservation() {
   ];
  
   const handleSubmitAdd = async (dryerId, ownerId, formData) => {
-    if (!farmerId) {
-      alert("You must be logged in!");
-      return;
+    if (!farmerId) return alert("You must be logged in!");
+  
+    const { crop_type, quantity, payment } = formData;
+  
+    if (!crop_type || !quantity || quantity <= 0) {
+      return alert("Invalid crop type or quantity.");
     }
   
     try {
       setLoading(true);
   
-      const check = await axios.get(
-        `${import.meta.env.VITE_API}/reservations`,
-        { params: { farmer_id: farmerId, dryer_id: dryerId } }
-      );
+      const check = await axios.get(`${import.meta.env.VITE_API}/crop-types/reservations/check`, {
+        params: { farmer_id: farmerId, dryer_id: dryerId },
+      });
   
-      if (check.data.exists) {
-        alert("You have already reserved this dryer.");
-        return;
-      }
+      if (check.data.exists) return alert("You have already reserved this dryer.");
   
       const res = await axios.post(`${import.meta.env.VITE_API}/reservations`, {
         farmer_id: farmerId,
         dryer_id: dryerId,
-        owner_id: ownerId,  
-        status: "pending",
-        crop_type: formData.crop_type,
-        quantity: formData.quantity,
-        payment: formData.payment,
+        owner_id: ownerId,
+        crop_type_name: crop_type,
+        quantity: Number(quantity),
+        payment: payment || "gcash",
       });
   
-      alert("Reservation created successfully!");
-      console.log(res.data);
+      alert(res.data.message || "Reservation created!");
       setModalAdd(false);
   
+      fetchData();
     } catch (error) {
-      console.error("Reservation error:", error.response?.data || error.message);
-      alert(error.response?.data?.message || "Failed to create reservation.");
-    } finally {
+      console.error("Reservation error:", error.response ? error.response.data : error.message);
+      alert(error.response?.data?.message || error.message || "Failed to create reservation.");
+    }
+      finally {
       setLoading(false);
     }
   };
-
+  
+  const handleAddFormSubmit = (e) => {
+    e.preventDefault();
+    const formData = Object.fromEntries(new FormData(e.target).entries());
+  
+    if (!formData.crop_type || !formData.quantity) {
+      return alert("Please fill in Crop Type and Quantity!");
+    }
+  
+    formData.quantity = Number(formData.quantity);
+    formData.payment = formData.payment || "gcash";
+  
+    handleSubmitAdd(selectedDryerId, selectedOwnerId, formData);
+  };
+  
   function handleView(dryer) {
     if (dryer.status !== "available") {
       alert("This dryer is occupied.");
@@ -129,12 +142,6 @@ function CreateReservation() {
     setSelectedOwnerId(dryer.owner_id);  
     setModalAdd(true);
   }
-
-  const handleAddFormSubmit = (e) => {
-    e.preventDefault();
-    const formData = Object.fromEntries(new FormData(e.target).entries());
-    handleSubmitAdd(selectedDryerId, selectedOwnerId, formData);
-  };
 
   const Endpoint = `${import.meta.env.VITE_API}/dryers`;  
 

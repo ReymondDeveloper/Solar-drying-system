@@ -206,39 +206,6 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                 </div>
               </div>
             ))}
-
-
-            {/* {datas?.map((data, index) =>
-              Object.keys(data).map((key, i) => (
-                <div key={`${index}-${i}`} className="col-span-2">
-                  <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                    <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                      {i + 1}
-                    </div>
-                    {key
-                      .replace("_", " ")
-                      .replace(/\b\w/g, (l) => l.toUpperCase())}
-                  </div>
-                  <div className="p-2 bg-[rgba(255,255,255,0.9)] border border-[rgb(138,183,45)] text-sm rounded-b-md relative capitalize">
-                    {key === "image_url" ? (
-                      <img
-                        src={
-                          data[key]
-                            ? data[key].startsWith("http")
-                              ? data[key]  
-                              : `${import.meta.env.VITE_API.replace("/api", "")}${data[key]}`
-                            : "/placeholder.png"
-                        }
-                        alt="Dryer"
-                        className="w-40 h-40 object-cover rounded-md border border-gray-400"
-                      /> 
-                    ) : (
-                      data[key]
-                    )}
-                  </div>
-                </div>
-              ))
-            )} */}
           </div>
 
           <div className="w-full flex gap-3 justify-end items-center mt-3">

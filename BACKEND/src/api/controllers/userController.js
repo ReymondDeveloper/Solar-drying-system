@@ -5,12 +5,19 @@ import { sendOtpEmail } from "../helpers/sendOtpEmail.js";
 
 export const getUsers = async (req, res, next) => {
   try {
-    const users = await User.findAll();
+    const role = req.query.role; 
+    let users = await User.findAll();
+
+    if (role) {
+      users = users.filter(u => u.role?.toLowerCase() === role.toLowerCase());
+    }
+
     res.json(users);
   } catch (err) {
     next(err);
   }
 };
+
 
 export const verifyUser = async (req, res, next) => {
   try {

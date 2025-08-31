@@ -44,7 +44,6 @@ function Availability() {
     setModal(false);
   };
 
-  // 👉 Point this to your backend API
   const Endpoint = `${import.meta.env.VITE_API}/dryers`;
 
   useEffect(() => {
@@ -58,18 +57,18 @@ function Availability() {
           params: { offset, limit },
         });
 
-        // your backend may return res.data.Results or res.data directly
         const dryers = res.data.Results || res.data;
 
-        // format to match table
         const formatted = dryers.map((dryer) => ({
           dryer_name: dryer.dryer_name,
           location: dryer.location,
-          status: dryer.status ?? "available", // default if no status in DB
+          status: dryer.status ?? "available",  
         }));
 
         setData(formatted);
       } catch (error) {
+        console.error("Error fetching dryers:", error);
+        setIsError(true);
         console.error("Error fetching dryers:", error);
         setIsError(true);
       } finally {
@@ -77,15 +76,19 @@ function Availability() {
       }
     };
 
+
     fetchData();
   }, [limit, currentPage]);
 
+
   const FilteredData = data.filter((info) => {
+    const isAvailable = info.status.toLowerCase() === "available";
+  
     const filterByFilters =
       filter && filter !== "all"
         ? info.status.toLowerCase().includes(filter.toLowerCase())
         : true;
-
+  
     const filterBySearch = search
       ? Object.entries(info)
           .filter(([key]) => key !== "status")

@@ -9,7 +9,7 @@ import Loading from "../component/Loading";
 import Button from "../component/Button";
 
 function BookingRequests() {
-  const ownerId = localStorage.getItem("owner_id"); 
+  const ownerId = localStorage.getItem("owner_id");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
@@ -55,8 +55,8 @@ function BookingRequests() {
   ];
 
   const handleSubmitFilter = (e) => {
-    setLoading(true);
     e.preventDefault();
+    setLoading(true);
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
     setFilter((prev) => ({ ...prev, ...data }));
@@ -71,12 +71,13 @@ function BookingRequests() {
 
     try {
       setLoading(true);
-      await axios.put(`http://localhost:3000/api/reservations/${selectedBooking.id}`, {
-        status: updated.status,
-      });
+      await axios.put(
+        `${import.meta.env.VITE_API}/reservations/${selectedBooking.id}`,
+        { status: updated.status }
+      );
       alert("Status updated successfully!");
       setModalView(false);
-      fetchData(); // refresh list
+      fetchData(); // refresh
     } catch (err) {
       console.error(err);
       alert("Failed to update status");
@@ -89,7 +90,7 @@ function BookingRequests() {
     setSelectedBooking(booking);
     setModalView(true);
   }
- 
+
   const Endpoint = `${import.meta.env.VITE_API}/reservations`;
 
   const fetchData = async () => {
@@ -131,7 +132,7 @@ function BookingRequests() {
 
   useEffect(() => {
     if (ownerId) fetchData();
-  }, [currentPage, limit]);
+  }, [ownerId, currentPage, limit]);
 
   const FilteredData = data.filter((info) => {
     const filterByStatus =
@@ -154,12 +155,13 @@ function BookingRequests() {
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
 
-  if (isError)
+  if (isError) {
     return (
       <div className="absolute top-0 left-0 w-full h-[calc(100dvh-56px)] text-5xl flex justify-center items-center font-bold py-5">
         Error while fetching the data
       </div>
     );
+  }
 
   return (
     <>

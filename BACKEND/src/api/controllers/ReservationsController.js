@@ -1,69 +1,56 @@
 import Reservations from "../models/Reservations.js";
 import Dryers from "../models/dryersModel.js";  
+import CropTypes from "../models/cropTypes.js";
 
 export const getReservations = async (req, res) => {
   try {
-    const { farmer_id } = req.query;
+    const { farmer_id, dryer_id } = req.query;
 
-    let reservations = await Reservations.findAll();
+    let reservations = await Reservations.findAll({ farmer_id });
 
-    if (farmer_id) {
-      reservations = reservations.filter(r => r.farmer?.id === farmer_id);
-    }
+    if (dryer_id) reservations = reservations.filter(r => r.dryer?.id === dryer_id);
 
     res.json(
       reservations.map(r => ({
         id: r.id,
-        farmer_id: r.farmer?.id,
-        farmer_name: r.farmer
-          ? `${r.farmer.first_name} ${r.farmer.last_name}`
-          : "N/A",
-        dryer_id: r.dryer?.id,
-        dryer_name: r.dryer?.dryer_name || "N/A",
-        location: r.dryer?.location || "N/A",
-        owner_id: r.owner?.id,
-        owner_name: r.owner
-          ? `${r.owner.first_name} ${r.owner.last_name}`
-          : "N/A",
-        status: r.status,
-        notes: r.notes,
+        farmer_id: r.farmer_id || null,
+        farmer_name: r.farmer ? `${r.farmer.first_name} ${r.farmer.last_name}` : "N/A",
+        dryer_id: r.dryer_id || null,
+        dryer_name: r.dryer ? r.dryer.dryer_name : "N/A",
+        location: r.dryer ? r.dryer.location : "N/A",
+        owner_id: r.owner_id || null,
+        owner_name: r.owner ? `${r.owner.first_name} ${r.owner.last_name}` : "N/A",
+        crop_type_name: r.crop_type ? r.crop_type.crop_type_name : "N/A",
+        quantity: r.crop_type ? r.crop_type.quantity : 0,
+        payment: r.crop_type ? r.crop_type.payment : "N/A",
+        status: r.status || "pending",
         created_at: r.created_at,
       }))
     );
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch reservations.", error: err.message });
+    res.status(500).json({ message: "Failed to fetch reservations.", error: err.message });
   }
 };
-
+ 
 export const getReservationById = async (req, res) => {
   try {
     const { id } = req.params;
+    const reservation = await Reservations.findById(id);
 
-    const reservation = await Reservations.findByPk(id, {
-      include: [
-        {
-          model: Dryers,
-          attributes: ["dryer_name", "location"],
-        },
-      ],
-    });
+    if (!reservation) return res.status(404).json({ message: "Reservation not found." });
 
-    if (!reservation) {
-      return res.status(404).json({ message: "Reservation not found." });
-    }
+    const dryer = reservation.dryer_id ? await Dryers.findById(reservation.dryer_id) : null;
 
     res.json({
       id: reservation.id,
       farmer_id: reservation.farmer_id,
       dryer_id: reservation.dryer_id,
       owner_id: reservation.owner_id,
-      status: reservation.status,
-      notes: reservation.notes,
+      crop_type_id: reservation.crop_type_id,
+      status: reservation.status || "pending",
       created_at: reservation.created_at,
-      dryer_name: reservation.dryer?.dryer_name || "N/A", 
-      location: reservation.dryer?.location || "N/A",   
+      dryer_name: dryer?.dryer_name || "N/A",
+      location: dryer?.location || "N/A",
     });
   } catch (err) {
     res.status(404).json({ message: "Reservation not found.", error: err.message });
@@ -72,36 +59,46 @@ export const getReservationById = async (req, res) => {
 
 export const createReservation = async (req, res) => {
   try {
-    const { farmer_id, dryer_id, owner_id, crop_type, quantity, payment } = req.body;
+    const { farmer_id, dryer_id, owner_id, crop_type_name, quantity, payment } = req.body;
 
-    const notes = {
-      crop_type,
+    if (!farmer_id || !dryer_id || !owner_id || !crop_type_name || !quantity) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const exists = await Reservations.checkReservation(farmer_id, dryer_id);
+    if (exists) {
+      return res.status(400).json({ message: "You have already reserved this dryer." });
+    }
+
+    const cropType = await CropTypes.create({
+      crop_type_name: crop_type_name.trim(),
       quantity,
-      payment,
-    };
+      payment: payment || "gcash",
+      created_by_id: farmer_id,
+    });
 
     const reservation = await Reservations.create({
       farmer_id,
       dryer_id,
       owner_id,
-      notes,  
+      crop_type_id: cropType.crop_type_id,  
+      status: "pending",
     });
 
-    res.status(201).json({ message: "Reservation created successfully.", reservation });
+    res.status(201).json({ message: "Reservation created successfully", reservation });
+
   } catch (err) {
-    res.status(400).json({ message: "Failed to create reservation.", error: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Failed to create reservation", error: err.message });
   }
 };
 
 export const updateReservation = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, notes } = req.body;
+    const { status } = req.body;
 
-    const reservation = await Reservations.update(
-      { status, notes },
-      { where: { id }, returning: true }
-    );
+    const reservation = await Reservations.update(id, { status });
 
     res.json({ message: "Reservation updated successfully.", reservation });
   } catch (err) {
@@ -112,7 +109,7 @@ export const updateReservation = async (req, res) => {
 export const deleteReservation = async (req, res) => {
   try {
     const { id } = req.params;
-    await Reservations.destroy({ where: { id } });
+    await Reservations.delete(id);
     res.json({ message: "Reservation deleted successfully." });
   } catch (err) {
     res.status(400).json({ message: "Failed to delete reservation.", error: err.message });
@@ -122,12 +119,8 @@ export const deleteReservation = async (req, res) => {
 export const checkReservation = async (req, res) => {
   try {
     const { farmer_id, dryer_id } = req.query;
-
-    const reservation = await Reservations.findOne({
-      where: { farmer_id, dryer_id },
-    });
-
-    res.json({ exists: !!reservation });
+    const exists = await Reservations.checkReservation(farmer_id, dryer_id);
+    res.json({ exists });
   } catch (err) {
     res.status(500).json({ message: "Error checking reservation", error: err.message });
   }
@@ -136,29 +129,25 @@ export const checkReservation = async (req, res) => {
 export const getReservationsByOwner = async (req, res) => {
   try {
     const { ownerId } = req.params;
-
     const reservations = await Reservations.findAll();
 
-    const filtered = reservations.filter(r => r.owner?.id === ownerId);
+    reservations = reservations.filter(r => r.owner?.id === ownerId);
 
     res.json(
-      filtered.map(r => ({
+      reservations.map(r => ({
         id: r.id,
-        farmer_id: r.farmer?.id,
-        farmer_name: r.farmer
-          ? `${r.farmer.first_name} ${r.farmer.last_name}`
-          : "N/A",
-        dryer_id: r.dryer?.id,
-        dryer_location: r.dryer?.location || "N/A",
-        crop_type: r.notes?.crop_type || "N/A",
-        quantity: r.notes?.quantity || "N/A",
-        status: r.status,
+        farmer_id: r.farmer?.id || null,
+        farmer_name: r.farmer ? `${r.farmer.first_name} ${r.farmer.last_name}` : "N/A",
+        dryer_id: r.dryer?.id || null,
+        dryer_name: r.dryer?.dryer_name || "N/A",
+        location: r.dryer?.location || "N/A",
+        owner_id: r.owner?.id || null,
+        owner_name: r.owner ? `${r.owner.first_name} ${r.owner.last_name}` : "N/A",
+        status: r.status || "pending",
         created_at: r.created_at,
       }))
     );
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch reservations by owner.", error: err.message });
+    res.status(500).json({ message: "Failed to fetch reservations by owner.", error: err.message });
   }
 };
