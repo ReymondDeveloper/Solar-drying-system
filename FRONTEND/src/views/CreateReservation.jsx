@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
@@ -7,6 +7,8 @@ import Search from "../component/Search";
 import Modal from "../component/Modal";
 import Loading from "../component/Loading";
 import Button from "../component/Button";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function CreateReservation() {
   const farmerId = localStorage.getItem("id");
@@ -78,14 +80,58 @@ function CreateReservation() {
       options: [{ value: "gcash" }, {value: "cash"}],
     },
   ];
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setIsError(false);
+
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API}/dryers`, {
+        params: {
+          offset: (currentPage - 1) * limit,
+          limit,
+        },
+      });
+
+      if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
+
+      setData(
+        res.data.map((dryer) => ({
+          id: dryer.id,
+          owner_id: dryer.owner_id,
+          dryer_name: dryer.dryer_name,
+          location: dryer.location,
+          status: dryer.status && dryer.status.trim() !== "" ? dryer.status : "available",
+          action: (
+            <Button
+              onClick={() => handleView(dryer)}
+              className="bg-blue-400 hover:bg-blue-500 text-white"
+            >
+              Reserve
+            </Button>
+          ),
+        }))
+      );
+    } catch (error) {
+      console.log(error.response.data.message || error);
+      setIsError(true);
+      setData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentPage, limit]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
  
   const handleSubmitAdd = async (dryerId, ownerId, formData) => {
-    if (!farmerId) return alert("You must be logged in!");
+    if (!farmerId) return toast.error("You must be logged in!");
   
     const { crop_type, quantity, payment } = formData;
   
     if (!crop_type || !quantity || quantity <= 0) {
-      return alert("Invalid crop type or quantity.");
+      return toast.error("Invalid crop type or quantity.");
     }
   
     try {
@@ -95,7 +141,7 @@ function CreateReservation() {
         params: { farmer_id: farmerId, dryer_id: dryerId },
       });
   
-      if (check.data.exists) return alert("You have already reserved this dryer.");
+      if (check.data.exists) return toast.info("You have already reserved this dryer.");
   
       const res = await axios.post(`${import.meta.env.VITE_API}/reservations`, {
         farmer_id: farmerId,
@@ -106,13 +152,12 @@ function CreateReservation() {
         payment: payment || "gcash",
       });
   
-      alert(res.data.message || "Reservation created!");
+      toast.success(res.data.message || "Reservation created!");
       setModalAdd(false);
-  
       fetchData();
     } catch (error) {
       console.error("Reservation error:", error.response ? error.response.data : error.message);
-      alert(error.response?.data?.message || error.message || "Failed to create reservation.");
+      toast.error(error.response?.data?.message || error.message || "Failed to create reservation.");
     }
       finally {
       setLoading(false);
@@ -124,7 +169,7 @@ function CreateReservation() {
     const formData = Object.fromEntries(new FormData(e.target).entries());
   
     if (!formData.crop_type || !formData.quantity) {
-      return alert("Please fill in Crop Type and Quantity!");
+      return toast.error("Please fill in Crop Type and Quantity!");
     }
   
     formData.quantity = Number(formData.quantity);
@@ -135,59 +180,13 @@ function CreateReservation() {
   
   function handleView(dryer) {
     if (dryer.status !== "available") {
-      alert("This dryer is occupied.");
-      return;
+      return toast.info("This dryer is currently occupied.");
     }
+
     setSelectedDryerId(dryer.id);
     setSelectedOwnerId(dryer.owner_id);  
     setModalAdd(true);
   }
-
-  const Endpoint = `${import.meta.env.VITE_API}/dryers`;  
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setIsError(false);
-  
-      try {
-        const res = await axios.get(Endpoint, {
-          params: {
-            offset: (currentPage - 1) * limit,
-            limit,
-          },
-        });
-  
-        if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
-  
-        setData(
-          res.data.map((dryer) => ({
-            id: dryer.id,            
-            owner_id: dryer.owner_id,  
-            dryer_name: dryer.dryer_name,
-            location: dryer.location,
-            status: dryer.status && dryer.status.trim() !== "" ? dryer.status : "available",
-            action: (
-              <Button
-                onClick={() => handleView(dryer)}  
-                className="bg-blue-400 hover:bg-blue-500 text-white"
-              >
-                Reserve
-              </Button>
-            ),
-          }))
-        );
-      } catch (error) {
-        console.error(error);
-        setIsError(true);
-        setData([]);  
-      } finally {
-        setIsLoading(false);
-      }
-    };
-  
-    fetchData();
-  }, [currentPage, limit]);
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =
@@ -218,6 +217,7 @@ function CreateReservation() {
   return (
     <>
       {loading && <Loading />}
+      <ToastContainer position="top-center" autoClose={3000} />
       {modalFilter && (
         <Modal
           setModal={setModalFilter}

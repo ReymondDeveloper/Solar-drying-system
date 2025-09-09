@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
@@ -81,7 +81,9 @@ function ReservationHistory() {
     try {
       const parsed = JSON.parse(notes);
       if (typeof parsed === "object") return parsed;
-    } catch (err) {}
+    } catch (err) {
+      console.log(err);
+    }
 
     const obj = {};
     notes.split(",").forEach((part) => {
@@ -95,19 +97,20 @@ function ReservationHistory() {
     return Object.keys(obj).length ? obj : { notes: String(notes) };
   }
 
-  function handleView(reservation) {
-    if (reservation?.notes) {
-      const parsed = parseNotes(reservation.notes);
-      setDatasView([parsed]);
-    } else {
-      setDatasView([]);
-    }
-    setModalView(true);
-  }
-
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async() => {
     if (!farmerId) return;
     setIsLoading(true);
+
+    function handleView(reservation) {
+      if (reservation?.notes) {
+        const parsed = parseNotes(reservation.notes);
+        setDatasView([parsed]);
+      } else {
+        setDatasView([]);
+      }
+      setModalView(true);
+      alert(JSON.stringify(reservation))
+    }
 
     try {
       const res = await axios.get(`${import.meta.env.VITE_API}/reservations`, {
@@ -145,11 +148,11 @@ function ReservationHistory() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [farmerId]);
 
   useEffect(() => {
     fetchHistory();
-  }, [farmerId, currentPage, limit]);
+  },[fetchHistory]);
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =
