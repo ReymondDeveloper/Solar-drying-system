@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
@@ -21,7 +22,8 @@ function CreateReservation() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedDryerId, setSelectedDryerId] = useState(null);
-  const [selectedOwnerId, setSelectedOwnerId] = useState(null); 
+  const [selectedOwnerId, setSelectedOwnerId] = useState(null);
+  const navigate = useNavigate();
 
   const tableHeadings = [
     "Registered Dryer",
@@ -75,60 +77,52 @@ function CreateReservation() {
       label: "Payment Type",
       type: "select",
       name: "payment",
-      options: [{ value: "gcash" }, {value: "cash"}],
+      options: [{ value: "gcash" }, { value: "cash" }],
     },
   ];
- 
+
   const handleSubmitAdd = async (dryerId, ownerId, formData) => {
     if (!farmerId) {
       alert("You must be logged in!");
       return;
     }
-  
+
     try {
       setLoading(true);
-  
+
       const check = await axios.get(
         `${import.meta.env.VITE_API}/reservations`,
         { params: { farmer_id: farmerId, dryer_id: dryerId } }
       );
-  
+
       if (check.data.exists) {
         alert("You have already reserved this dryer.");
         return;
       }
-  
+
       const res = await axios.post(`${import.meta.env.VITE_API}/reservations`, {
         farmer_id: farmerId,
         dryer_id: dryerId,
-        owner_id: ownerId,  
+        owner_id: ownerId,
         status: "pending",
         crop_type: formData.crop_type,
         quantity: formData.quantity,
         payment: formData.payment,
       });
-  
+
       alert("Reservation created successfully!");
       console.log(res.data);
       setModalAdd(false);
-  
     } catch (error) {
-      console.error("Reservation error:", error.response?.data || error.message);
+      console.error(
+        "Reservation error:",
+        error.response?.data || error.message
+      );
       alert(error.response?.data?.message || "Failed to create reservation.");
     } finally {
       setLoading(false);
     }
   };
-
-  function handleView(dryer) {
-    if (dryer.status !== "available") {
-      alert("This dryer is occupied.");
-      return;
-    }
-    setSelectedDryerId(dryer.id);
-    setSelectedOwnerId(dryer.owner_id);  
-    setModalAdd(true);
-  }
 
   const handleAddFormSubmit = (e) => {
     e.preventDefault();
@@ -136,36 +130,41 @@ function CreateReservation() {
     handleSubmitAdd(selectedDryerId, selectedOwnerId, formData);
   };
 
-  const Endpoint = `${import.meta.env.VITE_API}/dryers`;  
+  function handleView(dryer) {
+    navigate("/home/create-reservation/" + dryer);
+  }
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setIsError(false);
-  
+
       try {
-        const res = await axios.get(Endpoint, {
+        const res = await axios.get(`${import.meta.env.VITE_API}/dryers`, {
           params: {
             offset: (currentPage - 1) * limit,
             limit,
           },
         });
-  
+
         if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
-  
+
         setData(
           res.data.map((dryer) => ({
-            id: dryer.id,            
-            owner_id: dryer.owner_id,  
+            id: dryer.id,
+            owner_id: dryer.owner_id,
             dryer_name: dryer.dryer_name,
             location: dryer.location,
-            status: dryer.status && dryer.status.trim() !== "" ? dryer.status : "available",
+            status:
+              dryer.status && dryer.status.trim() !== ""
+                ? dryer.status
+                : "available",
             action: (
               <Button
-                onClick={() => handleView(dryer)}  
+                onClick={() => handleView(dryer.id)}
                 className="bg-blue-400 hover:bg-blue-500 text-white"
               >
-                Reserve
+                View
               </Button>
             ),
           }))
@@ -173,12 +172,12 @@ function CreateReservation() {
       } catch (error) {
         console.error(error);
         setIsError(true);
-        setData([]);  
+        setData([]);
       } finally {
         setIsLoading(false);
       }
     };
-  
+
     fetchData();
   }, [currentPage, limit]);
 
@@ -221,13 +220,13 @@ function CreateReservation() {
         />
       )}
       {modalAdd && (
-         <Modal
-         setModal={setModalAdd}
-         handleSubmit={handleAddFormSubmit}
-         fields={fieldsAdd}
-         title={"Reservation"}
-         button_name={"Reserve"}
-       />
+        <Modal
+          setModal={setModalAdd}
+          handleSubmit={handleAddFormSubmit}
+          fields={fieldsAdd}
+          title={"Reservation"}
+          button_name={"Reserve"}
+        />
       )}
       <div
         className={`w-full h-[calc(100dvh-160px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${

@@ -3,10 +3,15 @@ import dotenv from "dotenv";
 import userRoutes from "../src/api/routes/userRoutes.js";
 import dryerRoutes from "../src/api/routes/dryersRoutes.js";
 import reservationRoutes from "../src/api/routes/reservationsRoutes.js";
-import uploadRoutes from "../src/api/routes/uploadRoutes.js"
-import path from "path"; 
+import uploadRoutes from "../src/api/routes/uploadRoutes.js";
 import { errorHandler } from "../src/api/middleware/errorHandler.js";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// If using ES modules:
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 const app = express();
@@ -19,9 +24,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", userRoutes);
 app.use("/api/dryers", dryerRoutes);
 app.use("/api/reservations", reservationRoutes);
-app.use("/api/upload", uploadRoutes);  
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
-
+app.use("/api/upload", uploadRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 // Error handling
 app.use(errorHandler);
 
