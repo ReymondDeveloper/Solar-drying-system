@@ -2,47 +2,41 @@ import supabase from "../../database/supabase.db.js";
 import { v4 as uuidv4 } from "uuid";
 
 const Reservations = {
-  findAll: async () => {
-    const { data, error } = await supabase
-      .from("reservations")
-      .select(`
-        id,
-        created_at,
-        status,
-        notes,
-        farmer:farmer_id (
-          id, first_name, last_name, email, mobile_number
-        ),
-        dryer:dryer_id (
-          id, dryer_name, location, capacity, rate
-        ),
-        owner:owner_id (
-          id, first_name, last_name, email
-        )
-      `)
-      .order("created_at", { ascending: false });
-
+  findAll: async ({ farmer_id } = {}) => {
+    let query = supabase.from("reservations").select(`
+      id,
+      farmer:farmer_id (id, first_name, last_name, email, mobile_number),
+      dryer:dryer_id (id, dryer_name, location, capacity, rate),
+      owner:owner_id (id, first_name, last_name, email),
+      crop_type:crop_type_id (crop_type_id, crop_type_name, quantity, payment),
+      status,
+      created_at
+    `).order("created_at", { ascending: false });
+  
+    if (farmer_id) query = query.eq("farmer_id", farmer_id);
+    const { data, error } = await query;
     if (error) throw error;
     return data;
-  },
-
+  }, 
+  
   findById: async (id) => {
     const { data, error } = await supabase
       .from("reservations")
       .select(`
         id,
-        created_at,
-        status,
-        notes,
         farmer:farmer_id (
           id, first_name, last_name, email, mobile_number
         ),
-        dryer:dryer_id (
+        dryer:dryer_id ( 
           id, dryer_name, location, capacity, rate
         ),
         owner:owner_id (
           id, first_name, last_name, email
-        )
+        ),
+        crop_type_id,
+        quantity,
+        status,
+        created_at
       `)
       .eq("id", id)
       .single();
@@ -51,7 +45,7 @@ const Reservations = {
     return data;
   },
 
-  create: async ({ farmer_id, dryer_id, owner_id, notes = null }) => {
+  create: async ({ farmer_id, dryer_id, owner_id, crop_type_id, quantity, payment }) => {
     const { data, error } = await supabase
       .from("reservations")
       .insert([
@@ -60,24 +54,22 @@ const Reservations = {
           farmer_id,
           dryer_id,
           owner_id,
-          notes,
+          crop_type_id,
+          status: "pending",
         },
       ])
-      .select(
-        `id, created_at, status, notes, farmer_id, dryer_id, owner_id`
-      )
+      .select()
       .single();
 
     if (error) throw error;
     return data;
   },
 
-  update: async (id, { status, notes }) => {
+  update: async (id, { status }) => {
     const { data, error } = await supabase
       .from("reservations")
       .update({
         status,
-        notes,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
@@ -91,6 +83,18 @@ const Reservations = {
   delete: async (id) => {
     const { error } = await supabase.from("reservations").delete().eq("id", id);
     if (error) throw error;
+  },
+
+  checkReservation: async (farmer_id, dryer_id) => {
+    const { data, error } = await supabase
+      .from("reservations")
+      .select("id")
+      .eq("farmer_id", farmer_id)
+      .eq("dryer_id", dryer_id)
+      .single();
+
+    if (error && error.code !== "PGRST116") throw error; // ignore not found
+    return !!data;
   },
 };
 

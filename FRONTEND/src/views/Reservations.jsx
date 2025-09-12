@@ -13,7 +13,6 @@ function Reservations() {
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [modal, setModal] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -53,7 +52,6 @@ function Reservations() {
 
   const fetchReservations = async () => {
     setIsLoading(true);
-    setIsError(false);
 
     try {
       const res = await axios.get(Endpoint, {
@@ -82,7 +80,6 @@ function Reservations() {
       );
     } catch (err) {
       console.error(err);
-      setIsError(true);
     } finally {
       setIsLoading(false);
     }
@@ -111,14 +108,7 @@ function Reservations() {
   const totalPages = Math.max(1, Math.ceil(FilteredData.length / limit));
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
-
-  if (isError)
-    return (
-      <div className="absolute top-0 left-0 w-full h-[calc(100dvh-56px)] flex justify-center items-center font-bold text-3xl">
-        Error while fetching the data
-      </div>
-    );
-
+ 
   return (
     <>
       {loading && <Loading />}

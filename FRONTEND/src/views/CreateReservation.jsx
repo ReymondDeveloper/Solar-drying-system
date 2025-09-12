@@ -82,9 +82,12 @@ function CreateReservation() {
   ];
 
   const handleSubmitAdd = async (dryerId, ownerId, formData) => {
-    if (!farmerId) {
-      alert("You must be logged in!");
-      return;
+    if (!farmerId) return alert("You must be logged in!");
+
+    const { crop_type, quantity, payment } = formData;
+
+    if (!crop_type || !quantity || quantity <= 0) {
+      return alert("Invalid crop type or quantity.");
     }
 
     try {

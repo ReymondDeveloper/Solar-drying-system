@@ -19,10 +19,8 @@ function Reports() {
         const usersRes = await axios.get(`${base}/users`);
         setUsers(usersRes.data || []);
 
-        const farmersRes = await axios.get(`${base}/users`, {
-          params: { role: "farmer" },
-        });
-        setFarmers(farmersRes.data || []);
+        const farmersRes = await axios.get(`${base}/users`);
+        setFarmers((farmersRes.data || []).filter(u => u.role === "farmer"));
 
         const dryersRes = await axios.get(`${base}/dryers`);
         setDryers(dryersRes.data || []);
