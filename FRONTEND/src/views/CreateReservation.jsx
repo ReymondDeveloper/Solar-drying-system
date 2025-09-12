@@ -10,7 +10,6 @@ import Loading from "../component/Loading";
 import Button from "../component/Button";
 
 function CreateReservation() {
-  const farmerId = localStorage.getItem("id");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
@@ -21,8 +20,6 @@ function CreateReservation() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-  const [selectedDryerId, setSelectedDryerId] = useState(null);
-  const [selectedOwnerId, setSelectedOwnerId] = useState(null);
   const navigate = useNavigate();
 
   const tableHeadings = [
@@ -55,82 +52,6 @@ function CreateReservation() {
     setFilter(data.status);
     setLoading(false);
     setModalFilter(false);
-  };
-
-  const fieldsAdd = [
-    {
-      label: "Crop Type",
-      type: "text",
-      placeholder: "ex. Rice",
-      required: true,
-      name: "crop_type",
-    },
-    {
-      label: "Quantity (Cavans)",
-      type: "number",
-      min: 1,
-      placeholder: "ex. 50",
-      required: true,
-      name: "quantity",
-    },
-    {
-      label: "Payment Type",
-      type: "select",
-      name: "payment",
-      options: [{ value: "gcash" }, { value: "cash" }],
-    },
-  ];
-
-  const handleSubmitAdd = async (dryerId, ownerId, formData) => {
-    if (!farmerId) return alert("You must be logged in!");
-
-    const { crop_type, quantity, payment } = formData;
-
-    if (!crop_type || !quantity || quantity <= 0) {
-      return alert("Invalid crop type or quantity.");
-    }
-
-    try {
-      setLoading(true);
-
-      const check = await axios.get(
-        `${import.meta.env.VITE_API}/reservations`,
-        { params: { farmer_id: farmerId, dryer_id: dryerId } }
-      );
-
-      if (check.data.exists) {
-        alert("You have already reserved this dryer.");
-        return;
-      }
-
-      const res = await axios.post(`${import.meta.env.VITE_API}/reservations`, {
-        farmer_id: farmerId,
-        dryer_id: dryerId,
-        owner_id: ownerId,
-        status: "pending",
-        crop_type: formData.crop_type,
-        quantity: formData.quantity,
-        payment: formData.payment,
-      });
-
-      alert("Reservation created successfully!");
-      console.log(res.data);
-      setModalAdd(false);
-    } catch (error) {
-      console.error(
-        "Reservation error:",
-        error.response?.data || error.message
-      );
-      alert(error.response?.data?.message || "Failed to create reservation.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddFormSubmit = (e) => {
-    e.preventDefault();
-    const formData = Object.fromEntries(new FormData(e.target).entries());
-    handleSubmitAdd(selectedDryerId, selectedOwnerId, formData);
   };
 
   function handleView(dryer) {
