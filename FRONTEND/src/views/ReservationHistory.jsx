@@ -108,14 +108,18 @@ function ReservationHistory() {
   const fetchHistory = async () => {
     if (!farmerId) return;
     setIsLoading(true);
-
+  
     try {
+      const token = localStorage.getItem("token");   
       const res = await axios.get(`${import.meta.env.VITE_API}/reservations`, {
         params: { farmer_id: farmerId },
+        headers: {
+          Authorization: `Bearer ${token}`,  
+        },
       });
-
+  
       if (!Array.isArray(res.data)) throw new Error("Invalid API response");
-
+  
       setData(
         res.data.map((reservation) => ({
           farmer_name: reservation.farmer_name || "N/A",
@@ -138,9 +142,8 @@ function ReservationHistory() {
           ),
         }))
       );
-      
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching reservations:", error);
       setData([]);
     } finally {
       setIsLoading(false);

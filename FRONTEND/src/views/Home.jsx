@@ -1,7 +1,33 @@
-import { NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import Links from "../utils/Links";
+import api from "../api/api.js";
 
 function Home() {
+  const navigate = useNavigate();
+  const [authorized, setAuthorized] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/sign-in");
+        return;
+      }
+      try {
+        await api.get("/users");
+        setAuthorized(true);
+      } catch (err) {
+        console.error("Auth failed:", err.response?.data);
+        localStorage.clear();
+        navigate("/sign-in");
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
+  if (!authorized) return null; 
+
   return (
     <div className="w-full h-[calc(100dvh-160px)]">
       <div className="flex flex-col md:flex-row gap-3">

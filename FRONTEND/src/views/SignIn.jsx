@@ -3,6 +3,7 @@ import { useState } from "react";
 import Button from "../component/Button";
 import Loading from "../component/Loading";
 import axios from "axios";
+import api from  "../api/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import OTP from "../component/Otp";
@@ -28,32 +29,27 @@ function SignIn() {
     const formData = new FormData(e.target);
     const { email, password } = Object.fromEntries(formData.entries());
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API}/users/login`, {
+      const res = await api.post("/users/login", {
         email,
         password,
       });
-      const {
-        id,
-        role,
-        address,
-        full_name,
-        first_name,
-        middle_name,
-        last_name,
-      } = res.data;
-      if (res.data.message === "Account is not yet verified.") {
-        toast.error(res.data.message);
+      const { user, token, message } = res.data;
+      const { id, role, address, full_name, first_name, middle_name, last_name } = user;
+
+      if (message === "Account is not yet verified.") {
+        toast.error(message);
         setTimeout(() => {
-          setEmail(email);
+          setEmail(user.email);
           setOtp(true);
         }, 2000);
       } else {
+        localStorage.setItem("token", token);
         localStorage.setItem("role", role);
         localStorage.setItem("full_name", full_name);
         localStorage.setItem("first_name", first_name);
         localStorage.setItem("middle_name", middle_name);
         localStorage.setItem("last_name", last_name);
-        localStorage.setItem("email", email);
+        localStorage.setItem("email", user.email);
         localStorage.setItem("address", address);
         localStorage.setItem("id", id);
         toast.success(res.data.message);

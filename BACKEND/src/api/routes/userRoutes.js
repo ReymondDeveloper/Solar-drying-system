@@ -7,18 +7,18 @@ import {
   verifyOtp,
   verifyUser,
 } from "../controllers/userController.js";
-// import { protect } from "../middleware/authMiddleware.js"; // I comment auth Middleware for the min time
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// router.get("/", protect, getUsers);   // protected route
-router.get("/", getUsers);
+// Public routes
 router.post("/verify", verifyUser);
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.post("/verify-otp", verifyOtp);
 
-// router.put("/update-password", protect, updatePassword); // protected route
-router.put("/update", updatePassword);
+// Protected routes
+router.get("/", protect, getUsers);
+router.put("/update", protect, updatePassword);
 
 export default router;

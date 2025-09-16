@@ -10,6 +10,7 @@ import Loading from "../component/Loading";
 import Button from "../component/Button";
 
 function CreateReservation() {
+  const token = localStorage.getItem("token"); 
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
@@ -69,6 +70,7 @@ function CreateReservation() {
             offset: (currentPage - 1) * limit,
             limit,
           },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
@@ -103,7 +105,7 @@ function CreateReservation() {
     };
 
     fetchData();
-  }, [currentPage, limit]);
+  }, [currentPage, limit, token]);
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =
@@ -131,6 +133,7 @@ function CreateReservation() {
         Error while fetching the data
       </div>
     );
+
   return (
     <>
       {loading && <Loading />}

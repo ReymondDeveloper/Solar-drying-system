@@ -18,6 +18,9 @@ function Availability() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const token = localStorage.getItem("token");  
+  const Endpoint = `${import.meta.env.VITE_API}/dryers`;
+
   const tableHeadings = ["Registered Dryer", "Location (Sablayan)", "Status"];
   const tableDataCell = ["dryer_name", "location", "status"];
 
@@ -44,17 +47,17 @@ function Availability() {
     setModal(false);
   };
 
-  const Endpoint = `${import.meta.env.VITE_API}/dryers`;
-
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setIsError(false);
 
       const offset = (currentPage - 1) * limit;
+
       try {
         const res = await axios.get(Endpoint, {
           params: { offset, limit },
+          headers: { Authorization: `Bearer ${token}` },  
         });
 
         const dryers = res.data.Results || res.data;
@@ -62,33 +65,27 @@ function Availability() {
         const formatted = dryers.map((dryer) => ({
           dryer_name: dryer.dryer_name,
           location: dryer.location,
-          status: dryer.status ?? "available",  
+          status: dryer.status?.trim() || "available",
         }));
 
         setData(formatted);
       } catch (error) {
-        console.error("Error fetching dryers:", error);
-        setIsError(true);
-        console.error("Error fetching dryers:", error);
+        console.error("Error fetching dryers:", error.response?.data || error);
         setIsError(true);
       } finally {
         setIsLoading(false);
       }
     };
 
-
     fetchData();
-  }, [limit, currentPage]);
-
+  }, [limit, currentPage, token]);
 
   const FilteredData = data.filter((info) => {
-    const isAvailable = info.status.toLowerCase() === "available";
-  
     const filterByFilters =
       filter && filter !== "all"
         ? info.status.toLowerCase().includes(filter.toLowerCase())
         : true;
-  
+
     const filterBySearch = search
       ? Object.entries(info)
           .filter(([key]) => key !== "status")
