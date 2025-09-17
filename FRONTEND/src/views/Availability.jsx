@@ -81,11 +81,13 @@ function Availability() {
   }, [limit, currentPage, token]);
 
   const FilteredData = data.filter((info) => {
+    const isAvailable = info.status.toLowerCase() === "available";
+  
     const filterByFilters =
       filter && filter !== "all"
         ? info.status.toLowerCase().includes(filter.toLowerCase())
         : true;
-
+  
     const filterBySearch = search
       ? Object.entries(info)
           .filter(([key]) => key !== "status")
