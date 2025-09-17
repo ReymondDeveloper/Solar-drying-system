@@ -29,15 +29,24 @@ function SignIn() {
     const formData = new FormData(e.target);
     const { email, password } = Object.fromEntries(formData.entries());
     try {
-      const res = await api.post("/users/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API}/users/login`,
+        {
+          email: email.toLowerCase(),
+          password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
       const { user, token, message } = res.data;
       const { id, role, address, full_name, first_name, middle_name, last_name } = user;
-
       if (message === "Account is not yet verified.") {
         toast.error(message);
+        await axios.post(`${import.meta.env.VITE_API}/users/send-otp`, { email: user.email });
         setTimeout(() => {
           setEmail(user.email);
           setOtp(true);
@@ -52,13 +61,24 @@ function SignIn() {
         localStorage.setItem("email", user.email);
         localStorage.setItem("address", address);
         localStorage.setItem("id", id);
+  
         toast.success(res.data.message);
         setTimeout(() => {
           navigate("/home");
         }, 2000);
       }
     } catch (err) {
-      toast.error(err.response.data.message);
+      const message = err.response?.data?.message || "Invalid credentials";
+    
+      if (message.includes("not verified")) {
+        toast.error(message);
+        setTimeout(() => {
+          setEmail(email);
+          setOtp(true);
+        }, 2000);
+      } else {
+        toast.error(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -142,20 +162,29 @@ function SignIn() {
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
       const { password, confirm_password } = data;
+  
       if (password === confirm_password) {
-        const res = await axios.put(`${import.meta.env.VITE_API}/users/update`, {
-          password,
-          email,
-        });
+        const token = localStorage.getItem("token");  
+  
+        const res = await axios.put(
+          `${import.meta.env.VITE_API}/users/update`,
+          { password, email }, 
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, 
+            },
+          }
+        );
+  
         toast.success(res.data.message);
         setTimeout(() => {
           setModalEdit(false);
         }, 2000);
       } else {
-        toast.error("Password and Confirm Password doesn`t match.");
+        toast.error("Password and Confirm Password doesn’t match.");
       }
     } catch (err) {
-      toast.error(err.response.data.message);
+      toast.error(err.response?.data?.message || "Update failed");
     } finally {
       setLoading(false);
     }

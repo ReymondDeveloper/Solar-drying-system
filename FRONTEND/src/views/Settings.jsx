@@ -1,38 +1,42 @@
 import { useState } from "react";
 import Button from "../component/Button";
 import "react-toastify/dist/ReactToastify.css";  
-import { toast } from "react-toastify"; 
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify"; 
+import axios from "axios";
 
 function Settings() {
   const [profileImage, setProfileImage] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     first_name: localStorage.getItem("first_name") || "",
     middle_name: localStorage.getItem("middle_name") || "",
     last_name: localStorage.getItem("last_name") || "",
     mobile_number: localStorage.getItem("mobile_number") || "",
-    email: localStorage.getItem("email") || ""
+    email: localStorage.getItem("email") || "",
+    // no password input field, but keep it for API
+    password: localStorage.getItem("password") || "********",
   });
 
   const handleFileChange = (e) => {
-    setProfileImage(URL.createObjectURL(e.target.files[0]));
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImage(file); 
+    }
   };
 
-  
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     if (name === "mobile_number") {
-      let newValue = value.replace(/\D/g, "");  
+      let newValue = value.replace(/\D/g, "");
 
       if (newValue.startsWith("0")) {
-        newValue = "+63" + newValue.slice(1); 
+        newValue = "+63" + newValue.slice(1);
       } else if (newValue.startsWith("63")) {
-        newValue = "+" + newValue;  
+        newValue = "+" + newValue;
       } else if (!newValue.startsWith("+63") && newValue.length > 0) {
-        newValue = "+63" + newValue;  
+        newValue = "+63" + newValue;
       }
 
       if (newValue.length > 13) {
@@ -45,24 +49,54 @@ function Settings() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const mobileRegex = /^\+63\d{10}$/;
     if (!mobileRegex.test(formData.mobile_number)) {
       toast.error("Invalid mobile number. Format must be 11 digits.");
       return;
     }
-    toast.success("Profile updated successfully!");
-    setIsEditing(false);
+  
+    try {
+      const token = localStorage.getItem("token");
+      const base = import.meta.env.VITE_API;
+  
+      const formDataToSend = new FormData();
+      formDataToSend.append("first_name", formData.first_name);
+      formDataToSend.append("middle_name", formData.middle_name);
+      formDataToSend.append("last_name", formData.last_name);
+      formDataToSend.append("mobile_number", formData.mobile_number);
+      formDataToSend.append("email", formData.email);
+  
+      if (profileImage) {
+        formDataToSend.append("file", profileImage);   
+      }
+  
+      const res = await axios.put(`${base}/users/update`, formDataToSend, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+  
+      toast.success("Profile updated successfully!");
+      setIsEditing(false);
+  
+      console.log("Update response:", res.data);
+    } catch (err) {
+      console.error("Update failed:", err.response?.data || err.message);
+      toast.error(
+        err.response?.data?.message || "Failed to update profile. Please try again."
+      );
+    }
   };
-
   const formFields = [
     { label: "First Name", name: "first_name", type: "text", colSpan: 1, required: true },
-    { label: "Middle Name", name: "middle_name", type: "text", colSpan: 1, required: false},
-    { label: "Last Name", name: "last_name", type: "text", colSpan: 1, required: true},
-    { label: "Mobile Number", name: "mobile_number", type: "text", colSpan: 1, required: true},
-    { label: "Email", name: "email", type: "email", colSpan: 2, required: true }
+    { label: "Middle Name", name: "middle_name", type: "text", colSpan: 1, required: false },
+    { label: "Last Name", name: "last_name", type: "text", colSpan: 1, required: true },
+    { label: "Mobile Number", name: "mobile_number", type: "text", colSpan: 1, required: true },
+    { label: "Email", name: "email", type: "email", colSpan: 2, required: true },
   ];
 
   return (
@@ -71,14 +105,15 @@ function Settings() {
       <div className="w-full flex flex-col md:flex-row justify-center items-start p-6 gap-6 bg-[rgba(0,0,0,0.1)] backdrop-blur-[6px] rounded-lg">
         <div className="flex-1 flex flex-col items-center bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
           <div className="w-full md:w-80 md:h-80 rounded-full overflow-hidden bg-gray-200 mb-4 shadow-md">
-            <img
-              src={
-                profileImage ||
-                "https://png.pngtree.com/png-vector/20190710/ourmid/pngtree-user-vector-avatar-png-image_1541962.jpg"
-              }
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
+          <img
+            src={
+              profileImage
+                ? URL.createObjectURL(profileImage)  
+                : localStorage.getItem("profile_image") || "https://png.pngtree.com/png-vector/20190710/ourmid/pngtree-user-vector-avatar-png-image_1541962.jpg"
+            }
+            alt="Profile"
+            className="w-full h-full object-cover"
+          />
           </div>
           <h2 className="font-semibold text-xl mb-1 capitalize">
             {localStorage.getItem("full_name")}
@@ -122,11 +157,7 @@ function Settings() {
                   placeholder={field.label}
                   className={`border p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-600 
                     ${!isEditing ? "bg-gray-100 cursor-not-allowed" : ""}
-                    ${
-                      field.name === "password" || field.name === "email"
-                        ? ""
-                        : "capitalize"
-                    }
+                    ${field.name === "email" ? "" : "capitalize"}
                   `}
                   disabled={!isEditing}
                   required={field.required}
@@ -135,9 +166,9 @@ function Settings() {
             ))}
 
             <Button
-              type={isEditing ? "button" : "submit"}
-              onClick={() => setIsEditing((prev) => !prev)}
-              className={`mt-6 w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-lg font-semibold transition duration-200 col-span-2`}
+              type={isEditing ? "submit" : "button"}
+              onClick={() => !isEditing && setIsEditing(true)}
+              className="mt-6 w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-lg font-semibold transition duration-200 col-span-2"
             >
               {isEditing ? "Save Profile" : "Edit Profile"}
             </Button>

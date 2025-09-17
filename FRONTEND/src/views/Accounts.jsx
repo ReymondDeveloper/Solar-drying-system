@@ -159,10 +159,11 @@ function Accounts() {
     setIsError(false);
     const offset = (currentPage - 1) * limit;
     try {
+      const token = localStorage.getItem("token"); 
       const res = await axios.get(`${import.meta.env.VITE_API}/users`, {
-        params: {
-          offset,
-          limit,
+        params: { offset, limit },
+        headers: {
+          Authorization: `Bearer ${token}`, 
         },
       });
       setData(
@@ -180,7 +181,7 @@ function Accounts() {
           : []
       );
     } catch (err) {
-      toast.error(err.response.data.message);
+      toast.error(err.response?.data?.message || "Unauthorized request");
       setIsError(true);
     } finally {
       setIsLoading(false);
@@ -193,10 +194,11 @@ function Accounts() {
       setIsError(false);
       const offset = (currentPage - 1) * limit;
       try {
+        const token = localStorage.getItem("token");  
         const res = await axios.get(`${import.meta.env.VITE_API}/users`, {
-          params: {
-            offset,
-            limit,
+          params: { offset, limit },
+          headers: {
+            Authorization: `Bearer ${token}`, 
           },
         });
         setData(
@@ -214,7 +216,7 @@ function Accounts() {
             : []
         );
       } catch (err) {
-        toast.error(err.response.data.message);
+        toast.error(err.response?.data?.message || "Unauthorized request");
         setIsError(true);
       } finally {
         setIsLoading(false);

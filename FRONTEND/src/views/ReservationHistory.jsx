@@ -110,11 +110,13 @@ function ReservationHistory() {
     setIsLoading(true);
   
     try {
-      const token = localStorage.getItem("token");   
-      const res = await axios.get(`${import.meta.env.VITE_API}/reservations`, {
+      const token = localStorage.getItem("token");  
+      const base = import.meta.env.VITE_API;
+  
+      const res = await axios.get(`${base}/reservations`, {
         params: { farmer_id: farmerId },
         headers: {
-          Authorization: `Bearer ${token}`,  
+          Authorization: `Bearer ${token}`,
         },
       });
   
@@ -143,7 +145,7 @@ function ReservationHistory() {
         }))
       );
     } catch (error) {
-      console.error("Error fetching reservations:", error);
+      console.error("Error fetching reservations:", error.response?.data || error.message);
       setData([]);
     } finally {
       setIsLoading(false);

@@ -14,15 +14,18 @@ function Reports() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const token = localStorage.getItem("token");
         const base = import.meta.env.VITE_API;
 
-        const usersRes = await axios.get(`${base}/users`);
-        setUsers(usersRes.data || []);
+        const headers = { Authorization: `Bearer ${token}` };
 
-        const farmersRes = await axios.get(`${base}/users`);
-        setFarmers((farmersRes.data || []).filter(u => u.role === "farmer"));
+        const usersRes = await axios.get(`${base}/users`, { headers });
+        const allUsers = usersRes.data || [];
+        setUsers(allUsers);
 
-        const dryersRes = await axios.get(`${base}/dryers`);
+        setFarmers(allUsers.filter((u) => u.role === "farmer"));
+
+        const dryersRes = await axios.get(`${base}/dryers`, { headers });
         setDryers(dryersRes.data || []);
       } catch (err) {
         console.error("Error fetching reports:", err);
@@ -30,9 +33,10 @@ function Reports() {
         setLoading(false);
       }
     };
+
     fetchData();
   }, []);
-
+  
   const cards = [
     {
       label: "Registered Users",

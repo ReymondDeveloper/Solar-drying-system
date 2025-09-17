@@ -65,6 +65,7 @@ function CreateReservation() {
       setIsError(false);
 
       try {
+        console.log("Fetching dryers with token:", token);
         const res = await axios.get(`${import.meta.env.VITE_API}/dryers`, {
           params: {
             offset: (currentPage - 1) * limit,

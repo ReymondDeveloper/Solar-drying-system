@@ -86,18 +86,17 @@ function Registration() {
       password,
     } = Object.fromEntries(formData.entries());
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API}/users/register`,
-        {
-          first_name,
-          middle_name,
-          last_name,
-          address,
-          email,
-          password,
-          role,
-        }
-      );
+      const res = await axios.post(`${import.meta.env.VITE_API}/users/register`, {
+        first_name,
+        middle_name,
+        last_name,
+        address,
+        email,
+        password,
+        role,
+      });
+      
+      await axios.post(`${import.meta.env.VITE_API}/users/send-otp`, { email });
       toast.success(res.data.message);
       setTimeout(() => {
         setEmail(email);

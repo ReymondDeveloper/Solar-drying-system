@@ -103,17 +103,18 @@ export const loginUser = async (req, res) => {
     if (!user.is_verified) {
       const otp = Math.floor(1000 + Math.random() * 9000).toString();
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-
       await supabase
         .from("users")
         .update({ otp_code: otp, otp_expires_at: expiresAt })
         .eq("email", email.toLowerCase());
-
       await sendOtpEmail(email, otp);
-
-      return res.status(401).json({ message: "Account is not verified. OTP sent again." });
+    
+      return res.status(200).json({
+        message: "Account is not verified. OTP sent again.",
+        needVerification: true,
+        email,
+      });
     }
-
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid password." });
 
@@ -197,6 +198,46 @@ export const verifyOtp = async (req, res) => {
 
     res.json({ message: "Account verified successfully!", token });
   } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;  
+    const { first_name, middle_name, last_name, mobile_number, email } = req.body;
+
+    let profileImage = null;
+
+    if (req.file) {
+      profileImage = `${process.env.BASE_URL || "http://localhost:3000"}/uploads/${req.file.filename}`;
+    }
+
+    const updateData = {
+      first_name,
+      middle_name,
+      last_name,
+      mobile_number,
+      email: email.toLowerCase(),
+    };
+
+    if (profileImage) {
+      updateData.profile_image = profileImage;
+    }
+
+    const { error } = await supabase
+      .from("users")
+      .update(updateData)
+      .eq("id", userId);
+
+    if (error) {
+      console.error(error);
+      return res.status(400).json({ message: "Failed to update profile" });
+    }
+
+    res.json({ message: "Profile updated successfully", profile_image: profileImage });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };

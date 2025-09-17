@@ -25,6 +25,16 @@ function DryerInformation() {
   const [loading, setLoading] = useState(false);
   const [selectedDryer, setSelectedDryer] = useState(null);
 
+  const token = localStorage.getItem("token"); 
+  const base = import.meta.env.VITE_API;
+
+  const api = axios.create({
+    baseURL: base,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
   const tableHeadings = [
     "Dryer Name",
     "Location (Sablayan)",
@@ -50,33 +60,6 @@ function DryerInformation() {
     { value: "location 4", phrase: "Location 4" },
     { value: "location 5", phrase: "Location 5" },
   ];
-  
-
-  const fieldsFilter = [
-    {
-      label: "Location (Sablayan)",
-      type: "select",
-      name: "location",
-      options: [
-        { value: "all", phrase: "All" },
-        { value: "location 1", phrase: "Location 1" },
-        { value: "location 2", phrase: "Location 2" },
-        { value: "location 3", phrase: "Location 3" },
-        { value: "location 4", phrase: "Location 4" },
-        { value: "location 5", phrase: "Location 5" },
-      ],
-    },
-  ];
-
-  const handleSubmitFilter = (e) => {
-    setLoading(true);
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    setFilter(data);
-    setLoading(false);
-    setModalFilter(false);
-  };
 
   const fieldsAdd = [
     { label: "Dryer Name", type: "text", name: "dryer_name", required: true },
@@ -91,7 +74,7 @@ function DryerInformation() {
     { label: "Rate (PHP)", type: "number", name: "rate", required: true },
     { label: "Dryer Image", type: "file", name: "image_url" }, 
   ];
-  
+
   const handleSubmitAdd = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -106,16 +89,14 @@ function DryerInformation() {
         const uploadForm = new FormData();
         uploadForm.append("file", file);
   
-  
-        const uploadRes = await axios.post(`${import.meta.env.VITE_API}/upload`, uploadForm, {
+        const uploadRes = await api.post("/upload", uploadForm, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         
-  
         dryerData.image_url = uploadRes.data.url;  
       }
   
-      const res = await axios.post(`${import.meta.env.VITE_API}/dryers`, {
+      const res = await api.post("/dryers", {
         ...dryerData,
         created_by_id: createdById,
       });
@@ -148,21 +129,16 @@ function DryerInformation() {
         const uploadData = new FormData();
         uploadData.append("file", imageFile);
   
-        const uploadRes = await axios.post(
-          `${import.meta.env.VITE_API}/upload`,
-          uploadData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
+        const uploadRes = await api.post("/upload", uploadData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
   
         updatedData.image_url = uploadRes.data.url;  
       } else {
         updatedData.image_url = selectedDryer.image_url;  
       }
   
-      const res = await axios.put(
-        `${import.meta.env.VITE_API}/dryers/${selectedDryer.id}`,
-        updatedData
-      );
+      const res = await api.put(`/dryers/${selectedDryer.id}`, updatedData);
   
       toast.success(res.data.message);
       fetchData();
@@ -175,51 +151,13 @@ function DryerInformation() {
     }
   };
 
-    const datasView = selectedDryer
-    ? [
-        {
-          dryer_name: selectedDryer.dryer_name,
-          location: selectedDryer.location,
-          capacity: selectedDryer.capacity,
-          available_capacity: selectedDryer.available_capacity,
-          rate: selectedDryer.rate,
-          image_url: selectedDryer.image_url, 
-        },
-      ]
-    : [];
-
-
-  const fieldsEdit = [
-    { label: "Dryer Name", type: "text", name: "dryer_name", required: true, defaultValue: selectedDryer?.dryer_name || "" },
-    { label: "Location", type: "text", name: "location", required: true, defaultValue: selectedDryer?.location || "" },
-    { label: "Capacity", type: "number", name: "capacity", required: true, defaultValue: selectedDryer?.capacity || "" },
-    { label: "Rate", type: "number", name: "rate", required: true, defaultValue: selectedDryer?.rate || "" },
-    { label: "Available Capacity", type: "number", name: "available_capacity", required: true, defaultValue: selectedDryer?.available_capacity || "" },
-    { label: "Dryer Image", type: "file", name: "image_url", defaultValue: selectedDryer?.image_url || "" },  
-  ];
-    
-
-  const handleSubmitView = (e) => {
-    setLoading(true);
-    e.preventDefault();
-    setLoading(false);
-    setModalView(false);
-  };
-
-  function handleView(dryer) {
-    setSelectedDryer(dryer);
-    setModalView(true);
-  }
-
-  const Endpoint = `${import.meta.env.VITE_API}/dryers`;
-
   const fetchData = async () => {
     setIsLoading(true);
     setIsError(false);
     const offset = (currentPage - 1) * limit;
 
     try {
-      const res = await axios.get(Endpoint, {
+      const res = await api.get("/dryers", {
         params: { offset, limit },
       });
 
@@ -248,7 +186,7 @@ function DryerInformation() {
 
       setData(formatted);
     } catch (err) {
-      console.log(err.response.data.message)
+      console.error(err.response?.data?.message || err.message);
       setIsError(true);
     } finally {
       setIsLoading(false);
@@ -256,51 +194,6 @@ function DryerInformation() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setIsError(false);
-      const offset = (currentPage - 1) * limit;
-    
-      try {
-        const res = await axios.get(Endpoint, {
-          params: { offset, limit },
-        });
-    
-        const dryers = res.data.Results || res.data;
-    
-        const sorted = [...dryers].sort(
-          (a, b) => new Date(b.created_at) - new Date(a.created_at)
-        );
-    
-        const formatted = dryers.map((dryer) => ({
-          ...dryer,
-          available_capacity: dryer.available_capacity ?? dryer.capacity,
-          action: (
-            <div className="flex justify-center gap-2">
-              <Button
-                onClick={() => handleEdit(dryer)}
-                className="bg-blue-400 hover:bg-blue-500 text-white"
-              >
-                Edit
-              </Button>
-              <Button
-                onClick={() => handleView(dryer)}
-                className="bg-blue-400 hover:bg-blue-500 text-white"
-              >
-                View
-              </Button>
-            </div>
-          ),
-        }));
-    
-        setData(formatted);
-      } catch (error) {
-        console.error(err.response.data.message);
-        setIsError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchData();
   }, [limit, currentPage, Endpoint]);
 
