@@ -11,6 +11,7 @@ import cropTypesRoutes from "../src/api/routes/cropTypesRoutes.js";
 
 import { errorHandler } from "../src/api/middleware/errorHandler.js";
 import { protect } from "../src/api/middleware/authMiddleware.js"; 
+import { fileURLToPath } from "url";
 
 dotenv.config();
 const app = express();
@@ -19,8 +20,10 @@ app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
-
+app.use("/api/users", userRoutes);
 app.use("/api/dryers", protect, dryerRoutes);
 app.use("/api/reservations", protect, reservationRoutes);
 app.use("/api/upload", protect, uploadRoutes);
