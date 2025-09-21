@@ -2,11 +2,11 @@ import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import supabase from "../../database/supabase.db.js";
 import { sendOtpEmail } from "../helpers/sendOtpEmail.js";
-import jwt from "jsonwebtoken";  
+import jwt from "jsonwebtoken";
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "1d",  
+    expiresIn: process.env.JWT_EXPIRES_IN || "1d",
   });
 };
 
@@ -29,15 +29,18 @@ export const verifyUser = async (req, res, next) => {
   try {
     const { email } = req.body;
     const user = await User.findByEmail(email);
-    if (!user) return res.status(404).json({ message: "Account doesn’t exist." });
+    if (!user)
+      return res.status(404).json({ message: "Account doesn’t exist." });
 
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const date = new Date();
+    date.setMinutes(date.getMinutes() + 5);
+    const expiresAt = date.toString();
 
     await supabase
       .from("users")
       .update({ otp_code: otp, otp_expires_at: expiresAt })
-      .eq("email", email.toLowerCase());
+      .eq("email", email);
 
     await sendOtpEmail(email, otp);
 
@@ -49,7 +52,15 @@ export const verifyUser = async (req, res, next) => {
 
 export const registerUser = async (req, res, next) => {
   try {
-    const { first_name, middle_name, last_name, email, password, role, address } = req.body;
+    const {
+      first_name,
+      middle_name,
+      last_name,
+      email,
+      password,
+      role,
+      address,
+    } = req.body;
 
     const existingUser = await User.findByEmail(email);
     if (existingUser) {
@@ -58,8 +69,9 @@ export const registerUser = async (req, res, next) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-
+    const date = new Date();
+    date.setMinutes(date.getMinutes() + 5);
+    const expiresAt = date.toString();
     const { data, error } = await supabase
       .from("users")
       .insert([
@@ -98,25 +110,33 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findByEmail(email);
-    if (!user) return res.status(404).json({ message: "Account doesn’t exist." });
+    if (!user)
+      return res.status(404).json({ message: "Account doesn’t exist." });
 
     if (!user.is_verified) {
       const otp = Math.floor(1000 + Math.random() * 9000).toString();
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+      const date = new Date();
+      date.setMinutes(date.getMinutes() + 5);
+      const expiresAt = date.toString();
+
       await supabase
         .from("users")
         .update({ otp_code: otp, otp_expires_at: expiresAt })
-        .eq("email", email.toLowerCase());
+        .eq("email", user.email);
+
       await sendOtpEmail(email, otp);
-    
+
       return res.status(200).json({
-        message: "Account is not verified. OTP sent again.",
-        needVerification: true,
-        email,
+        message: "Account is not yet verified.",
       });
     }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid password." });
+
+    const token = generateToken(user.id);
+    if (!token)
+      return res.status(401).json({ message: "Token is not working." });
 
     res.json({
       message: "Login successful",
@@ -128,8 +148,9 @@ export const loginUser = async (req, res) => {
         last_name: user.last_name,
         role: user.role,
         address: user.address,
+        email: user.email,
       },
-      token: generateToken(user.id),  
+      token: token,
     });
   } catch (err) {
     res.status(500).json({ message: "Server error." });
@@ -141,11 +162,14 @@ export const updatePassword = async (req, res) => {
     const { password, email } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required." });
+      return res
+        .status(400)
+        .json({ message: "Email and password are required." });
     }
 
     const user = await User.findByEmail(email);
-    if (!user) return res.status(404).json({ message: "Invalid email address." });
+    if (!user)
+      return res.status(404).json({ message: "Invalid email address." });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await User.updatePassword(email, hashedPassword);
@@ -160,24 +184,26 @@ export const verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
 
   try {
-    const { data, error } = await supabase
+    const { data: user, error } = await supabase
       .from("users")
       .select("id, otp_code, otp_expires_at")
-      .eq("email", email.toLowerCase())
+      .eq("email", email)
       .single();
 
-    if (error || !data) {
+    if (!user || error) {
+      console.log("Email:" + email);
       return res.status(400).json({ message: "User not found" });
     }
 
-    if (!data.otp_code || !data.otp_expires_at) {
+    if (!user.otp_code || !user.otp_expires_at) {
+      console.error(user);
       return res.status(400).json({ message: "No OTP generated" });
     }
 
-    const now = new Date();
-    const expiry = new Date(data.otp_expires_at + "Z");
+    const expiry = user.otp_expires_at;
+    const now = new Date().toString();
 
-    if (data.otp_code !== otp) {
+    if (user.otp_code !== otp) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
@@ -185,32 +211,30 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: "OTP expired" });
     }
 
-    const { error: updateError } = await supabase
+    await supabase
       .from("users")
       .update({ otp_code: null, otp_expires_at: null, is_verified: true })
-      .eq("email", email.toLowerCase());
+      .eq("email", email);
 
-    if (updateError) {
-      return res.status(500).json({ message: "Failed to verify account" });
-    }
-
-    const token = generateToken(data.id);
-
-    res.json({ message: "Account verified successfully!", token });
+    res.status(200).json({ message: "Account verified successfully!" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
 export const updateProfile = async (req, res) => {
   try {
-    const userId = req.user.id;  
-    const { first_name, middle_name, last_name, mobile_number, email } = req.body;
+    const userId = req.user.id;
+    const { first_name, middle_name, last_name, mobile_number, email } =
+      req.body;
 
     let profileImage = null;
 
     if (req.file) {
-      profileImage = `${process.env.BASE_URL || "http://localhost:3000"}/uploads/${req.file.filename}`;
+      profileImage = `${
+        process.env.BASE_URL || "http://localhost:3000"
+      }/uploads/${req.file.filename}`;
     }
 
     const updateData = {
@@ -235,7 +259,10 @@ export const updateProfile = async (req, res) => {
       return res.status(400).json({ message: "Failed to update profile" });
     }
 
-    res.json({ message: "Profile updated successfully", profile_image: profileImage });
+    res.json({
+      message: "Profile updated successfully",
+      profile_image: profileImage,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
