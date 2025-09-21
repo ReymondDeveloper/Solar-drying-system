@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-function OTP({ setOtp, email, onVerified, loading, setLoading }) {
+function OTP({ setOtp, onVerified, loading, setLoading }) {
   const inputRefs = useRef([]);
   const [otpValues, setOtpValues] = useState(["", "", "", ""]);
   useEffect(() => {
@@ -12,13 +12,15 @@ function OTP({ setOtp, email, onVerified, loading, setLoading }) {
   const handleOTP = async (otpCode) => {
     setLoading(true);
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API}/users/verify-otp`, {
-        email,
-        otp: otpCode,
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API}/users/verify-otp`,
+        {
+          email: localStorage.getItem("email"),
+          otp: otpCode,
+        }
+      );
       toast.success(res.data.message);
       setTimeout(() => {
-        localStorage.setItem("email", email);
         onVerified?.();
       }, 2000);
     } catch (err) {

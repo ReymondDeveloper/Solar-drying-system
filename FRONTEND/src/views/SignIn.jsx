@@ -3,7 +3,7 @@ import { useState } from "react";
 import Button from "../component/Button";
 import Loading from "../component/Loading";
 import axios from "axios";
-import api from  "../api/api";
+import api from "../api/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import OTP from "../component/Otp";
@@ -41,14 +41,21 @@ function SignIn() {
           },
         }
       );
-  
-      const { user, token, message } = res.data;
-      const { id, role, address, full_name, first_name, middle_name, last_name } = user;
+
+      const { user = {}, token, message } = res.data;
+      const {
+        id,
+        role,
+        address,
+        full_name,
+        first_name,
+        middle_name,
+        last_name,
+      } = user;
       if (message === "Account is not yet verified.") {
         toast.error(message);
-        await axios.post(`${import.meta.env.VITE_API}/users/send-otp`, { email: user.email });
         setTimeout(() => {
-          setEmail(user.email);
+          localStorage.setItem("email", email.toLowerCase());
           setOtp(true);
         }, 2000);
       } else {
@@ -58,32 +65,23 @@ function SignIn() {
         localStorage.setItem("first_name", first_name);
         localStorage.setItem("middle_name", middle_name);
         localStorage.setItem("last_name", last_name);
-        localStorage.setItem("email", user.email);
+        localStorage.setItem("email", email.toLowerCase());
         localStorage.setItem("address", address);
         localStorage.setItem("id", id);
-  
+
         toast.success(res.data.message);
         setTimeout(() => {
           navigate("/home");
         }, 2000);
       }
     } catch (err) {
-      const message = err.response?.data?.message || "Invalid credentials";
-    
-      if (message.includes("not verified")) {
-        toast.error(message);
-        setTimeout(() => {
-          setEmail(email);
-          setOtp(true);
-        }, 2000);
-      } else {
-        toast.error(message);
-      }
+      const message = err.response?.data?.message || err.message;
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
- 
+
   const formField = [
     {
       label: "Email address",
@@ -124,7 +122,7 @@ function SignIn() {
       toast.success(res.data.message);
       setModalVerify(false);
       setTimeout(() => {
-        setEmail(email);
+        localStorage.setItem("email", email);
         setOtpVerify(true);
       }, 2000);
     } catch (err) {
@@ -162,20 +160,20 @@ function SignIn() {
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
       const { password, confirm_password } = data;
-  
+
       if (password === confirm_password) {
-        const token = localStorage.getItem("token");  
-  
+        const token = localStorage.getItem("token");
+
         const res = await axios.put(
           `${import.meta.env.VITE_API}/users/update`,
-          { password, email }, 
+          { password, email: localStorage.getItem("email") },
           {
             headers: {
-              Authorization: `Bearer ${token}`, 
+              Authorization: `Bearer ${token}`,
             },
           }
         );
-  
+
         toast.success(res.data.message);
         setTimeout(() => {
           setModalEdit(false);
@@ -196,7 +194,6 @@ function SignIn() {
       {otp && (
         <OTP
           setOtp={setOtp}
-          email={email}
           onVerified={() => setOtp(false)}
           loading={loading}
           setLoading={setLoading}
@@ -223,7 +220,6 @@ function SignIn() {
       {otpVerify && (
         <OTP
           setOtp={setOtp}
-          email={email}
           onVerified={() => (setOtpVerify(false), setModalEdit(true))}
           loading={loading}
           setLoading={setLoading}

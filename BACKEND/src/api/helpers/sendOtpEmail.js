@@ -14,14 +14,14 @@ export async function sendOtpEmail(toEmail, otp) {
 
     await transporter.sendMail({
       from: `"Solar Drying System" <${process.env.EMAIL_USER}>`,
-      to: toEmail,
+      to: toEmail.toLowerCase(),
       subject:
         "Verify your newly created account at Solar Drying System using this OTP",
       text: `Your OTP code is ${otp}. It will expire in 5 minutes.`,
       html: `<h6>Your OTP is <b>${otp}</b>. It will expire in 5 minutes.</h6>`,
     });
 
-    console.log(`✅ OTP email sent to ${toEmail}`);
+    console.log(`✅ OTP email sent to ${toEmail.toLowerCase()}`);
   } catch (err) {
     console.error("❌ Error sending OTP email:", err.message);
   }
