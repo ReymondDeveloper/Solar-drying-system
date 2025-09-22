@@ -72,7 +72,7 @@ _This endpoint makes an HTTP POST request to create a new user._
 | 400              | User already exist.                       |
 | 500              | Unsuccessful creation of an user.                       |
 
-### Response example
+### Sample Response
 
 ```json
 {
