@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect, useCallback } from "react";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
@@ -7,20 +6,20 @@ import Search from "../component/Search";
 import Modal from "../component/Modal";
 import Loading from "../component/Loading";
 import Button from "../component/Button";
+import api from "../api/api";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function BookingRequests() {
-  const ownerId = localStorage.getItem("owner_id");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
   const [modalView, setModalView] = useState(false);
   const [filter, setFilter] = useState({ status: "all", location: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState(null);
 
   const tableHeadings = [
     "Farmer Name",
@@ -67,53 +66,95 @@ function BookingRequests() {
   const handleSubmitView = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const updated = Object.fromEntries(formData.entries());
+    const data = Object.fromEntries(formData.entries());
 
     try {
       setLoading(true);
-      await axios.put(
-        `${import.meta.env.VITE_API}/reservations/${selectedBooking.id}`,
-        { status: updated.status }
+      await api.put(
+        `${import.meta.env.VITE_API}/reservations/${data.id}`,
+        { status: data.status }
       );
-      alert("Status updated successfully!");
+      toast.success("Booking is updated successfully!");
       setModalView(false);
-      fetchData(); // refresh
+      fetchData();
     } catch (err) {
       console.error(err);
-      alert("Failed to update status");
+      toast.error(err.response.data.message);
     } finally {
       setLoading(false);
     }
   };
 
-  function handleView(booking) {
-    setSelectedBooking(booking);
+  const [fieldsView, setFieldsView] = useState([]);
+
+  const handleView = useCallback((data) => {
+    setFieldsView([
+      {
+        label: "ID",
+        type: "hidden",
+        name: "id",
+        value: data.id,
+      },
+      {
+        label: "Crop Type",
+        type: "text",
+        name: "crop_type",
+        defaultValue: data.crop_type,
+        disabled: true,
+        colspan: 2,
+      },
+      {
+        label: "Quantity",
+        type: "number",
+        name: "quantity",
+        defaultValue: data.quantity,
+        disabled: true,
+        colspan: 2,
+      },
+      {
+        label: "Payment",
+        type: "text",
+        name: "payment",
+        defaultValue: data.payment,
+        disabled: true,
+        colspan: 2,
+      },
+      {
+        label: "Status",
+        type: "select",
+        name: "status",
+        defaultValue: data.status,
+        options: [
+          { value: "pending", phrase: "Pending" },
+          { value: "approved", phrase: "Approved" },
+          { value: "denied", phrase: "Denied" },
+        ],
+        colspan: 2,
+      },
+    ]);
     setModalView(true);
-  }
+  }, []);
 
-  const Endpoint = `${import.meta.env.VITE_API}/reservations`;
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
-    setIsError(false);
     try {
-      const res = await axios.get(Endpoint, {
+      const res = await api.get(`${import.meta.env.VITE_API}/reservations`, {
         params: { offset: (currentPage - 1) * limit, limit },
       });
 
       if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
 
       setData(
-        res.data.map((r) => ({
-          id: r.id,
-          farmer_name: r.farmer_name || "N/A",
-          location: r.dryer_location || "N/A",
-          crop_type: r.crop_type || "N/A",
-          quantity: r.quantity || "N/A",
-          status: r.status || "pending",
+        res.data.map((res) => ({
+          id: res.id,
+          farmer_name: res.farmer_name || "N/A",
+          location: res.dryer_location || "N/A",
+          crop_type: res.crop_type || "N/A",
+          quantity: res.quantity || "N/A",
+          status: res.status || "pending",
           action: (
             <Button
-              onClick={() => handleView(r)}
+              onClick={() => handleView(res)}
               className="bg-blue-400 hover:bg-blue-500 text-white"
             >
               View
@@ -123,16 +164,15 @@ function BookingRequests() {
       );
     } catch (error) {
       console.error(error);
-      setIsError(true);
       setData([]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, limit, handleView]);
 
   useEffect(() => {
-    if (ownerId) fetchData();
-  }, [ownerId, currentPage, limit]);
+    fetchData();
+  }, [fetchData]);
 
   const FilteredData = data.filter((info) => {
     const filterByStatus =
@@ -155,17 +195,10 @@ function BookingRequests() {
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
 
-  if (isError) {
-    return (
-      <div className="absolute top-0 left-0 w-full h-[calc(100dvh-56px)] text-5xl flex justify-center items-center font-bold py-5">
-        Error while fetching the data
-      </div>
-    );
-  }
-
   return (
     <>
       {loading && <Loading />}
+      <ToastContainer position="top-center" autoClose={3000} />
       {modalFilter && (
         <Modal
           setModal={setModalFilter}
@@ -175,29 +208,12 @@ function BookingRequests() {
           button_name={"Apply Status"}
         />
       )}
-      {modalView && selectedBooking && (
+      {modalView && (
         <Modal
           setModal={setModalView}
           handleSubmit={handleSubmitView}
-          datas={[
-            {
-              crop_type: selectedBooking.crop_type,
-              quantity: selectedBooking.quantity,
-              payment: selectedBooking.payment,
-              status: (
-                <select
-                  className="w-full outline-0"
-                  name="status"
-                  defaultValue={selectedBooking.status}
-                >
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="denied">Denied</option>
-                </select>
-              ),
-            },
-          ]}
-          title={`Booking by ${selectedBooking.farmer_name}`}
+          fields={fieldsView}
+          title={"Booking Details"}
           button_name={"Update"}
         />
       )}

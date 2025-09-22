@@ -2,7 +2,7 @@ import { useState } from "react";
 import Button from "./Button";
 import { RiCloseLargeLine } from "react-icons/ri";
 
-function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
+function Modal({ setModal, handleSubmit, title, button_name, fields }) {
   const [address, setAddress] = useState("");
   const [previewUrls, setPreviewUrls] = useState({});
   const handleLocation = () => {
@@ -44,7 +44,7 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
           className="min-w-[320px] bg-gray-300 gap-5 rounded-lg p-5 flex flex-col justify-between items-start my-auto"
         >
           <div className="w-full flex justify-between items-center">
-            <h1 className="font-bold text-2xl text-[rgba(0,100,0,255)]">
+            <h1 className="font-bold text-2xl text-[rgba(0,100,0,255)] capitalize">
               {title}
             </h1>
             <div
@@ -63,10 +63,12 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                   field.colspan === 1 ? "md:col-span-1" : "md:col-span-2"
                 }`}
               >
-                <label className="text-[rgba(0,100,0,255)] font-bold text-md">
-                  {field.label}
-                </label>
-                  {field.name === "image_url" ? (
+                
+                {field.name === "image_url" ? (
+                  <>
+                    <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                      {field.label}
+                    </label>
                     <div className="flex flex-col gap-2">
                       <input
                         type="file"
@@ -109,32 +111,42 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                           />
                         )}
                     </div>
-                  ) : field.type === "select" ? (
-                  <div className="bg-gray-200 w-full rounded-md p-2">
-                    <div
-                      className={`max-h-48 overflow-y-auto rounded-md ${
-                        field.options.length >= 5 ? "scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100" : ""
-                      }`}
-                    >
-                      <select
-                        name={field.name}
-                        className="outline-0 w-full text-[rgba(0,100,0,255)] capitalize bg-gray-200"
-                        defaultValue={field.defaultValue || ""}
+                  </>
+                ) : field.type === "select" ? (
+                  <>
+                    <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                      {field.label}
+                    </label>
+                    <div className="bg-gray-200 w-full rounded-md p-2">
+                      <div
+                        className={`max-h-48 overflow-y-auto rounded-md ${
+                          field.options.length >= 5 ? "scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100" : ""
+                        }`}
                       >
-                        {field.options.map((option, idx) => (
-                          <option
-                            key={idx}
-                            value={option.value}
-                            className="bg-gray-200 capitalize"
-                          >
-                            {option.value}
-                          </option>
-                        ))}
-                      </select>
+                        <select
+                          name={field.name}
+                          className="outline-0 w-full text-[rgba(0,100,0,255)] capitalize bg-gray-200"
+                          defaultValue={field.defaultValue || ""}
+                          disabled={field.disabled}
+                        >
+                          {field.options.map((option, idx) => (
+                            <option
+                              key={idx}
+                              value={option.value}
+                              className="bg-gray-200 capitalize"
+                            >
+                              {option.value}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                  </div>
+                  </>
                 ) : field.name === "address" ? (
                   <>
+                    <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                      {field.label}
+                    </label>
                     <input
                       className="bg-gray-200 w-full rounded-md p-2 outline-0"
                       type={field.type}
@@ -150,60 +162,30 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                       Use Current Location
                     </span>
                   </>
-                ) : (
+                ) : field.name === "id" ? (
                   <input
-                    className="bg-gray-200 w-full rounded-md p-2 outline-0"
-                    type={field.type}
-                    required={field.required}
                     name={field.name}
-                    minLength={field.minLength}
-                    maxLength={field.maxLength}
-                    defaultValue={field.defaultValue || ""}
-                    step={field.step}
+                    type={field.type} 
+                    value={field.value}
                   />
-                )}
-              </div>
-            ))}
-            {datas?.map((data, index) => (
-              <div
-                key={index}
-                className="col-span-2 flex flex-row gap-5 border border-[rgb(138,183,45)] rounded-md bg-white p-3"
-              >
-                <div className="flex-shrink-0">
-                  {(data.image_url || data.user_profile) && (
-                    <img
-                      src={
-                        (data.image_url || data.user_profile).startsWith("http")
-                          ? (data.image_url || data.user_profile)
-                          : `${import.meta.env.VITE_API.replace("/api", "")}${
-                              data.image_url || data.user_profile
-                            }`
-                      }
-                      alt="Preview"
-                      className="w-64 h-64 object-cover rounded-md border border-gray-400"
+                ) : (
+                  <>
+                    <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                      {field.label}
+                    </label>
+                    <input
+                      className="bg-gray-200 w-full rounded-md p-2 outline-0 capitalize"
+                      type={field.type}
+                      required={field.required}
+                      name={field.name}
+                      minLength={field.minLength}
+                      maxLength={field.maxLength}
+                      defaultValue={field.defaultValue || ""}
+                      disabled={field.disabled}
+                      step={field.step}
                     />
-                  )}
-                </div>
-
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {Object.keys(data).map(
-                    (key, i) =>
-                      key !== "image_url" &&
-                      key !== "user_profile" && (
-                        <div key={`${index}-${i}`} className="rounded-md border">
-                          <div className="bg-[rgb(138,183,45)] p-2 flex gap-2 font-bold rounded-t-md text-white">
-                            <div className="w-6 h-6 flex justify-center items-center text-[rgb(138,183,45)] rounded-full bg-white">
-                              {i + 1}
-                            </div>
-                            {key.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
-                          </div>
-                          <div className="p-2 bg-[rgba(255,255,255,0.9)] text-sm rounded-b-md capitalize">
-                            {data[key]}
-                          </div>
-                        </div>
-                      )
-                  )}
-                </div>
+                  </>
+                )}
               </div>
             ))}
           </div>
