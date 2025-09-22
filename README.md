@@ -1,6 +1,6 @@
-<img src="./FRONTEND/public/logo.png" style="text-align: center;">
 <div align="center">
 
+![](./FRONTEND/public/logo.png)
 # Solar Drying System
 
 </div>
