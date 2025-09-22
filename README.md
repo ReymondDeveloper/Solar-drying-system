@@ -1,4 +1,4 @@
-[](./FRONTEND/public/logo.png)
+![](./FRONTEND/public/logo.png)
 
 <div align="center">
 
@@ -6,7 +6,10 @@
 
 </div>
 
-> [!NOTE]
+> [!TIP]
+> Use latest node version (24.1.0).
+
+> [!!CAUTION]
 > Follow the setup properly to use the system as expected.
 
 ## Setup
