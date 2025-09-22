@@ -9,7 +9,7 @@
 > [!TIP]
 > Use latest node version (24.1.0).
 
-> [!!CAUTION]
+> [!CAUTION]
 > Follow the setup properly to use the system as expected.
 
 ## Setup
