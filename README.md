@@ -4,7 +4,8 @@
 
 </div>
 
-## Setup
+> [!NOTE]
+> Setup
 
 Open a terminal - `Shortcut key:` Ctrl + `
 
