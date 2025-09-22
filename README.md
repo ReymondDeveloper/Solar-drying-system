@@ -15,7 +15,7 @@
 
 Rename the `.env.sample` to `.env`, then fill up the environment variables.
 
-Open a terminal - `Shortcut key:` Ctrl + `
+Open a terminal connected to the project source directory - `Shortcut key:` Ctrl + `
 
 ```bash
   cd .\FRONTEND\`
@@ -36,7 +36,7 @@ Run the project's' front-end
 _This will open a tab in default browser._
 
 
-Open a new terminal - `Shortcut key:` Ctrl + Shift + `
+Open a new terminal connected to the project source directory - `Shortcut key:` Ctrl + Shift + `
 
 ```bash
   cd .\BACKEND\
