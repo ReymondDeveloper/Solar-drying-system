@@ -51,11 +51,13 @@ _This will handle the behind-the-scene proccesses of the opened tab in default b
 
 ## API endpoints
 
+### Register
+
 > POST /users/register
 
 _This endpoint makes an HTTP POST request to create a new user._
 
-### Form data
+#### Form data
 
 | Name                | Location | Type    | Required |
 | ------------------- | -------- | ------- | -------- |
@@ -67,7 +69,7 @@ _This endpoint makes an HTTP POST request to create a new user._
 | role                | body     | varchar | yes      |
 | address             | body     | varchar | yes      |
 
-### Response
+#### Response
 
 | HTTP Status Code | Description                                             |
 | ---------------- | ------------------------------------------------------- |
@@ -75,7 +77,7 @@ _This endpoint makes an HTTP POST request to create a new user._
 | 400              | User already exist.                       |
 | 500              | Unsuccessful creation of an user.                       |
 
-### Sample Response
+#### Sample Response
 
 ```json
 {
