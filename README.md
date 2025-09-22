@@ -1,39 +1,116 @@
-# Instructions: Start
+<div align="center">
 
-[Open-The-Terminal] - Shortcut key: [Ctrl+`]
+![](./FRONTEND/public/logo.png)
+# Solar Drying System
 
-Type: [cd] [space] [Shift+F] [Tab] [Enter]
-This will auto complete the `cd F` and results to `cd .\FRONTEND\`
+</div>
 
-Type: [npm] [space] [i] [Enter]
-Expected: `npm i`
+> [!TIP]
+> Use latest node version (24.1.0).
 
-Type: [npm] [space] [run] [space] [dev]
-Expected: `npm run dev`
+> [!CAUTION]
+> Follow the setup properly to use the system as expected.
 
-This will open the Front-End(UI/UX) automatically.
+## Setup
 
-[Open-New-Terminal] - Shortcut key: [Ctrl+Shift+`]
+Rename the `.env.sample` to `.env`, then fill up the environment variables.
 
-Type: [cd] [space] [Shift+B] [Tab] [Enter]
-This will auto complete the `cd B` and results to `cd .\BACKEND\`
+Open a terminal connected to the project source directory - `Shortcut key:` Ctrl + `
 
-Type: [npm] [space] [i] [Enter]
-Expected: `npm i`
+```bash
+  cd .\FRONTEND\`
+```
 
-Type: [npm] [space] [run] [space] [start]
-Expected: `npm run start`
+Install dependecies for front-end
 
-This will start the Back-End(hidden processes).
+```bash
+  npm i
+```
 
-# Instructions: End
+Run the project's' front-end
 
-# System Code Stack
+```bash
+  npm run dev
+```
 
-FRONT-END
+_This will open a tab in default browser._
 
-- [React] [Tailwind]
 
-BACK-END
+Open a new terminal connected to the project source directory - `Shortcut key:` Ctrl + Shift + `
 
-- [Express] [Supabase]
+```bash
+  cd .\BACKEND\
+```
+
+Install dependecies for back-end
+
+```bash
+  npm i
+```
+
+Run the project's back-end
+
+```bash
+  npm run start
+```
+
+_This will handle the behind-the-scene proccesses of the opened tab in default browser._
+
+## API endpoints
+
+### Register
+
+> POST /users/register
+
+_This endpoint makes an HTTP POST request to create a new user._
+
+#### Form data
+
+| Name                | Location | Type    | Required |
+| ------------------- | -------- | ------- | -------- |
+| first_name          | body     | varchar | yes      |
+| middle_name         | body     | varchar | yes      |
+| last_name           | body     | varchar | yes      |
+| email               | body     | varchar | yes      |
+| password            | body     | varchar | yes      |
+| role                | body     | varchar | yes      |
+| address             | body     | varchar | yes      |
+
+#### Response
+
+| HTTP Status Code | Description                                             |
+| ---------------- | ------------------------------------------------------- |
+| 201              | Successdul creation of an user.                         |
+| 400              | User already exist.                       |
+| 500              | Unsuccessful creation of an user.                       |
+
+#### Sample Response
+
+```json
+{
+    "message": [
+        {
+            "Registered successfully. Please verify with OTP."
+        }
+    ],
+    "message": [
+        {
+            "Email already exists."
+        }
+    ],
+    "message": [
+        {
+            "Registration failed."
+        }
+    ]
+}
+```
+
+## Built with
+
+-   React ✨
+-   Tailwind ✨
+-   Node JS ✨
+-   Express JS ✨
+-   Supabase ✨
+-   PostgreSQL ✨
