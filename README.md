@@ -101,9 +101,9 @@ _This endpoint makes an HTTP POST request to create a new user._
 
 ## Built with
 
--   React✨
--   Tailwind
--   Node
--   Express
--   Supabase
--   PostgreSQL
+-   React ✨
+-   Tailwind ✨
+-   Node JS ✨
+-   Express JS ✨
+-   Supabase ✨
+-   PostgreSQL ✨
