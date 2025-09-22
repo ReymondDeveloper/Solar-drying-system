@@ -8,6 +8,7 @@ import Modal from "../component/Modal";
 import Loading from "../component/Loading";
 import Button from "../component/Button";
 import { ToastContainer, toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 
 function DryerInformation() {
@@ -24,6 +25,7 @@ function DryerInformation() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedDryer, setSelectedDryer] = useState(null);
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token"); 
   const base = import.meta.env.VITE_API;
@@ -110,7 +112,11 @@ function DryerInformation() {
       setLoading(false);
     }
   };
-  
+
+  function handleView(dryer) {
+    setSelectedDryer(dryer);
+    setModalView(true);
+  }
 
   function handleEdit(dryer) {
     setSelectedDryer(dryer);
@@ -195,8 +201,57 @@ function DryerInformation() {
 
   useEffect(() => {
     fetchData();
-  }, [limit, currentPage, Endpoint]);
+  }, [limit, currentPage, base]); 
 
+  const fieldsEdit = [
+    { 
+      label: "Dryer Name", 
+      type: "text", 
+      name: "dryer_name", 
+      required: true, 
+      defaultValue: selectedDryer?.dryer_name 
+    },
+    { 
+      label: "Location (Sablayan)", 
+      type: "select", 
+      name: "location", 
+      required: true, 
+      options: locationOptions, 
+      defaultValue: selectedDryer?.location 
+    },
+    { 
+      label: "Capacity (Cavans)", 
+      type: "number", 
+      name: "capacity", 
+      required: true, 
+      defaultValue: selectedDryer?.capacity 
+    },
+    { 
+      label: "Rate (PHP)", 
+      type: "number", 
+      name: "rate", 
+      required: true, 
+      defaultValue: selectedDryer?.rate 
+    },
+    { 
+      label: "Dryer Image", 
+      type: "file", 
+      name: "image_url" 
+    },
+  ];
+
+  const datasView = selectedDryer
+  ? [
+      { label: "Dryer Name", value: selectedDryer.dryer_name },
+      { label: "Location", value: selectedDryer.location },
+      { label: "Capacity", value: selectedDryer.capacity },
+      { label: "Available Capacity", value: selectedDryer.available_capacity },
+      { label: "Rate (PHP)", value: selectedDryer.rate },
+      { label: "Image", image_url: selectedDryer.image_url }, 
+    ]
+  : [];
+
+  
   const FilteredData = data.filter((info) => {
     const filterByFilters =
       !filter.location ||
@@ -259,7 +314,6 @@ function DryerInformation() {
       {modalView && (
         <Modal
           setModal={setModalView}
-          handleSubmit={handleSubmitView}
           datas={datasView}
           title={"Dryer Details"}
           button_name={"Done"}

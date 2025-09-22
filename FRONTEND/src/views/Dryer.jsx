@@ -206,7 +206,7 @@ export default function Dryer() {
             <b>{data.capacity}</b>
           </div>
           <div>
-            <span>Available Capacity: </span>
+            <span>Available Capacity: </span> 
             <b>{data.available_capacity}</b>
           </div>
           <div>
