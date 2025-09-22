@@ -12,17 +12,19 @@ Open a terminal - `Shortcut key:` Ctrl + `
   cd .\FRONTEND\`
 ```
 
-Install dependecies
+Install dependecies for front-end
 
 ```bash
   npm i
 ```
 
-Run the project
+Run the project's' front-end
 
 ```bash
   npm run dev
 ```
+
+_This will open a tab in default browser._
 
 Open a new terminal - `Shortcut key:` Ctrl + Shift + `
 
@@ -30,17 +32,19 @@ Open a new terminal - `Shortcut key:` Ctrl + Shift + `
   cd .\BACKEND\
 ```
 
-Install dependecies
+Install dependecies for back-end
 
 ```bash
   npm i
 ```
 
-Run the project
+Run the project's back-end
 
 ```bash
   npm run start
 ```
+
+_This will handle the behind-the-scene proccesses of the opened tab in default browser._
 
 ## Built with
 
