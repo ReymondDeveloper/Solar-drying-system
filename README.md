@@ -13,6 +13,8 @@
 
 ## Setup
 
+Rename the `.env.sample` to `.env`, then fill up the environment variables.
+
 Open a terminal - `Shortcut key:` Ctrl + `
 
 ```bash
@@ -32,6 +34,7 @@ Run the project's' front-end
 ```
 
 _This will open a tab in default browser._
+
 
 Open a new terminal - `Shortcut key:` Ctrl + Shift + `
 
