@@ -1,3 +1,5 @@
+[](./FRONTEND/public/logo.png)
+
 <div align="center">
 
 # Solar Drying System
