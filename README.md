@@ -5,7 +5,7 @@
 </div>
 
 > [!NOTE]
-> Setup
+> Follow this setup properly to use the system as expected.
 
 Open a terminal - `Shortcut key:` Ctrl + `
 
