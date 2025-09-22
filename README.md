@@ -1,39 +1,48 @@
-# Instructions: Start
+<div align="center">
 
-[Open-The-Terminal] - Shortcut key: [Ctrl+`]
+# Solar Drying System 1.0
 
-Type: [cd] [space] [Shift+F] [Tab] [Enter]
-This will auto complete the `cd F` and results to `cd .\FRONTEND\`
+</div>
 
-Type: [npm] [space] [i] [Enter]
-Expected: `npm i`
+## Setup
 
-Type: [npm] [space] [run] [space] [dev]
-Expected: `npm run dev`
+Open a terminal - `Shortcut key:` Ctrl + `
 
-This will open the Front-End(UI/UX) automatically.
+```bash
+  cd .\FRONTEND\`
+```
 
-[Open-New-Terminal] - Shortcut key: [Ctrl+Shift+`]
+Install dependecies
 
-Type: [cd] [space] [Shift+B] [Tab] [Enter]
-This will auto complete the `cd B` and results to `cd .\BACKEND\`
+```bash
+  npm i
+```
 
-Type: [npm] [space] [i] [Enter]
-Expected: `npm i`
+Run the project
 
-Type: [npm] [space] [run] [space] [start]
-Expected: `npm run start`
+```bash
+  npm run dev
+```
 
-This will start the Back-End(hidden processes).
+Open a new terminal - `Shortcut key:` Ctrl + Shift + `
 
-# Instructions: End
+```bash
+  cd .\BACKEND\
+```
 
-# System Code Stack
+Install dependecies
 
-FRONT-END
+```bash
+  npm i
+```
 
-- [React] [Tailwind]
+Run the project
 
-BACK-END
+```bash
+  npm run start
+```
 
-- [Express] [Supabase]
+## Built with
+
+-   React frontend ✨
+-   Tailwind
