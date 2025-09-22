@@ -64,12 +64,35 @@ _This endpoint makes an HTTP POST request to create a new user._
 | role                | body     | varchar | yes      |
 | address             | body     | varchar | yes      |
 
-### Responses
+### Response
 
 | HTTP Status Code | Description                                             |
 | ---------------- | ------------------------------------------------------- |
-| 200              | Successdul creation of an user.                         |
-| 500              | Unsuccessdul creation of an user.                       |
+| 201              | Successdul creation of an user.                         |
+| 400              | User already exist.                       |
+| 500              | Unsuccessful creation of an user.                       |
+
+### Response example
+
+```json
+{
+    "message": [
+        {
+            "Registered successfully. Please verify with OTP."
+        }
+    ],
+    "message": [
+        {
+            "Email already exists."
+        }
+    ],
+    "message": [
+        {
+            "Registration failed."
+        }
+    ],
+}
+```
 
 ## Built with
 
