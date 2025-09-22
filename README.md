@@ -90,7 +90,7 @@ _This endpoint makes an HTTP POST request to create a new user._
         {
             "Registration failed."
         }
-    ],
+    ]
 }
 ```
 
