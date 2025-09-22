@@ -1,6 +1,6 @@
 <div align="center">
 
-# Solar Drying System 1.0
+# Solar Drying System
 
 </div>
 
@@ -46,7 +46,36 @@ Run the project's back-end
 
 _This will handle the behind-the-scene proccesses of the opened tab in default browser._
 
+## API endpoints
+
+> POST /users/register
+
+_This endpoint makes an HTTP POST request to create a new user._
+
+### Form data
+
+| Name                | Location | Type    | Required |
+| ------------------- | -------- | ------- | -------- |
+| first_name          | body     | varchar | yes      |
+| middle_name         | body     | varchar | yes      |
+| last_name           | body     | varchar | yes      |
+| email               | body     | varchar | yes      |
+| password            | body     | varchar | yes      |
+| role                | body     | varchar | yes      |
+| address             | body     | varchar | yes      |
+
+### Responses
+
+| HTTP Status Code | Description                                             |
+| ---------------- | ------------------------------------------------------- |
+| 200              | Successdul creation of an user.                         |
+| 500              | Unsuccessdul creation of an user.                       |
+
 ## Built with
 
--   React frontend ✨
+-   React✨
 -   Tailwind
+-   Node
+-   Express
+-   Supabase
+-   PostgreSQL
