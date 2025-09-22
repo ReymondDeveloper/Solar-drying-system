@@ -1,5 +1,4 @@
-![](./FRONTEND/public/logo.png)
-<img src="./FRONTEND/public/logo.png" style="margin-inline: auto;" width="50%" height="50%">
+<img src="./FRONTEND/public/logo.png" style="text-align: center;">
 <div align="center">
 
 # Solar Drying System
