@@ -56,13 +56,6 @@ function DryerInformation() {
     "rate",
     "action",
   ]; 
-  const locationOptions = [
-    { value: "location 1", phrase: "Location 1" },
-    { value: "location 2", phrase: "Location 2" },
-    { value: "location 3", phrase: "Location 3" },
-    { value: "location 4", phrase: "Location 4" },
-    { value: "location 5", phrase: "Location 5" },
-  ];
 
   const fieldsAdd = [
     { label: "Dryer Name", type: "text", name: "dryer_name", required: true },
@@ -239,7 +232,7 @@ function DryerInformation() {
       type: "select", 
       name: "location", 
       required: true, 
-      options: locationOptions, 
+      options: addresses.map((a) => ({ value: a.name, phrase: a.name })),  
       defaultValue: selectedDryer?.location 
     },
     { 
