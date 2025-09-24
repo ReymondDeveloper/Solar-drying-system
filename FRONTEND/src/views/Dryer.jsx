@@ -43,13 +43,20 @@ export default function Dryer() {
   const farmerId = localStorage.getItem("id");
   const [selectedDryerId, setSelectedDryerId] = useState(null);
   const [selectedOwnerId, setSelectedOwnerId] = useState(null);
-
+  const token = localStorage.getItem("token");   
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
 
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API}/dryers/${id}`);
+        const res = await axios.get(
+          `${import.meta.env.VITE_API}/dryers/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
         setData(res.data);
       } catch (error) {
         toast.error(error.response?.data?.message || "Error fetching data");
@@ -62,7 +69,7 @@ export default function Dryer() {
     };
 
     fetchData();
-  }, []);
+  }, [id, token, navigate]);
 
   const ratings = [
     {

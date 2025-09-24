@@ -26,11 +26,11 @@ function Home() {
 
     checkAuth();
   }, [navigate]);
-  if (!authorized) return null; 
+  if (!authorized) return null;
 
   return (
-    <div className="w-full h-[calc(100dvh-160px)]">
-      <div className="flex flex-col md:flex-row gap-3">
+    <div className="w-full h-[calc(100dvh-160px)] p-4">
+      <div className="flex flex-col md:flex-row md:flex-wrap gap-4">
         {Links.map(
           (data) =>
             data.role === localStorage.getItem("role") &&
@@ -39,31 +39,39 @@ function Home() {
                 index > 0 && (
                   <NavLink
                     to={route.to}
-                    className={`
-										flex gap-2 rounded-sm bg-[rgba(138,183,45,255)]
-										md:flex-col md:w-1/2 md:p-5
-                    lg:w-1/4
-                  `}
                     key={index}
+                    className={`
+                      flex gap-3 items-center
+                      rounded-md bg-[rgba(138,183,45,1)]
+                      md:flex-col md:w-[48%] md:p-6 lg:w-[23%]
+                      text-white shadow-md transition-all duration-300
+                      hover:bg-[rgba(120,160,40,1)] hover:shadow-xl hover:scale-[1.02]
+                    `}
                   >
                     <div
                       className="
-											bg-[rgba(110,146,36,255)] w-15 h-20 p-3 text-white
-											md:w-20
-										"
+                        flex items-center justify-center
+                        bg-[rgba(110,146,36,1)] 
+                        w-16 h-16 md:w-20 md:h-20 rounded-md
+                        text-white text-3xl
+                        transition-transform duration-300
+                        group-hover:rotate-3
+                      "
                     >
                       {route.icon}
                     </div>
+
                     <div
                       className="
-											flex-grow flex flex-col justify-center text-white
-											md:flex-grow-0
-										"
+                        flex-grow flex flex-col justify-center md:flex-grow-0 md:text-center
+                      "
                     >
-                      <span className="font-bold text-lg uppercase">
+                      <span className="font-bold text-lg uppercase tracking-wide">
                         {route.title}
                       </span>
-                      <span className="text-xs">{route.description}</span>
+                      <span className="text-xs opacity-90">
+                        {route.description}
+                      </span>
                     </div>
                   </NavLink>
                 )

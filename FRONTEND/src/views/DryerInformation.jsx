@@ -10,6 +10,7 @@ import Button from "../component/Button";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
+import ViewModal from "../component/ViewModal.jsx";
 
 function DryerInformation() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,6 +27,7 @@ function DryerInformation() {
   const [loading, setLoading] = useState(false);
   const [selectedDryer, setSelectedDryer] = useState(null);
   const navigate = useNavigate();
+  const { addresses } = useAddresses();
 
   const token = localStorage.getItem("token"); 
   const base = import.meta.env.VITE_API;
@@ -53,8 +55,7 @@ function DryerInformation() {
     "available_capacity",
     "rate",
     "action",
-  ];
-
+  ]; 
   const locationOptions = [
     { value: "location 1", phrase: "Location 1" },
     { value: "location 2", phrase: "Location 2" },
@@ -70,11 +71,11 @@ function DryerInformation() {
       type: "select",
       name: "location",
       required: true,
-      options: locationOptions,
+      options: addresses.map((a) => ({ value: a.name, phrase: a.name })),
     },
     { label: "Capacity (Cavans)", type: "number", name: "capacity", required: true },
     { label: "Rate (PHP)", type: "number", name: "rate", required: true },
-    { label: "Dryer Image", type: "file", name: "image_url" }, 
+    { label: "Dryer Image", type: "file", name: "image_url" },
   ];
 
   const handleSubmitAdd = async (e) => {
@@ -112,6 +113,28 @@ function DryerInformation() {
       setLoading(false);
     }
   };
+
+  function useAddresses() {
+    const [addresses, setAddresses] = useState([]);
+    const [loading, setLoading] = useState(false);
+  
+    useEffect(() => {
+      const fetchAddresses = async () => {
+        setLoading(true);
+        try {
+          const res = await api.get("/addresses");
+          setAddresses(res.data);
+        } catch (err) {
+          console.error("Failed to fetch addresses:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchAddresses();
+    }, []);
+  
+    return { addresses, loading };
+  }
 
   function handleView(dryer) {
     setSelectedDryer(dryer);
@@ -312,13 +335,13 @@ function DryerInformation() {
         />
       )}
       {modalView && (
-        <Modal
+        <ViewModal
           setModal={setModalView}
           datas={datasView}
-          title={"Dryer Details"}
-          button_name={"Done"}
+          title="Dryer Details"
         />
       )}
+
       <div
         className={`w-full h-[calc(100dvh-160px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${
           modalFilter || modalView ? "overflow-hidden" : "overflow-auto"

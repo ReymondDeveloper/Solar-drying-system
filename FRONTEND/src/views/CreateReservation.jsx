@@ -73,7 +73,6 @@ function CreateReservation() {
           },
           headers: { Authorization: `Bearer ${token}` },
         });
-
         if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
 
         setData(
