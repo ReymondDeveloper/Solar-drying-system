@@ -3,7 +3,6 @@ import { useState } from "react";
 import Button from "../component/Button";
 import Loading from "../component/Loading";
 import axios from "axios";
-import api from "../api/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import OTP from "../component/Otp";
@@ -14,7 +13,6 @@ function SignIn() {
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState(false);
   const [otpVerify, setOtpVerify] = useState(false);
-  const [email, setEmail] = useState(null);
   const [modalEdit, setModalEdit] = useState(false);
   const [modalVerify, setModalVerify] = useState(false);
 
