@@ -5,9 +5,9 @@ const Reservations = {
   findAll: async ({ farmer_id } = {}) => {
     let query = supabase.from("reservations").select(`
       id,
-      farmer:farmer_id (id, first_name, last_name, email, mobile_number),
-      dryer:dryer_id (id, dryer_name, location, rate),
-      crop_type:crop_type_id (crop_type_id, crop_type_name, quantity, payment),
+      farmer_id:farmer_id (id, first_name, last_name, email, mobile_number),
+      dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity),
+      crop_type_id:crop_type_id (crop_type_id, crop_type_name, quantity, payment),
       status,
       created_at
     `).order("created_at", { ascending: false });
@@ -15,6 +15,7 @@ const Reservations = {
     if (farmer_id) query = query.eq("farmer_id", farmer_id);
     const { data, error } = await query;
     if (error) throw error;
+
     return data;
   }, 
   
@@ -23,14 +24,15 @@ const Reservations = {
       .from("reservations")
       .select(`
         id,
-        farmer:farmer_id (
+        farmer_id:farmer_id (
           id, first_name, last_name, email, mobile_number
         ),
-        dryer:dryer_id ( 
-          id, dryer_name, location, rate
+        dryer_id:dryer_id ( 
+          id, dryer_name, location, rate, available_capacity
         ),
-        crop_type_id,
-        quantity,
+        crop_type_id:crop_type_id ( 
+          crop_type_id, crop_type_name, quantity, payment
+        ),
         status,
         created_at
       `)

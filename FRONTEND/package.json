@@ -1,7 +1,7 @@
 {
   "name": "solar-drying-system",
   "private": true,
-  "version": "0.0.25",
+  "version": "1.0.75",
   "type": "module",
   "homepage": "https://github.com/ReymondDeveloper/Solar-drying-system",
   "scripts": {

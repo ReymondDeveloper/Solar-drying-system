@@ -10,21 +10,7 @@ export const getReservations = async (req, res) => {
 
     if (dryer_id) reservations = reservations.filter(r => r.dryer?.id === dryer_id);
 
-    res.json(
-      reservations.map(r => ({
-        id: r.id,
-        farmer_id: r.farmer_id || null,
-        farmer_name: r.farmer ? `${r.farmer.first_name} ${r.farmer.last_name}` : "N/A",
-        dryer_id: r.dryer_id || null,
-        dryer_name: r.dryer ? r.dryer.dryer_name : "N/A",
-        location: r.dryer ? r.dryer.location : "N/A",
-        crop_type_name: r.crop_type ? r.crop_type.crop_type_name : "N/A",
-        quantity: r.crop_type ? r.crop_type.quantity : 0,
-        payment: r.crop_type ? r.crop_type.payment : "N/A",
-        status: r.status || "pending",
-        created_at: r.created_at,
-      }))
-    );
+    res.json(reservations);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch reservations.", error: err.message });
   }
@@ -34,22 +20,8 @@ export const getReservationById = async (req, res) => {
   try {
     const { id } = req.params;
     const reservation = await Reservations.findById(id);
-
     if (!reservation) return res.status(404).json({ message: "Reservation not found." });
-
-    const dryer = reservation.dryer_id ? await Dryers.findById(reservation.dryer_id) : null;
-
-    res.json({
-      id: reservation.id,
-      farmer_id: reservation.farmer_id,
-      dryer_id: reservation.dryer_id,
-      owner_id: reservation.owner_id,
-      crop_type_id: reservation.crop_type_id,
-      status: reservation.status || "pending",
-      created_at: reservation.created_at,
-      dryer_name: dryer?.dryer_name || "N/A",
-      location: dryer?.location || "N/A",
-    });
+    res.json(reservation);
   } catch (err) {
     res.status(404).json({ message: "Reservation not found.", error: err.message });
   }

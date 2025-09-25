@@ -77,38 +77,9 @@ function ReservationHistory() {
     setModalView(false);
   };
 
-  function parseNotes(notes) {
-    if (!notes) return null;
-    if (typeof notes === "object") return notes;
-
-    try {
-      const parsed = JSON.parse(notes);
-      if (typeof parsed === "object") return parsed;
-      const obj = {};
-      notes.split(",").forEach((part) => {
-        const [k, ...rest] = part.split(":");
-        if (!k || rest.length === 0) return;
-        const v = rest.join(":").trim();
-        const key = k.trim().toLowerCase().replace(/\s+/g, "_");
-        obj[key] = v;
-      });
-
-      return Object.keys(obj).length ? obj : { notes: String(notes) };
-    } catch (err) {
-      console.log(err)
-    }
-  }
-
-  
-
   useEffect(() => {
     function handleView(reservation) {
-      if (reservation?.notes) {
-        const parsed = parseNotes(reservation.notes);
-        setDatasView([parsed]);
-      } else {
-        setDatasView([]);
-      }
+      setDatasView(() => (reservation))
       setModalView(true);
     }
 
@@ -130,12 +101,12 @@ function ReservationHistory() {
   
         setData(
           res.data.map((reservation) => ({
-            farmer_name: reservation.farmer_name || "N/A",
-            dryer_name: reservation.dryer_name || "N/A",
-            location: reservation.location || "N/A",
-            crop_type_name: reservation.crop_type_name || "N/A",
-            quantity: reservation.quantity || 0,
-            payment: reservation.payment || "N/A",
+            farmer_name: reservation.farmer_id.first_name || "N/A",
+            dryer_name: reservation.dryer_id.dryer_name || "N/A",
+            location: reservation.dryer_id.location || "N/A",
+            crop_type_name: reservation.crop_type_id.crop_type_name || "N/A",
+            quantity: reservation.crop_type_id.quantity || 0,
+            payment: reservation.crop_type_id.payment || "N/A",
             date: reservation.created_at
               ? new Date(reservation.created_at).toLocaleDateString()
               : "N/A",

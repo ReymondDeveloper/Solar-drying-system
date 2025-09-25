@@ -13,7 +13,7 @@ export function DynamicMap({ location }) {
   let Location =
     String(location).includes("Sablayan") ||
     String(location).includes("Occidental Mindoro")
-      ? ""
+      ? location
       : location + ", Sablayan, Occidental Mindoro";
   const encodedLocation = encodeURIComponent(Location);
   const mapSrc = `https://maps.google.com/maps?q=${encodedLocation}&output=embed`;

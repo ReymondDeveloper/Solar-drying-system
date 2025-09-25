@@ -2,7 +2,7 @@ import { useState } from "react";
 import Button from "./Button";
 import { RiCloseLargeLine } from "react-icons/ri";
 
-function Modal({ setModal, handleSubmit, title, button_name, fields }) {
+function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
   const [address, setAddress] = useState("");
   const [previewUrls, setPreviewUrls] = useState({});
   const [mainImage, setMainImage] = useState("");  
@@ -33,6 +33,11 @@ function Modal({ setModal, handleSubmit, title, button_name, fields }) {
         );
       }
     );
+  };
+
+  const safeNumber = (val) => {
+    const cleaned = (val || "0").toString().replace(/[^0-9.-]+/g, "");
+    return isNaN(cleaned) ? 0 : Number(cleaned);
   };
 
   return (
@@ -148,6 +153,63 @@ function Modal({ setModal, handleSubmit, title, button_name, fields }) {
               )}
             </div>
           ))}
+
+          {datas ? (
+            <div className="col-span-1 md:col-span-2">
+              <div className="flex flex-col items-center text-sm">
+                <b className="uppercase text-md">{datas.dryer_id.dryer_name}</b>
+                <p className="capitalize">{
+                  String(datas.dryer_id.location).includes("Sablayan") ||
+                  String(datas.dryer_id.location).includes("Occidental Mindoro")
+                    ? datas.dryer_id.location
+                    : datas.dryer_id.location + ", Sablayan, Occidental Mindoro"
+                }</p>
+                <div className="w-full text-start mt-5 overflow-auto">
+                  <p>Status: <span className="capitalize font-bold">{datas.status}</span></p>
+                  <p>Reserved by: <span className="capitalize font-bold">{datas.farmer_id.first_name + ' ' + datas.farmer_id.last_name}</span></p>
+                  <p>Reserved on: <span className="capitalize font-bold">{
+                    new Date(datas.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: true,
+                    })
+                  }</span></p>
+                  <table className="w-full my-2 min-w-[500px]">
+                    <thead>
+                      <tr>
+                        <th className="border-t border-x">#</th>
+                        <th className="border-t border-x">Crop Type</th>
+                        <th className="border-t border-x">Quantity (Canvans)</th>
+                        <th className="border-t border-x">Rate</th>
+                        <th className="border-t border-x">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border-b border-x text-center">1</td>
+                        <td className="border-b border-x ps-5 capitalize">{datas.crop_type_id.crop_type_name}</td>
+                        <td className="border-b border-x pe-5 text-end">{datas.crop_type_id.quantity}</td>
+                        <td className="border-b border-x pe-5 text-end">{datas.dryer_id.rate}</td>
+                        <td className="border-b border-x pe-5 text-end">{safeNumber(datas?.dryer_id.rate) * safeNumber(datas?.crop_type_id?.quantity)}</td>
+                      </tr>
+                    </tbody>
+                    <tfoot className="w-full text-end">
+                      <tr>
+                        <td colSpan={5}>
+                          <p>Amount Due: <span>{safeNumber(datas?.dryer_id.rate) * safeNumber(datas?.crop_type_id?.quantity)}</span></p>
+                          <p className="capitalize">Payment Method: <span>{datas?.crop_type_id.payment}</span></p>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
 
         {mainImage && (
