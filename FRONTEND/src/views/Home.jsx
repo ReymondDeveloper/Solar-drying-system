@@ -41,7 +41,7 @@ function Home() {
                     to={route.to}
                     key={index}
                     className={`
-                      flex gap-3 items-center
+                      flex gap-3 items-center p-3
                       rounded-md bg-[rgba(138,183,45,1)]
                       md:flex-col md:w-[48%] md:p-6 lg:w-[23%]
                       text-white shadow-md transition-all duration-300

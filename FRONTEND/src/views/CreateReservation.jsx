@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
@@ -8,6 +7,7 @@ import Search from "../component/Search";
 import Modal from "../component/Modal";
 import Loading from "../component/Loading";
 import Button from "../component/Button";
+import api from "../api/api.js";
 
 function CreateReservation() {
   const token = localStorage.getItem("token"); 
@@ -17,7 +17,6 @@ function CreateReservation() {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
-  const [modalAdd, setModalAdd] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -55,39 +54,35 @@ function CreateReservation() {
     setModalFilter(false);
   };
 
-  function handleView(dryer) {
-    navigate("/home/create-reservation/" + dryer);
-  }
-
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setIsError(false);
 
       try {
-        console.log("Fetching dryers with token:", token);
-        const res = await axios.get(`${import.meta.env.VITE_API}/dryers`, {
+        const res = await api.get(`${import.meta.env.VITE_API}/dryers`, {
           params: {
             offset: (currentPage - 1) * limit,
             limit,
           },
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}` 
+          },
         });
         if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
 
         setData(
           res.data.map((dryer) => ({
             id: dryer.id,
-            owner_id: dryer.owner_id,
             dryer_name: dryer.dryer_name,
             location: dryer.location,
             status:
-              dryer.status && dryer.status.trim() !== ""
-                ? dryer.status
-                : "available",
+              dryer.available_capacity > 0
+                ? "available"
+                : "occupied",
             action: (
               <Button
-                onClick={() => handleView(dryer.id)}
+                onClick={() => navigate("/home/create-reservation/" + dryer.id)}
                 className="bg-blue-400 hover:bg-blue-500 text-white"
               >
                 View
@@ -105,7 +100,7 @@ function CreateReservation() {
     };
 
     fetchData();
-  }, [currentPage, limit, token]);
+  }, [currentPage, limit, token, navigate]);
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =
@@ -146,18 +141,9 @@ function CreateReservation() {
           button_name={"Apply Status"}
         />
       )}
-      {modalAdd && (
-        <Modal
-          setModal={setModalAdd}
-          handleSubmit={handleAddFormSubmit}
-          fields={fieldsAdd}
-          title={"Reservation"}
-          button_name={"Reserve"}
-        />
-      )}
       <div
         className={`w-full h-[calc(100dvh-160px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${
-          modalFilter || modalAdd ? "overflow-hidden" : "overflow-auto"
+          modalFilter ? "overflow-hidden" : "overflow-auto"
         }`}
       >
         <Search setSearch={setSearch} setModal={setModalFilter} />

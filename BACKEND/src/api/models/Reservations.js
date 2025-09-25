@@ -5,10 +5,9 @@ const Reservations = {
   findAll: async ({ farmer_id } = {}) => {
     let query = supabase.from("reservations").select(`
       id,
-      farmer:farmer_id (id, first_name, last_name, email, mobile_number),
-      dryer:dryer_id (id, dryer_name, location, capacity, rate),
-      owner:owner_id (id, first_name, last_name, email),
-      crop_type:crop_type_id (crop_type_id, crop_type_name, quantity, payment),
+      farmer_id:farmer_id (id, first_name, last_name, email, mobile_number),
+      dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity),
+      crop_type_id:crop_type_id (crop_type_id, crop_type_name, quantity, payment),
       status,
       created_at
     `).order("created_at", { ascending: false });
@@ -16,6 +15,7 @@ const Reservations = {
     if (farmer_id) query = query.eq("farmer_id", farmer_id);
     const { data, error } = await query;
     if (error) throw error;
+
     return data;
   }, 
   
@@ -24,17 +24,15 @@ const Reservations = {
       .from("reservations")
       .select(`
         id,
-        farmer:farmer_id (
+        farmer_id:farmer_id (
           id, first_name, last_name, email, mobile_number
         ),
-        dryer:dryer_id ( 
-          id, dryer_name, location, capacity, rate
+        dryer_id:dryer_id ( 
+          id, dryer_name, location, rate, available_capacity
         ),
-        owner:owner_id (
-          id, first_name, last_name, email
+        crop_type_id:crop_type_id ( 
+          crop_type_id, crop_type_name, quantity, payment
         ),
-        crop_type_id,
-        quantity,
         status,
         created_at
       `)
@@ -45,7 +43,7 @@ const Reservations = {
     return data;
   },
 
-  create: async ({ farmer_id, dryer_id, owner_id, crop_type_id, quantity, payment }) => {
+  create: async ({ farmer_id, dryer_id, crop_type_id }) => {
     const { data, error } = await supabase
       .from("reservations")
       .insert([
@@ -53,7 +51,6 @@ const Reservations = {
           id: uuidv4(),
           farmer_id,
           dryer_id,
-          owner_id,
           crop_type_id,
           status: "pending",
         },
