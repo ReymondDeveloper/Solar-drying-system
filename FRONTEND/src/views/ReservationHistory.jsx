@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
@@ -7,9 +6,11 @@ import Search from "../component/Search";
 import Loading from "../component/Loading";
 import Modal from "../component/Modal";
 import Button from "../component/Button";
+import api from "../api/api.js";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function ReservationHistory() {
-  const farmerId = localStorage.getItem("farmer_id") || localStorage.getItem("id") || null;
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
@@ -20,6 +21,8 @@ function ReservationHistory() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [datasView, setDatasView] = useState([]);
+  const token = localStorage.getItem("token"); 
+
   const tableHeadings = [
     "Farmer",
     "Booked Dryer",
@@ -81,80 +84,81 @@ function ReservationHistory() {
     try {
       const parsed = JSON.parse(notes);
       if (typeof parsed === "object") return parsed;
-    } catch (err) {}
-
-    const obj = {};
-    notes.split(",").forEach((part) => {
-      const [k, ...rest] = part.split(":");
-      if (!k || rest.length === 0) return;
-      const v = rest.join(":").trim();
-      const key = k.trim().toLowerCase().replace(/\s+/g, "_");
-      obj[key] = v;
-    });
-
-    return Object.keys(obj).length ? obj : { notes: String(notes) };
-  }
-
-  function handleView(reservation) {
-    if (reservation?.notes) {
-      const parsed = parseNotes(reservation.notes);
-      setDatasView([parsed]);
-    } else {
-      setDatasView([]);
-    }
-    setModalView(true);
-  }
-
-  const fetchHistory = async () => {
-    if (!farmerId) return;
-    setIsLoading(true);
-  
-    try {
-      const token = localStorage.getItem("token");  
-      const base = import.meta.env.VITE_API;
-  
-      const res = await axios.get(`${base}/reservations`, {
-        params: { farmer_id: farmerId },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const obj = {};
+      notes.split(",").forEach((part) => {
+        const [k, ...rest] = part.split(":");
+        if (!k || rest.length === 0) return;
+        const v = rest.join(":").trim();
+        const key = k.trim().toLowerCase().replace(/\s+/g, "_");
+        obj[key] = v;
       });
-  
-      if (!Array.isArray(res.data)) throw new Error("Invalid API response");
-  
-      setData(
-        res.data.map((reservation) => ({
-          farmer_name: reservation.farmer_name || "N/A",
-          dryer_name: reservation.dryer_name || "N/A",
-          location: reservation.location || "N/A",
-          crop_type_name: reservation.crop_type_name || "N/A",
-          quantity: reservation.quantity || 0,
-          payment: reservation.payment || "N/A",
-          date: reservation.created_at
-            ? new Date(reservation.created_at).toLocaleDateString()
-            : "N/A",
-          status: reservation.status || "pending",
-          action: (
-            <Button
-              onClick={() => handleView(reservation)}
-              className="bg-blue-400 hover:bg-blue-500 text-white"
-            >
-              View
-            </Button>
-          ),
-        }))
-      );
-    } catch (error) {
-      console.error("Error fetching reservations:", error.response?.data || error.message);
-      setData([]);
-    } finally {
-      setIsLoading(false);
+
+      return Object.keys(obj).length ? obj : { notes: String(notes) };
+    } catch (err) {
+      console.log(err)
     }
-  };
+  }
+
+  
 
   useEffect(() => {
-    fetchHistory();
-  }, [farmerId, currentPage, limit]);
+    function handleView(reservation) {
+      if (reservation?.notes) {
+        const parsed = parseNotes(reservation.notes);
+        setDatasView([parsed]);
+      } else {
+        setDatasView([]);
+      }
+      setModalView(true);
+    }
+
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const res = await api.get(
+          `${import.meta.env.VITE_API}/reservations`,
+          {
+            params: { 
+              farmer_id: localStorage.getItem("id")
+            },
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        if (!Array.isArray(res.data)) throw new Error("Invalid API response");
+  
+        setData(
+          res.data.map((reservation) => ({
+            farmer_name: reservation.farmer_name || "N/A",
+            dryer_name: reservation.dryer_name || "N/A",
+            location: reservation.location || "N/A",
+            crop_type_name: reservation.crop_type_name || "N/A",
+            quantity: reservation.quantity || 0,
+            payment: reservation.payment || "N/A",
+            date: reservation.created_at
+              ? new Date(reservation.created_at).toLocaleDateString()
+              : "N/A",
+            status: reservation.status || "pending",
+            action: (
+              <Button
+                onClick={() => handleView(reservation)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
+              >
+                View
+              </Button>
+            ),
+          }))
+        );
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Error fetching data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [token]);
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =
@@ -179,6 +183,7 @@ function ReservationHistory() {
   return (
     <>
       {loading && <Loading />}
+      <ToastContainer position="top-center" autoClose={3000} />
       {modalFilter && (
         <Modal
           setModal={setModalFilter}

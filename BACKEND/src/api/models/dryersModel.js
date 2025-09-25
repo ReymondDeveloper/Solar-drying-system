@@ -6,7 +6,7 @@ const Dryers = {
     const { data, error } = await supabase
       .from("dryers")
       .select(`
-        id, dryer_name, location, capacity, rate, image_url,
+        id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url,
         created_at, updated_at, created_by_id, updated_by_id
       `);
     if (error) throw error;
@@ -17,7 +17,7 @@ const Dryers = {
     const { data, error } = await supabase
       .from("dryers")
       .select(`
-        id, dryer_name, location, capacity, rate, image_url,
+        id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url,
         created_at, updated_at, created_by_id, updated_by_id
       `)
       .eq("id", id)
@@ -26,7 +26,7 @@ const Dryers = {
     return data;
   },
 
-  create: async ({ dryer_name, location, capacity, rate, image_url = null, created_by_id = null }) => {
+  create: async ({ dryer_name, location, available_capacity, maximum_capacity, rate, image_url = null, created_by_id = null }) => {
     const { data, error } = await supabase
       .from("dryers")
       .insert([
@@ -34,14 +34,15 @@ const Dryers = {
           id: uuidv4(),
           dryer_name,
           location,
-          capacity,
+          available_capacity,
+          maximum_capacity,
           rate,
           image_url,
           created_by_id,
         },
       ])
       .select(`
-        id, dryer_name, location, capacity, rate, image_url,
+        id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url,
         created_at, created_by_id
       `)
       .single();
@@ -49,13 +50,14 @@ const Dryers = {
     return data;
   },
 
-  update: async (id, { dryer_name, location, capacity, rate, image_url, updated_by_id }) => {
+  update: async (id, { dryer_name, location, available_capacity, maximum_capacity, rate, image_url, updated_by_id }) => {
     const { data, error } = await supabase
       .from("dryers")
       .update({
         dryer_name,
         location,
-        capacity,
+        available_capacity,
+        maximum_capacity,
         rate,
         image_url,
         updated_by_id,
@@ -63,7 +65,7 @@ const Dryers = {
       })
       .eq("id", id)
       .select(`
-        id, dryer_name, location, capacity, rate, image_url,
+        id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url,
         updated_at, updated_by_id
       `)
       .single();

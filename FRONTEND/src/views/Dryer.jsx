@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Loading from "../component/Loading";
-import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AiFillStar } from "react-icons/ai";
 import { CgArrowUp, CgArrowDown } from "react-icons/cg";
 import Button from "../component/Button";
 import Modal from "../component/Modal";
+import api from "../api/api.js";
 
 export function DynamicMap({ location }) {
   let Location =
@@ -37,19 +37,17 @@ export default function Dryer() {
   const { id } = useParams();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [modal, setModal] = useState(false);
   const [modalAdd, setModalAdd] = useState(false);
   const navigate = useNavigate();
   const farmerId = localStorage.getItem("id");
-  const [selectedDryerId, setSelectedDryerId] = useState(null);
-  const [selectedOwnerId, setSelectedOwnerId] = useState(null);
   const token = localStorage.getItem("token");   
+  
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
 
       try {
-        const res = await axios.get(
+        const res = await api.get(
           `${import.meta.env.VITE_API}/dryers/${id}`,
           {
             headers: {
@@ -92,6 +90,7 @@ export default function Dryer() {
       placeholder: "ex. Rice",
       required: true,
       name: "crop_type",
+      colspan: 1
     },
     {
       label: "Quantity (Cavans)",
@@ -100,65 +99,41 @@ export default function Dryer() {
       placeholder: "ex. 50",
       required: true,
       name: "quantity",
+      colspan: 1
     },
     {
       label: "Payment Type",
       type: "select",
       name: "payment",
       options: [{ value: "gcash" }, { value: "cash" }],
+      colspan: 2
     },
   ];
 
-  const handleSubmitAdd = async (dryerId, ownerId, formData) => {
-    if (!farmerId) return alert("You must be logged in!");
-
+  const handleAddFormSubmit = async (e) => {
+    e.preventDefault();
+    const formData = Object.fromEntries(new FormData(e.target).entries());
     const { crop_type, quantity, payment } = formData;
-
-    if (!crop_type || !quantity || quantity <= 0) {
-      return alert("Invalid crop type or quantity.");
-    }
 
     try {
       setLoading(true);
-
-      const check = await axios.get(
-        `${import.meta.env.VITE_API}/reservations`,
-        { params: { farmer_id: farmerId, dryer_id: dryerId } }
-      );
-
-      if (check.data.exists) {
-        alert("You have already reserved this dryer.");
-        return;
-      }
-
-      const res = await axios.post(`${import.meta.env.VITE_API}/reservations`, {
+      const res = await api.post(`${import.meta.env.VITE_API}/reservations`, {
         farmer_id: farmerId,
-        dryer_id: dryerId,
-        owner_id: ownerId,
-        status: "pending",
-        crop_type: formData.crop_type,
-        quantity: formData.quantity,
-        payment: formData.payment,
+        dryer_id: id,
+        crop_type: crop_type,
+        quantity: quantity,
+        payment: payment,
       });
-
-      alert("Reservation created successfully!");
-      console.log(res.data);
+      toast.success(res.data.message);
       setModalAdd(false);
+      setTimeout(() => {
+        navigate("/home/reservation-history");
+      }, 2000);
     } catch (error) {
-      console.error(
-        "Reservation error:",
-        error.response?.data || error.message
-      );
-      alert(error.response?.data?.message || "Failed to create reservation.");
+      toast.error(error.response?.data?.message);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleAddFormSubmit = (e) => {
-    e.preventDefault();
-    const formData = Object.fromEntries(new FormData(e.target).entries());
-    handleSubmitAdd(selectedDryerId, selectedOwnerId, formData);
   };
   return (
     <>
@@ -175,7 +150,7 @@ export default function Dryer() {
       )}
       <div
         className={`w-full h-[calc(100dvh-170px)] ${
-          modal ? "overflow-hidden" : "overflow-auto"
+          modalAdd ? "overflow-hidden" : "overflow-auto"
         }`}
       >
         {data.image_url ? (
@@ -210,19 +185,23 @@ export default function Dryer() {
           </div>
           <div>
             <span>Maximum Capacity: </span>
-            <b>{data.capacity}</b>
+            <b>{data.maximum_capacity}</b>
           </div>
           <div>
             <span>Available Capacity: </span> 
             <b>{data.available_capacity}</b>
           </div>
           <div>
+            <span>Rate: </span>
+            <b>PHP{data.rate}</b>
+          </div>
+          <div>
             <span>Created: </span>
             <b>{new Date(data.created_at).toLocaleString()}</b>
           </div>
           <div>
-            <span>Rate: </span>
-            <b>PHP{data.rate}</b>
+            <span>Owned: </span>
+            <b>{data.owner}</b>
           </div>
           <DynamicMap location={data.location} />
           <div className="mt-3">
