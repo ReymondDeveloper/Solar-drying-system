@@ -69,85 +69,96 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                 field.colspan === 2 ? "md:col-span-2" : ""
               }`}
             >
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                {field.label}
-              </label>
-
               {field.name === "image_url" ? (
-                <div className="flex flex-col gap-3">
-                  <input
-                    type="file"
-                    name={field.name}
-                    accept="image/*"
-                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
-                    onChange={async (e) => {
-                      const file = e.target.files[0];
-                      if (!file) return;
-                      const localPreview = URL.createObjectURL(file);
-                      setPreviewUrls((prev) => ({
-                        ...prev,
-                        [field.name]: localPreview,
-                      }));
-                      setMainImage(localPreview);
+                <>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    {field.label}
+                  </label>
+                  <div className="flex flex-col gap-3">
+                    <input
+                      type="file"
+                      name={field.name}
+                      accept="image/*"
+                      className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const localPreview = URL.createObjectURL(file);
+                        setPreviewUrls((prev) => ({
+                          ...prev,
+                          [field.name]: localPreview,
+                        }));
+                        setMainImage(localPreview);
 
-                      const formData = new FormData();
-                      formData.append("file", file);
+                        const formData = new FormData();
+                        formData.append("file", file);
 
-                      try {
-                        const res = await fetch(
-                          `${import.meta.env.VITE_API}/upload`,
-                          {
-                            method: "POST",
-                            body: formData,
+                        try {
+                          const res = await fetch(
+                            `${import.meta.env.VITE_API}/upload`,
+                            {
+                              method: "POST",
+                              body: formData,
+                            }
+                          );
+                          const data = await res.json();
+                          if (data.url) {
+                            setPreviewUrls((prev) => ({
+                              ...prev,
+                              [field.name]: data.url,
+                            }));
+                            setMainImage(data.url);
                           }
-                        );
-                        const data = await res.json();
-                        if (data.url) {
-                          setPreviewUrls((prev) => ({
-                            ...prev,
-                            [field.name]: data.url,
-                          }));
-                          setMainImage(data.url);
+                        } catch (err) {
+                          console.error("Image upload failed:", err);
                         }
-                      } catch (err) {
-                        console.error("Image upload failed:", err);
-                      }
-                    }}
-                  />
-                </div>
+                      }}
+                    />
+                  </div>
+                </>
               ) : field.type === "select" ? (
-                <select
-                  name={field.name}
-                  className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500"
-                  defaultValue={field.defaultValue || ""}
-                >
-                  {field.options.map((option, idx) => (
-                    <option
-                      key={idx}
-                      value={option.value}
-                      className="capitalize"
-                    >
-                      {option.value}
-                    </option>
-                  ))}
-                </select>
-              ) : field.name === "address" ? (
-                <div className="flex flex-col gap-2">
-                  <input
-                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
-                    type={field.type}
-                    required={field.required}
+                <>
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                    {field.label}
+                  </label>
+                  <select
                     name={field.name}
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                  />
-                  <span
-                    onClick={handleLocation}
-                    className="text-xs font-semibold text-blue-500 hover:underline cursor-pointer"
+                    className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500"
+                    defaultValue={field.defaultValue || ""}
                   >
-                    Use Current Location
-                  </span>
-                </div>
+                    {field.options.map((option, idx) => (
+                      <option
+                        key={idx}
+                        value={option.value}
+                        className="capitalize"
+                      >
+                        {option.value}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              ) : field.name === "address" ? (
+                <>
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                    {field.label}
+                  </label>
+                  <div className="flex flex-col gap-2">
+                    <input
+                      className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
+                      type={field.type}
+                      required={field.required}
+                      name={field.name}
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                    />
+                    <span
+                      onClick={handleLocation}
+                      className="text-xs font-semibold text-blue-500 hover:underline cursor-pointer"
+                    >
+                      Use Current Location
+                    </span>
+                  </div>
+                </>
               ) : field.name === "id" ? (
                 <input
                   name={field.name}
@@ -155,16 +166,21 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                   value={field.value}
                 />
               ) : (
-                <input
-                  className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
-                  type={field.type}
-                  required={field.required}
-                  name={field.name}
-                  minLength={field.minLength}
-                  maxLength={field.maxLength}
-                  defaultValue={field.defaultValue || ""}
-                  step={field.step}
-                />
+                <>
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                    {field.label}
+                  </label>
+                  <input
+                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
+                    type={field.type}
+                    required={field.required}
+                    name={field.name}
+                    minLength={field.minLength}
+                    maxLength={field.maxLength}
+                    defaultValue={field.defaultValue || ""}
+                    step={field.step}
+                  />
+                </>
               )}
             </div>
           ))}
