@@ -148,6 +148,12 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     Use Current Location
                   </span>
                 </div>
+              ) : field.name === "id" ? (
+                <input
+                  name={field.name}
+                  type={field.type}
+                  value={field.value}
+                />
               ) : (
                 <input
                   className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
