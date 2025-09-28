@@ -26,9 +26,11 @@ function CreateReservation() {
     "Registered Dryer",
     "Location (Sablayan)",
     "Status",
+    // "Available Slots",
     "Action",
   ];
 
+  // const tableDataCell = ["dryer_name", "location", "status", "available_slots", "action"];
   const tableDataCell = ["dryer_name", "location", "status", "action"];
 
   const fieldsFilter = [
@@ -80,6 +82,7 @@ function CreateReservation() {
               dryer.available_capacity > 0
                 ? "available"
                 : "occupied",
+                // available_slots: dryer.available_capacity ?? 0, // 👈 NEW
             action: (
               <Button
                 onClick={() => navigate("/home/create-reservation/" + dryer.id)}

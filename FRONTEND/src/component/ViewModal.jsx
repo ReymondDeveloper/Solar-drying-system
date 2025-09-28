@@ -4,7 +4,9 @@ import Button from "./Button";
 function ViewModal({ setModal, title, datas }) {
   const imageItem = datas.find((d) => d.image_url);
   const detailItems = datas.filter((d) => !d.image_url);
-
+  console.log("datasView:", datas);
+  console.log("imageItem:", imageItem);
+  
   return (
     <div
       onClick={() => setModal(false)}

@@ -52,18 +52,21 @@ function Reservations() {
 
   const fetchReservations = async () => {
     setIsLoading(true);
-
     try {
-      const res = await axios.get(Endpoint, {
-        params: { offset: (currentPage - 1) * limit, limit },
-      });
-
+      const ownerId = localStorage.getItem("id"); // 👈 your logged-in owner ID
+      const res = await axios.get(
+        `${import.meta.env.VITE_API}/reservations/owner/${ownerId}`,
+        {
+          params: { offset: (currentPage - 1) * limit, limit },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+  
       const results = res.data;
-
       setData(
         results.map((reservation) => ({
           dryer_name: reservation.dryer_name,
-          location: reservation.dryer_location || reservation.location || "N/A",
+          location: reservation.location || "N/A",
           date: reservation.created_at
             ? new Date(reservation.created_at).toLocaleDateString()
             : "",

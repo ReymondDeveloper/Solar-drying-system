@@ -6,7 +6,7 @@ export const getDryers = async (req, res) => {
 
     const { data: dryers, error } = await supabase
       .from("dryers")
-      .select("id, dryer_name, location, available_capacity, maximum_capacity, rate, created_by_id")
+      .select("id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id")
       .order("created_at", { ascending: false })
       .range(Number(offset), Number(offset) + Number(limit) - 1);
 
@@ -51,20 +51,11 @@ export const getDryerById = async (req, res) => {
 
 export const createDryer = async (req, res) => {
   try {
-    const { dryer_name, location, capacity, rate, image_url, created_by_id } = req.body;
+    const { dryer_name, location, maximum_capacity, rate, image_url, created_by_id } = req.body;
 
     const { data, error } = await supabase
       .from("dryers")
-      .insert([
-        {
-          dryer_name,
-          location,
-          capacity,
-          rate,
-          image_url,
-          created_by_id,
-        },
-      ])
+      .insert([{ dryer_name, location, maximum_capacity, rate, image_url, created_by_id }])
       .select()
       .single();
 
@@ -79,13 +70,13 @@ export const createDryer = async (req, res) => {
 export const updateDryer = async (req, res) => {
   try {
     const { id } = req.params;
-    const { dryer_name, location, capacity, rate, available_capacity, image_url } = req.body;
+    const { dryer_name, location, maximum_capacity, rate, available_capacity, image_url } = req.body;
     const { data, error } = await supabase
       .from("dryers")
       .update({
         dryer_name,
         location,
-        capacity,
+        maximum_capacity,
         rate,
         available_capacity,
         image_url,

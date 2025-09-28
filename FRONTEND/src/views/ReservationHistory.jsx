@@ -193,7 +193,7 @@ function ReservationHistory() {
                 />
                 {FilteredData?.length === 0 && (
                   <div className="flex justify-center items-center font-bold py-5">
-                    No History Found.
+                    Your transaction history is empty.
                   </div>
                 )}
               </>

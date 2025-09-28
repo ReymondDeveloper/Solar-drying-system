@@ -93,7 +93,7 @@ function BookingRequests() {
         label: "ID",
         type: "hidden",
         name: "id",
-        value: data.id,
+        defaultValue: data.id,   
       },
       {
         label: "Crop Type",
@@ -141,6 +141,7 @@ function BookingRequests() {
       const res = await api.get(`${import.meta.env.VITE_API}/reservations`, {
         params: { offset: (currentPage - 1) * limit, limit },
       });
+      console.log("Fetched reservations:", res.data);
 
       if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
 
@@ -237,8 +238,7 @@ function BookingRequests() {
                 />
                 {FilteredData?.length === 0 && (
                   <div className="text-center font-bold py-5">
-                    Under Maintenance
-                    {/* No Booking Requests Found. */}
+                    No transactions to display at the moment.
                   </div>
                 )}
               </>

@@ -1,18 +1,75 @@
 import Reservations from "../models/Reservations.js";
 import Dryers from "../models/dryersModel.js";  
 import CropTypes from "../models/cropTypes.js";
+import supabase from "../../database/supabase.db.js";
 
 export const getReservations = async (req, res) => {
   try {
-    const { farmer_id, dryer_id } = req.query;
+    const { dryer_id } = req.query;
+    const { data: reservations, error: resError } = await supabase
+      .from("reservations")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-    let reservations = await Reservations.findAll({ farmer_id });
+    if (resError) throw resError;
 
-    if (dryer_id) reservations = reservations.filter(r => r.dryer?.id === dryer_id);
+    const formatted = await Promise.all(
+      reservations.map(async (r) => {
+        console.log("Processing reservation:", r);
+    
+        const { data: dryer, error: dryerError } = await supabase
+          .from("dryers")
+          .select("*")
+          .eq("id", r.dryer_id)
+          .single();
+    
+        if (dryerError) {
+          console.error("Error fetching dryer:", dryerError);
+          return null;
+        }
+    
+        if (dryer_id && dryer.id !== dryer_id) return null;
+    
+        const { data: farmer, error: farmerError } = await supabase
+          .from("users")
+          .select("id, first_name, last_name")
+          .eq("id", r.farmer_id)
+          .single();
+    
+        if (farmerError) console.error("Error fetching farmer:", farmerError);
+    
+        const { data: cropType, error: cropTypeError } = await supabase
+        .from("crop_types")
+        .select("crop_type_name, quantity, payment")  
+        .eq("crop_type_id", r.crop_type_id)   
+        .single();
 
-    res.json(reservations);
+        if (cropTypeError) console.error("Error fetching crop type:", cropTypeError);
+
+        const mapped = {
+          id: r.id,
+          farmer_id: farmer?.id || null,
+          farmer_name: farmer ? `${farmer.first_name} ${farmer.last_name}` : "N/A",
+          dryer_id: dryer?.id || null,
+          dryer_name: dryer?.dryer_name || "N/A",
+          dryer_location: dryer?.location || "N/A",
+          crop_type: cropType?.crop_type_name || "N/A",    
+          quantity: r.quantity || cropType?.quantity || 0, 
+          payment: cropType?.payment || "N/A", 
+          rate: dryer?.rate || 0,
+          status: r.status || "pending",
+          created_at: r.created_at,
+        };
+    
+        return mapped;
+      })
+    );
+
+    const filtered = formatted.filter((f) => f !== null);
+
+    res.json(filtered);
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch reservations.", error: err.message });
+    res.status(500).json({ message: "Failed to fetch reservations", error: err.message });
   }
 };
  
@@ -72,9 +129,17 @@ export const updateReservation = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const reservation = await Reservations.update(id, { status });
+    const { data, error } = await supabase
+      .from("reservations")
+      .update({ status })
+      .eq("id", id)
+      .select();
 
-    res.json({ message: "Reservation updated successfully.", reservation });
+    if (error) throw error;
+    if (!data || data.length === 0)
+      return res.status(404).json({ message: "Reservation not found or not updated" });
+
+    res.json({ message: "Reservation updated successfully.", reservation: data[0] });
   } catch (err) {
     res.status(400).json({ message: "Failed to update reservation.", error: err.message });
   }

@@ -51,7 +51,7 @@ function DryerInformation() {
   const tableDataCell = [
     "dryer_name",
     "location",
-    "capacity",
+    "maximum_capacity",
     "available_capacity",
     "rate",
     "action",
@@ -66,7 +66,7 @@ function DryerInformation() {
       required: true,
       options: addresses.map((a) => ({ value: a.name, phrase: a.name })),
     },
-    { label: "Capacity (Cavans)", type: "number", name: "capacity", required: true },
+    { label: "Capacity (Cavans)", type: "number", name: "maximum_capacity", required: true },
     { label: "Rate (PHP)", type: "number", name: "rate", required: true },
     { label: "Dryer Image", type: "file", name: "image_url" },
   ];
@@ -86,14 +86,21 @@ function DryerInformation() {
         uploadForm.append("file", file);
   
         const uploadRes = await api.post("/upload", uploadForm, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         });
         
         dryerData.image_url = uploadRes.data.url;  
       }
   
       const res = await api.post("/dryers", {
-        ...dryerData,
+        dryer_name: dryerData.dryer_name,
+        location: dryerData.location,
+        maximum_capacity: dryerData.maximum_capacity,
+        rate: dryerData.rate,
+        image_url: dryerData.image_url,
         created_by_id: createdById,
       });
   
@@ -187,7 +194,7 @@ function DryerInformation() {
 
       const formatted = dryers.map((dryer) => ({
         ...dryer,
-        available_capacity: dryer.available_capacity ?? dryer.capacity,
+        available_capacity: dryer.available_capacity ?? dryer.maximum_capacity,
         action: (
           <div className="flex justify-center gap-2">
             <Button
@@ -238,9 +245,9 @@ function DryerInformation() {
     { 
       label: "Capacity (Cavans)", 
       type: "number", 
-      name: "capacity", 
+      name: "maximum_capacity", 
       required: true, 
-      defaultValue: selectedDryer?.capacity 
+      defaultValue: selectedDryer?.maximum_capacity 
     },
     { 
       label: "Rate (PHP)", 
@@ -260,7 +267,7 @@ function DryerInformation() {
   ? [
       { label: "Dryer Name", value: selectedDryer.dryer_name },
       { label: "Location", value: selectedDryer.location },
-      { label: "Capacity", value: selectedDryer.capacity },
+      { label: "Capacity", value: selectedDryer.maximum_capacity },
       { label: "Available Capacity", value: selectedDryer.available_capacity },
       { label: "Rate (PHP)", value: selectedDryer.rate },
       { label: "Image", image_url: selectedDryer.image_url }, 
@@ -364,7 +371,7 @@ function DryerInformation() {
                 {FilteredData?.length === 0 && (
                   <>
                     <div className="hidden lg:flex justify-center items-center font-bold py-5">
-                      No Available Solar Dryers Found.
+                      No transactions to display at the moment.
                     </div>
 
                     <div className="lg:hidden rounded-md flex flex-col">
@@ -374,7 +381,7 @@ function DryerInformation() {
                         </div>
                       </div>
                       <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
-                        No Available Solar Dryers Found.
+                        No transactions to display at the moment.
                       </div>
                     </div>
                   </>
