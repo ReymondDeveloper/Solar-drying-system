@@ -21,7 +21,7 @@ function ReservationHistory() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [datasView, setDatasView] = useState([]);
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
 
   const tableHeadings = [
     "Farmer",
@@ -39,7 +39,7 @@ function ReservationHistory() {
     "farmer_name",
     "dryer_name",
     "location",
-    "crop_type_name",
+    "crop_type",
     "quantity",
     "payment",
     "date",
@@ -79,34 +79,31 @@ function ReservationHistory() {
 
   useEffect(() => {
     function handleView(reservation) {
-      setDatasView(() => (reservation))
+      setDatasView(() => reservation);
       setModalView(true);
     }
 
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const res = await api.get(
-          `${import.meta.env.VITE_API}/reservations`,
-          {
-            params: { 
-              farmer_id: localStorage.getItem("id")
-            },
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        );
+        const res = await api.get(`${import.meta.env.VITE_API}/reservations`, {
+          params: {
+            farmer_id: localStorage.getItem("id"),
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!Array.isArray(res.data)) throw new Error("Invalid API response");
-  
+
         setData(
           res.data.map((reservation) => ({
-            farmer_name: reservation.farmer_id.first_name || "N/A",
-            dryer_name: reservation.dryer_id.dryer_name || "N/A",
-            location: reservation.dryer_id.location || "N/A",
-            crop_type_name: reservation.crop_type_id.crop_type_name || "N/A",
-            quantity: reservation.crop_type_id.quantity || 0,
-            payment: reservation.crop_type_id.payment || "N/A",
+            farmer_name: reservation.farmer_name || "N/A",
+            dryer_name: reservation.dryer_name || "N/A",
+            location: reservation.dryer_location || "N/A",
+            crop_type: reservation.crop_type || "N/A",
+            quantity: reservation.quantity || 0,
+            payment: reservation.payment || "N/A",
             date: reservation.created_at
               ? new Date(reservation.created_at).toLocaleDateString()
               : "N/A",
@@ -122,7 +119,7 @@ function ReservationHistory() {
           }))
         );
       } catch (error) {
-        toast.error(error.response?.data?.message || "Error fetching data");
+        toast.error(error.response?.data?.message || error.message);
       } finally {
         setIsLoading(false);
       }

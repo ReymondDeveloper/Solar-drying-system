@@ -5,7 +5,7 @@ import { RiCloseLargeLine } from "react-icons/ri";
 function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
   const [address, setAddress] = useState("");
   const [previewUrls, setPreviewUrls] = useState({});
-  const [mainImage, setMainImage] = useState("");  
+  const [mainImage, setMainImage] = useState("");
 
   const handleLocation = () => {
     navigator.geolocation.getCurrentPosition(
@@ -65,7 +65,9 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
           {fields?.map((field, index) => (
             <div
               key={index}
-              className={`col-span-1 ${field.colspan === 2 ? "md:col-span-2" : ""}`}
+              className={`col-span-1 ${
+                field.colspan === 2 ? "md:col-span-2" : ""
+              }`}
             >
               <label className="block text-sm font-semibold text-gray-700 mb-1">
                 {field.label}
@@ -86,23 +88,26 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                         ...prev,
                         [field.name]: localPreview,
                       }));
-                      setMainImage(localPreview);  
+                      setMainImage(localPreview);
 
                       const formData = new FormData();
                       formData.append("file", file);
 
                       try {
-                        const res = await fetch(`${import.meta.env.VITE_API}/upload`, {
-                          method: "POST",
-                          body: formData,
-                        });
+                        const res = await fetch(
+                          `${import.meta.env.VITE_API}/upload`,
+                          {
+                            method: "POST",
+                            body: formData,
+                          }
+                        );
                         const data = await res.json();
                         if (data.url) {
                           setPreviewUrls((prev) => ({
                             ...prev,
                             [field.name]: data.url,
                           }));
-                          setMainImage(data.url);  
+                          setMainImage(data.url);
                         }
                       } catch (err) {
                         console.error("Image upload failed:", err);
@@ -117,7 +122,11 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                   defaultValue={field.defaultValue || ""}
                 >
                   {field.options.map((option, idx) => (
-                    <option key={idx} value={option.value} className="capitalize">
+                    <option
+                      key={idx}
+                      value={option.value}
+                      className="capitalize"
+                    >
                       {option.value}
                     </option>
                   ))}
@@ -157,33 +166,46 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
           {datas ? (
             <div className="col-span-1 md:col-span-2">
               <div className="flex flex-col items-center text-sm">
-                <b className="uppercase text-md">{datas.dryer_id.dryer_name}</b>
-                <p className="capitalize">{
-                  String(datas.dryer_id.location).includes("Sablayan") ||
-                  String(datas.dryer_id.location).includes("Occidental Mindoro")
-                    ? datas.dryer_id.location
-                    : datas.dryer_id.location + ", Sablayan, Occidental Mindoro"
-                }</p>
+                <b className="uppercase text-md">{datas.dryer_name}</b>
+                <p className="capitalize">
+                  {String(datas.dryer_location).includes("Sablayan") ||
+                  String(datas.dryer_location).includes("Occidental Mindoro")
+                    ? datas.dryer_location
+                    : datas.dryer_location + ", Sablayan, Occidental Mindoro"}
+                </p>
                 <div className="w-full text-start mt-5 overflow-auto">
-                  <p>Status: <span className="capitalize font-bold">{datas.status}</span></p>
-                  <p>Reserved by: <span className="capitalize font-bold">{datas.farmer_id.first_name + ' ' + datas.farmer_id.last_name}</span></p>
-                  <p>Reserved on: <span className="capitalize font-bold">{
-                    new Date(datas.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: true,
-                    })
-                  }</span></p>
+                  <p>
+                    Status:{" "}
+                    <span className="capitalize font-bold">{datas.status}</span>
+                  </p>
+                  <p>
+                    Reserved by:{" "}
+                    <span className="capitalize font-bold">
+                      {datas.farmer_name}
+                    </span>
+                  </p>
+                  <p>
+                    Reserved on:{" "}
+                    <span className="capitalize font-bold">
+                      {new Date(datas.created_at).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: true,
+                      })}
+                    </span>
+                  </p>
                   <table className="w-full my-2 min-w-[500px]">
                     <thead>
                       <tr>
                         <th className="border-t border-x">#</th>
                         <th className="border-t border-x">Crop Type</th>
-                        <th className="border-t border-x">Quantity (Canvans)</th>
+                        <th className="border-t border-x">
+                          Quantity (Canvans)
+                        </th>
                         <th className="border-t border-x">Rate</th>
                         <th className="border-t border-x">Total</th>
                       </tr>
@@ -191,17 +213,34 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     <tbody>
                       <tr>
                         <td className="border-b border-x text-center">1</td>
-                        <td className="border-b border-x ps-5 capitalize">{datas.crop_type_id.crop_type_name}</td>
-                        <td className="border-b border-x pe-5 text-end">{datas.crop_type_id.quantity}</td>
-                        <td className="border-b border-x pe-5 text-end">{datas.dryer_id.rate}</td>
-                        <td className="border-b border-x pe-5 text-end">{safeNumber(datas?.dryer_id.rate) * safeNumber(datas?.crop_type_id?.quantity)}</td>
+                        <td className="border-b border-x ps-5 capitalize">
+                          {datas.crop_type}
+                        </td>
+                        <td className="border-b border-x pe-5 text-end">
+                          {datas.quantity}
+                        </td>
+                        <td className="border-b border-x pe-5 text-end">
+                          {datas.rate}
+                        </td>
+                        <td className="border-b border-x pe-5 text-end">
+                          {safeNumber(datas?.rate) *
+                            safeNumber(datas?.quantity)}
+                        </td>
                       </tr>
                     </tbody>
                     <tfoot className="w-full text-end">
                       <tr>
                         <td colSpan={5}>
-                          <p>Amount Due: <span>{safeNumber(datas?.dryer_id.rate) * safeNumber(datas?.crop_type_id?.quantity)}</span></p>
-                          <p className="capitalize">Payment Method: <span>{datas?.crop_type_id.payment}</span></p>
+                          <p>
+                            Amount Due:{" "}
+                            <span>
+                              {safeNumber(datas?.rate) *
+                                safeNumber(datas?.quantity)}
+                            </span>
+                          </p>
+                          <p className="capitalize">
+                            Payment Method: <span>{datas?.payment}</span>
+                          </p>
                         </td>
                       </tr>
                     </tfoot>
@@ -214,15 +253,18 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
 
         {mainImage && (
           <div className="flex justify-center border rounded-lg p-4 bg-gray-50">
-              <img
-                src={
-                  mainImage.startsWith("http") || mainImage.startsWith("blob:")
-                    ? mainImage
-                    : `${import.meta.env.VITE_API.replace("/api", "")}${mainImage}`
-                }
-                alt="Preview"
-                className="max-h-[400px] w-auto object-contain rounded-lg shadow-md"
-              />
+            <img
+              src={
+                mainImage.startsWith("http") || mainImage.startsWith("blob:")
+                  ? mainImage
+                  : `${import.meta.env.VITE_API.replace(
+                      "/api",
+                      ""
+                    )}${mainImage}`
+              }
+              alt="Preview"
+              className="max-h-[400px] w-auto object-contain rounded-lg shadow-md"
+            />
           </div>
         )}
 
