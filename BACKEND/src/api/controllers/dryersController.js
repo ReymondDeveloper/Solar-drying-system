@@ -6,7 +6,7 @@ export const getDryers = async (req, res) => {
 
     const { data: dryers, error } = await supabase
       .from("dryers")
-      .select("id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id")
+      .select("id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id, created_at") 
       .order("created_at", { ascending: false })
       .range(Number(offset), Number(offset) + Number(limit) - 1);
 

@@ -21,8 +21,8 @@ function Availability() {
   const token = localStorage.getItem("token");  
   const Endpoint = `${import.meta.env.VITE_API}/dryers`;
 
-  const tableHeadings = ["Registered Dryer", "Location (Sablayan)", "Status"];
-  const tableDataCell = ["dryer_name", "location", "status"];
+  const tableHeadings = ["Registered Dryer", "Location (Sablayan)", "Date Created" ,"Status"];
+  const tableDataCell = ["dryer_name", "location", "created_at", "status"];
 
   const fields = [
     {
@@ -66,6 +66,13 @@ function Availability() {
           dryer_name: dryer.dryer_name,
           location: dryer.location,
           status: dryer.status?.trim() || "available",
+          created_at: dryer.created_at
+            ? new Date(dryer.created_at).toLocaleString("en-PH", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+            : "N/A",
         }));
 
         setData(formatted);

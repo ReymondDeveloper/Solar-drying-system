@@ -26,6 +26,7 @@ function BookingRequests() {
     "Dryer Location",
     "Crop Type",
     "Quantity (Cavans)",
+    "Date Created",
     "Status",
     "Action",
   ];
@@ -35,6 +36,7 @@ function BookingRequests() {
     "location",
     "crop_type",
     "quantity",
+    "created_at",
     "status",
     "action",
   ];
@@ -152,6 +154,13 @@ function BookingRequests() {
           location: res.dryer_location || "N/A",
           crop_type: res.crop_type || "N/A",
           quantity: res.quantity || "N/A",
+          created_at: res.created_at
+            ? new Date(res.created_at).toLocaleString("en-PH", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+            : "N/A",
           status: res.status || "pending",
           action: (
             <Button

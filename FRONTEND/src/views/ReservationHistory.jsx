@@ -105,7 +105,11 @@ function ReservationHistory() {
             quantity: reservation.quantity || 0,
             payment: reservation.payment || "N/A",
             date: reservation.created_at
-              ? new Date(reservation.created_at).toLocaleDateString()
+              ? new Date(reservation.created_at).toLocaleString("en-PH", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
               : "N/A",
             status: reservation.status || "pending",
             action: (

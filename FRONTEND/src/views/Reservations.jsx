@@ -17,29 +17,30 @@ function Reservations() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const tableHeadings = [
-    "Booked Dryer",
-    "Location",
-    "Date",
-    "Status",
-    "Action",
-  ];
-  const tableDataCell = ["dryer_name", "location", "date", "status", "action"];
-
-  const fields = [
-    {
-      label: "Status",
-      type: "select",
-      name: "status",
-      options: [
-        { value: "all" },
-        { value: "pending" },
-        { value: "approved" },
-        { value: "denied" },
-      ],
-    },
-  ];
+  const role = localStorage.getItem("role");  
+  const ownerId = localStorage.getItem("id");
+  const tableHeadings =
+    role === "admin"
+     ? ["Owner", "Email", "Dryers", "Location", "Date Created"]
+      : ["Booked Dryer", "Location", "Date", "Status", "Action"];  
+      const tableDataCell =
+      role === "admin"
+      ? ["owner_name", "owner_email", "dryer_name", "location", "created_at"]
+      : ["dryer_name", "location", "date", "status", "action"];
+  
+    const fields = [
+      {
+        label: "Status",
+        type: "select",
+        name: "status",
+        options: [
+          { value: "all" },
+          { value: "pending" },
+          { value: "approved" },
+          { value: "denied" },
+        ],
+      },
+    ];
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -53,22 +54,51 @@ function Reservations() {
   const fetchReservations = async () => {
     setIsLoading(true);
     try {
-      const ownerId = localStorage.getItem("id"); // 👈 your logged-in owner ID
-      const res = await axios.get(
-        `${import.meta.env.VITE_API}/reservations/owner/${ownerId}`,
-        {
-          params: { offset: (currentPage - 1) * limit, limit },
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
+      let res;
   
-      const results = res.data;
-      setData(
-        results.map((reservation) => ({
+      if (role === "admin") {
+        res = await axios.get(`${import.meta.env.VITE_API}/reservations/owners`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+  
+        const results = res.data;
+        const formattedData = results.flatMap((owner) =>
+          owner.dryers.map((dryer) => ({
+            owner_name: owner.name,
+            owner_email: owner.email,
+            dryer_name: dryer.name,
+            location: dryer.location,
+            created_at: dryer.created_at
+              ? new Date(dryer.created_at).toLocaleString("en-PH", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "N/A",
+          }))
+        );
+  
+        setData(formattedData);
+  
+      } else {
+        res = await axios.get(
+          `${import.meta.env.VITE_API}/reservations/owner/${ownerId}`,
+          {
+            params: { offset: (currentPage - 1) * limit, limit },
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          }
+        );
+  
+        const results = res.data;
+        const formattedData = results.map((reservation) => ({
           dryer_name: reservation.dryer_name,
           location: reservation.location || "N/A",
           date: reservation.created_at
-            ? new Date(reservation.created_at).toLocaleDateString()
+            ? new Date(reservation.created_at).toLocaleString("en-PH", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
             : "",
           status: reservation.status,
           action: (
@@ -79,8 +109,10 @@ function Reservations() {
               Print
             </Button>
           ),
-        }))
-      );
+        }));
+  
+        setData(formattedData);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -115,7 +147,7 @@ function Reservations() {
   return (
     <>
       {loading && <Loading />}
-      {modal && (
+      {modal && role !== "admin" && (  
         <Modal
           setModal={setModal}
           handleSubmit={handleSubmit}

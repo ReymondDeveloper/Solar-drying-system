@@ -45,6 +45,7 @@ function DryerInformation() {
     "Capacity (Cavans)",
     "Available Capacity (Cavans)",
     "Rate",
+    "Date Created",  
     "Action",
   ];
 
@@ -54,6 +55,7 @@ function DryerInformation() {
     "maximum_capacity",
     "available_capacity",
     "rate",
+    "created_at",
     "action",
   ]; 
 
@@ -195,6 +197,13 @@ function DryerInformation() {
       const formatted = dryers.map((dryer) => ({
         ...dryer,
         available_capacity: dryer.available_capacity ?? dryer.maximum_capacity,
+        created_at: dryer.created_at
+        ? new Date(dryer.created_at).toLocaleString("en-PH", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+        : "N/A",
         action: (
           <div className="flex justify-center gap-2">
             <Button
