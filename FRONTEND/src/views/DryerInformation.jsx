@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect, useCallback } from "react";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
@@ -8,9 +7,9 @@ import Modal from "../component/Modal";
 import Loading from "../component/Loading";
 import Button from "../component/Button";
 import { ToastContainer, toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import ViewModal from "../component/ViewModal.jsx";
+import api from "../api/api";
 
 function DryerInformation() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,18 +25,8 @@ function DryerInformation() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedDryer, setSelectedDryer] = useState(null);
-  const navigate = useNavigate();
   const { addresses } = useAddresses();
-
   const token = localStorage.getItem("token"); 
-  const base = import.meta.env.VITE_API;
-
-  const api = axios.create({
-    baseURL: base,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
 
   const tableHeadings = [
     "Dryer Name",
@@ -58,6 +47,26 @@ function DryerInformation() {
     "created_at",
     "action",
   ]; 
+
+  const fieldsFilter = [
+    {
+      label: "Location (Sablayan)",
+      type: "select",
+      name: "location",
+      options: [{ value: 'all', phrase: 'All' }, ...addresses.map((a) => ({ value: a.name, phrase: a.name }))],
+      colspan: 2,
+    },
+  ];
+
+  const handleSubmitFilter = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    setFilter((prev) => ({ ...prev, ...data }));
+    setLoading(false);
+    setModalFilter(false);
+  };
 
   const fieldsAdd = [
     { label: "Dryer Name", type: "text", name: "dryer_name", required: true },
@@ -162,6 +171,7 @@ function DryerInformation() {
   
         const uploadRes = await api.post("/upload", uploadData, {
           headers: { "Content-Type": "multipart/form-data" },
+
         });
   
         updatedData.image_url = uploadRes.data.url;  
@@ -182,14 +192,14 @@ function DryerInformation() {
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
     setIsError(false);
-    const offset = (currentPage - 1) * limit;
-
     try {
-      const res = await api.get("/dryers", {
-        params: { offset, limit },
+      const res = await api.get("/dryers",{
+        headers: { 
+          Authorization: `Bearer ${token}` 
+        },
       });
 
       const dryers = res.data.Results || res.data;
@@ -229,11 +239,11 @@ function DryerInformation() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchData();
-  }, [limit, currentPage, base]); 
+  }, [fetchData]);
 
   const fieldsEdit = [
     { 

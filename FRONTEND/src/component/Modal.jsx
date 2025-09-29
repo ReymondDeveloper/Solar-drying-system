@@ -69,12 +69,13 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                 field.colspan === 2 ? "md:col-span-2" : ""
               }`}
             >
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                {field.label}
-              </label>
-
               {field.name === "image_url" ? (
-                <div className="flex flex-col gap-3">
+                <>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    {field.label}
+                  </label>
+
+                  <div className="flex flex-col gap-3">
                   <input
                     type="file"
                     name={field.name}
@@ -115,50 +116,77 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     }}
                   />
                 </div>
+                </>
+                
               ) : field.type === "select" ? (
-                <select
-                  name={field.name}
-                  className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500"
-                  defaultValue={field.defaultValue || ""}
-                >
-                  {field.options.map((option, idx) => (
-                    <option
-                      key={idx}
-                      value={option.value}
-                      className="capitalize"
-                    >
-                      {option.value}
-                    </option>
-                  ))}
-                </select>
+                <>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    {field.label}
+                  </label>
+
+                  <select
+                    name={field.name}
+                    className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500 capitalize"
+                    defaultValue={field.defaultValue || ""}
+                  >
+                    {field.options.map((option, idx) => (
+                      <option
+                        key={idx}
+                        value={option.value}
+                        className="capitalize"
+                      >
+                        {option.value}
+                      </option>
+                    ))}
+                  </select>
+                </>
+                
               ) : field.name === "address" ? (
-                <div className="flex flex-col gap-2">
+                <>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    {field.label}
+                  </label>
+
+                  <div className="flex flex-col gap-2">
+                    <input
+                      className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
+                      type={field.type}
+                      required={field.required}
+                      name={field.name}
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                    />
+                    <span
+                      onClick={handleLocation}
+                      className="text-xs font-semibold text-blue-500 hover:underline cursor-pointer"
+                    >
+                      Use Current Location
+                    </span>
+                  </div>
+                </>
+              ) : field.name === "id" ? (
+                <input
+                  name={field.name}
+                  type={field.type} 
+                  value={field.value}
+                />
+              ) : (
+                <>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    {field.label}
+                  </label>
+
                   <input
                     className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
                     type={field.type}
                     required={field.required}
                     name={field.name}
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    minLength={field.minLength}
+                    maxLength={field.maxLength}
+                    defaultValue={field.defaultValue || ""}
+                    step={field.step}
                   />
-                  <span
-                    onClick={handleLocation}
-                    className="text-xs font-semibold text-blue-500 hover:underline cursor-pointer"
-                  >
-                    Use Current Location
-                  </span>
-                </div>
-              ) : (
-                <input
-                  className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
-                  type={field.type}
-                  required={field.required}
-                  name={field.name}
-                  minLength={field.minLength}
-                  maxLength={field.maxLength}
-                  defaultValue={field.defaultValue || ""}
-                  step={field.step}
-                />
+                </>
               )}
             </div>
           ))}

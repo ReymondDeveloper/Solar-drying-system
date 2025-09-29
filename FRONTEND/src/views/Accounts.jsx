@@ -49,17 +49,22 @@ function Accounts() {
         { value: "owner" },
         { value: "farmer" },
       ],
+      colspan: 2,
     },
   ];
 
   const handleSubmitFilter = (e) => {
-    setLoading(true);
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    setFilter(data.role);
-    setLoading(false);
-    setModalFilter(false);
+    setLoading(true);
+    try {
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      setFilter(data.role);
+      setModalFilter(false);
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fieldsAdd = [

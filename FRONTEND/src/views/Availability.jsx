@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
 import Modal from "../component/Modal";
 import Loading from "../component/Loading";
+import api from "../api/api";
 
 function Availability() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,9 +17,6 @@ function Availability() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const token = localStorage.getItem("token");  
-  const Endpoint = `${import.meta.env.VITE_API}/dryers`;
 
   const tableHeadings = ["Registered Dryer", "Location (Sablayan)", "Date Created" ,"Status"];
   const tableDataCell = ["dryer_name", "location", "created_at", "status"];
@@ -34,17 +31,22 @@ function Availability() {
         { value: "available", phrase: "Available" },
         { value: "occupied", phrase: "Occupied" },
       ],
+      colspan: 2,
     },
   ];
 
   const handleSubmit = (e) => {
-    setLoading(true);
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    setFilter(data.status);
-    setLoading(false);
-    setModal(false);
+    setLoading(true);
+    try {
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      setFilter(data.status);
+      setModal(false);
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -52,12 +54,9 @@ function Availability() {
       setIsLoading(true);
       setIsError(false);
 
-      const offset = (currentPage - 1) * limit;
-
       try {
-        const res = await axios.get(Endpoint, {
-          params: { offset, limit },
-          headers: { Authorization: `Bearer ${token}` },  
+        const res = await api.get(`${import.meta.env.VITE_API}/dryers`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },  
         });
 
         const dryers = res.data.Results || res.data;
@@ -77,7 +76,7 @@ function Availability() {
 
         setData(formatted);
       } catch (error) {
-        console.error("Error fetching dryers:", error.response?.data || error);
+        console.error("Error fetching dryers:", error.response?.data?.message || error.message);
         setIsError(true);
       } finally {
         setIsLoading(false);
@@ -85,11 +84,9 @@ function Availability() {
     };
 
     fetchData();
-  }, [limit, currentPage, token]);
+  }, []);
 
   const FilteredData = data.filter((info) => {
-    const isAvailable = info.status.toLowerCase() === "available";
-  
     const filterByFilters =
       filter && filter !== "all"
         ? info.status.toLowerCase().includes(filter.toLowerCase())
