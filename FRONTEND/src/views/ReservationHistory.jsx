@@ -57,6 +57,7 @@ function ReservationHistory() {
         { value: "approved", phrase: "Approved" },
         { value: "denied", phrase: "Denied" },
       ],
+      colspan: 2,
     },
   ];
 

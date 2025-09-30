@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect, useCallback } from "react";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
 import Modal from "../component/Modal";
-import Button from "../component/Button";
 import Loading from "../component/Loading";
+import api from "../api/api";
 
 function Reservations() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,121 +16,100 @@ function Reservations() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-  const role = localStorage.getItem("role");  
-  const ownerId = localStorage.getItem("id");
-  const tableHeadings =
-    role === "admin"
-     ? ["Owner", "Email", "Dryers", "Location", "Date Created"]
-      : ["Booked Dryer", "Location", "Date", "Status", "Action"];  
-      const tableDataCell =
-      role === "admin"
-      ? ["owner_name", "owner_email", "dryer_name", "location", "created_at"]
-      : ["dryer_name", "location", "date", "status", "action"];
+  const tableHeadings = ["Owner", "Email", "Dryers", "Location", "Date Created"];  
+  const tableDataCell = ["owner_name", "owner_email", "dryer_name", "location", "created_at"];
+  const { addresses } = useAddresses();
   
-    const fields = [
-      {
-        label: "Status",
-        type: "select",
-        name: "status",
-        options: [
-          { value: "all" },
-          { value: "pending" },
-          { value: "approved" },
-          { value: "denied" },
-        ],
-      },
-    ];
+  function useAddresses() {
+    const [addresses, setAddresses] = useState([]);
+    const [loading, setLoading] = useState(false);
+  
+    useEffect(() => {
+      const fetchAddresses = async () => {
+        setLoading(true);
+        try {
+          const res = await api.get("/addresses");
+          setAddresses(res.data);
+        } catch (err) {
+          console.error("Failed to fetch addresses:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchAddresses();
+    }, []);
+  
+    return { addresses, loading };
+  }
+
+  const fields = [
+    {
+      label: "Location (Sablayan)",
+      type: "select",
+      name: "location",
+      options: [{ value: 'all', phrase: 'All' }, ...addresses.map((a) => ({ value: a.name, phrase: a.name }))],
+      colspan: 2,
+    },
+  ];
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const formData = Object.fromEntries(new FormData(e.target).entries());
-    setFilter(formData.status);
-    setModal(false);
+    setLoading(true);
+    try {
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      setFilter(data.location);
+      setModal(false);
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const Endpoint = `${import.meta.env.VITE_API}/reservations`;
-
-  const fetchReservations = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      let res;
+      const res = await api.get(`${import.meta.env.VITE_API}/reservations/owners`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
   
-      if (role === "admin") {
-        res = await axios.get(`${import.meta.env.VITE_API}/reservations/owners`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-  
-        const results = res.data;
-        const formattedData = results.flatMap((owner) =>
-          owner.dryers.map((dryer) => ({
-            owner_name: owner.name,
-            owner_email: owner.email,
-            dryer_name: dryer.name,
-            location: dryer.location,
-            created_at: dryer.created_at
-              ? new Date(dryer.created_at).toLocaleString("en-PH", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })
-              : "N/A",
-          }))
-        );
-  
-        setData(formattedData);
-  
-      } else {
-        res = await axios.get(
-          `${import.meta.env.VITE_API}/reservations/owner/${ownerId}`,
-          {
-            params: { offset: (currentPage - 1) * limit, limit },
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          }
-        );
-  
-        const results = res.data;
-        const formattedData = results.map((reservation) => ({
-          dryer_name: reservation.dryer_name,
-          location: reservation.location || "N/A",
-          date: reservation.created_at
-            ? new Date(reservation.created_at).toLocaleString("en-PH", {
+      const results = res.data;
+      const formattedData = results.flatMap((owner) =>
+        owner.dryers.map((dryer) => ({
+          owner_name: owner.name,
+          owner_email: owner.email,
+          dryer_name: dryer.name,
+          location: dryer.location,
+          created_at: dryer.created_at
+            ? new Date(dryer.created_at).toLocaleString("en-PH", {
                 year: "numeric",
                 month: "short",
                 day: "numeric",
               })
-            : "",
-          status: reservation.status,
-          action: (
-            <Button
-              onClick={() => alert(`Reservation ID: ${reservation.id}`)}
-              className="bg-blue-400 hover:bg-blue-500 text-white"
-            >
-              Print
-            </Button>
-          ),
-        }));
+            : "N/A",
+        }))
+      );
   
-        setData(formattedData);
-      }
+      setData(formattedData);
     } catch (err) {
       console.error(err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchReservations();
-  }, [currentPage, limit]);
+    fetchData();
+  }, [fetchData]);
 
   const FilteredData = data.filter((info) => {
     const filterByStatus =
       filter !== "all"
-        ? info.status.toLowerCase() === filter.toLowerCase()
+        ? info.location.toLowerCase() === filter.toLowerCase()
         : true;
     const filterBySearch = search
       ? Object.entries(info)
-          .filter(([key]) => key !== "status" && key !== "action")
+          .filter(([key]) => key !== "location")
           .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
@@ -147,7 +125,7 @@ function Reservations() {
   return (
     <>
       {loading && <Loading />}
-      {modal && role !== "admin" && (  
+      {modal && (  
         <Modal
           setModal={setModal}
           handleSubmit={handleSubmit}

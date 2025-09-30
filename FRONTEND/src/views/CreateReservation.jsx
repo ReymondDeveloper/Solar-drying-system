@@ -41,6 +41,7 @@ function CreateReservation() {
         { value: "available", phrase: "Available" },
         { value: "occupied", phrase: "Occupied" },
       ],
+      colspan: 2,
     },
   ];
 
@@ -61,10 +62,6 @@ function CreateReservation() {
 
       try {
         const res = await api.get(`${import.meta.env.VITE_API}/dryers`, {
-          params: {
-            offset: (currentPage - 1) * limit,
-            limit,
-          },
           headers: { 
             Authorization: `Bearer ${token}` 
           },
@@ -107,7 +104,7 @@ function CreateReservation() {
     };
 
     fetchData();
-  }, [currentPage, limit, token, navigate]);
+  }, [token, navigate]);
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =

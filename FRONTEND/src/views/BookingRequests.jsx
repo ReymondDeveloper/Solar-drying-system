@@ -11,6 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function BookingRequests() {
+  const token = localStorage.getItem("token"); 
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
@@ -52,17 +53,22 @@ function BookingRequests() {
         { value: "approved", phrase: "Approved" },
         { value: "denied", phrase: "Denied" },
       ],
+      colspan: 2,
     },
   ];
 
   const handleSubmitFilter = (e) => {
     e.preventDefault();
     setLoading(true);
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    setFilter((prev) => ({ ...prev, ...data }));
-    setLoading(false);
-    setModalFilter(false);
+    try {
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      setFilter((prev) => ({ ...prev, ...data }));
+      setModalFilter(false);
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmitView = async (e) => {
@@ -140,10 +146,11 @@ function BookingRequests() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await api.get(`${import.meta.env.VITE_API}/reservations`, {
-        params: { offset: (currentPage - 1) * limit, limit },
-      });
-      console.log("Fetched reservations:", res.data);
+      const res = await api.get(`${import.meta.env.VITE_API}/reservations`,{
+          headers: { 
+            Authorization: `Bearer ${token}` 
+          },
+        });
 
       if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
 
@@ -178,7 +185,7 @@ function BookingRequests() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, limit, handleView]);
+  }, [handleView, token]);
 
   useEffect(() => {
     fetchData();
