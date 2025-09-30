@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
-import Search from "../component/Search"; 
+import Search from "../component/Search";
 import Modal from "../component/Modal";
 import Loading from "../component/Loading";
 import Button from "../component/Button";
@@ -26,7 +26,7 @@ function DryerInformation() {
   const [loading, setLoading] = useState(false);
   const [selectedDryer, setSelectedDryer] = useState(null);
   const { addresses } = useAddresses();
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
 
   const tableHeadings = [
     "Dryer Name",
@@ -34,7 +34,7 @@ function DryerInformation() {
     "Capacity (Cavans)",
     "Available Capacity (Cavans)",
     "Rate",
-    "Date Created",  
+    "Date Created",
     "Action",
   ];
 
@@ -46,14 +46,17 @@ function DryerInformation() {
     "rate",
     "created_at",
     "action",
-  ]; 
+  ];
 
   const fieldsFilter = [
     {
       label: "Location (Sablayan)",
       type: "select",
       name: "location",
-      options: [{ value: 'all', phrase: 'All' }, ...addresses.map((a) => ({ value: a.name, phrase: a.name }))],
+      options: [
+        { value: "all", phrase: "All" },
+        ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
+      ],
       colspan: 2,
     },
   ];
@@ -77,7 +80,12 @@ function DryerInformation() {
       required: true,
       options: addresses.map((a) => ({ value: a.name, phrase: a.name })),
     },
-    { label: "Capacity (Cavans)", type: "number", name: "maximum_capacity", required: true },
+    {
+      label: "Capacity (Cavans)",
+      type: "number",
+      name: "maximum_capacity",
+      required: true,
+    },
     { label: "Rate (PHP)", type: "number", name: "rate", required: true },
     { label: "Dryer Image", type: "file", name: "image_url" },
   ];
@@ -85,27 +93,27 @@ function DryerInformation() {
   const handleSubmitAdd = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
+
     try {
       const createdById = localStorage.getItem("id");
       const formData = new FormData(e.target);
       let dryerData = Object.fromEntries(formData.entries());
-  
+
       const file = formData.get("image_url");
       if (file && file.size > 0) {
         const uploadForm = new FormData();
         uploadForm.append("file", file);
-  
+
         const uploadRes = await api.post("/upload", uploadForm, {
           headers: {
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         });
-        
-        dryerData.image_url = uploadRes.data.url;  
+
+        dryerData.image_url = uploadRes.data.url;
       }
-  
+
       const res = await api.post("/dryers", {
         dryer_name: dryerData.dryer_name,
         location: dryerData.location,
@@ -114,7 +122,7 @@ function DryerInformation() {
         image_url: dryerData.image_url,
         created_by_id: createdById,
       });
-  
+
       toast.success(res.data.message);
       fetchData();
       setModalAdd(false);
@@ -128,7 +136,7 @@ function DryerInformation() {
   function useAddresses() {
     const [addresses, setAddresses] = useState([]);
     const [loading, setLoading] = useState(false);
-  
+
     useEffect(() => {
       const fetchAddresses = async () => {
         setLoading(true);
@@ -143,7 +151,7 @@ function DryerInformation() {
       };
       fetchAddresses();
     }, []);
-  
+
     return { addresses, loading };
   }
 
@@ -159,28 +167,27 @@ function DryerInformation() {
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
+
     const formData = new FormData(e.target);
     let updatedData = Object.fromEntries(formData.entries());
-  
+
     try {
       const imageFile = formData.get("image_url");
       if (imageFile && imageFile instanceof File && imageFile.size > 0) {
         const uploadData = new FormData();
         uploadData.append("file", imageFile);
-  
+
         const uploadRes = await api.post("/upload", uploadData, {
           headers: { "Content-Type": "multipart/form-data" },
-
         });
-  
-        updatedData.image_url = uploadRes.data.url;  
+
+        updatedData.image_url = uploadRes.data.url;
       } else {
-        updatedData.image_url = selectedDryer.image_url;  
+        updatedData.image_url = selectedDryer.image_url;
       }
-  
+
       const res = await api.put(`/dryers/${selectedDryer.id}`, updatedData);
-  
+
       toast.success(res.data.message);
       fetchData();
       setModalEdit(false);
@@ -196,24 +203,31 @@ function DryerInformation() {
     setIsLoading(true);
     setIsError(false);
     try {
-      const res = await api.get("/dryers",{
-        headers: { 
-          Authorization: `Bearer ${token}` 
+      const res = await api.get(
+        "/dryers/owned",
+        {
+          user: {
+            id: localStorage.getItem("id"),
+          },
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      const dryers = res.data.Results || res.data;
+      const dryers = [res.data] || [];
 
       const formatted = dryers.map((dryer) => ({
         ...dryer,
-        available_capacity: dryer.available_capacity ?? dryer.maximum_capacity,
         created_at: dryer.created_at
-        ? new Date(dryer.created_at).toLocaleString("en-PH", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-        : "N/A",
+          ? new Date(dryer.created_at).toLocaleString("en-PH", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
+          : "N/A",
         action: (
           <div className="flex justify-center gap-2">
             <Button
@@ -246,54 +260,56 @@ function DryerInformation() {
   }, [fetchData]);
 
   const fieldsEdit = [
-    { 
-      label: "Dryer Name", 
-      type: "text", 
-      name: "dryer_name", 
-      required: true, 
-      defaultValue: selectedDryer?.dryer_name 
+    {
+      label: "Dryer Name",
+      type: "text",
+      name: "dryer_name",
+      required: true,
+      defaultValue: selectedDryer?.dryer_name,
     },
-    { 
-      label: "Location (Sablayan)", 
-      type: "select", 
-      name: "location", 
-      required: true, 
-      options: addresses.map((a) => ({ value: a.name, phrase: a.name })),  
-      defaultValue: selectedDryer?.location 
+    {
+      label: "Location (Sablayan)",
+      type: "select",
+      name: "location",
+      required: true,
+      options: addresses.map((a) => ({ value: a.name, phrase: a.name })),
+      defaultValue: selectedDryer?.location,
     },
-    { 
-      label: "Capacity (Cavans)", 
-      type: "number", 
-      name: "maximum_capacity", 
-      required: true, 
-      defaultValue: selectedDryer?.maximum_capacity 
+    {
+      label: "Capacity (Cavans)",
+      type: "number",
+      name: "maximum_capacity",
+      required: true,
+      defaultValue: selectedDryer?.maximum_capacity,
     },
-    { 
-      label: "Rate (PHP)", 
-      type: "number", 
-      name: "rate", 
-      required: true, 
-      defaultValue: selectedDryer?.rate 
+    {
+      label: "Rate (PHP)",
+      type: "number",
+      name: "rate",
+      required: true,
+      defaultValue: selectedDryer?.rate,
     },
-    { 
-      label: "Dryer Image", 
-      type: "file", 
-      name: "image_url" 
+    {
+      label: "Dryer Image",
+      type: "file",
+      name: "image_url",
     },
   ];
 
   const datasView = selectedDryer
-  ? [
-      { label: "Dryer Name", value: selectedDryer.dryer_name },
-      { label: "Location", value: selectedDryer.location },
-      { label: "Capacity", value: selectedDryer.maximum_capacity },
-      { label: "Available Capacity", value: selectedDryer.available_capacity },
-      { label: "Rate (PHP)", value: selectedDryer.rate },
-      { label: "Image", image_url: selectedDryer.image_url }, 
-    ]
-  : [];
+    ? [
+        { label: "Dryer Name", value: selectedDryer.dryer_name },
+        { label: "Location", value: selectedDryer.location },
+        { label: "Capacity", value: selectedDryer.maximum_capacity },
+        {
+          label: "Available Capacity",
+          value: selectedDryer.available_capacity,
+        },
+        { label: "Rate (PHP)", value: selectedDryer.rate },
+        { label: "Image", image_url: selectedDryer.image_url },
+      ]
+    : [];
 
-  
   const FilteredData = data.filter((info) => {
     const filterByFilters =
       !filter.location ||
@@ -390,7 +406,7 @@ function DryerInformation() {
                 {FilteredData?.length === 0 && (
                   <>
                     <div className="hidden lg:flex justify-center items-center font-bold py-5">
-                      No transactions to display at the moment.
+                      No records to display at the moment.
                     </div>
 
                     <div className="lg:hidden rounded-md flex flex-col">
@@ -400,7 +416,7 @@ function DryerInformation() {
                         </div>
                       </div>
                       <div className="p-3 bg-[rgba(255,255,255,0.9)] backdrop-filter-[6px] border border-[rgb(138,183,45)] rounded-b-md text-center font-bold">
-                        No transactions to display at the moment.
+                        No records to display at the moment.
                       </div>
                     </div>
                   </>
