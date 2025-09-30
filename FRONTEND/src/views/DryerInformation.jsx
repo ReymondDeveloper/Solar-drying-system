@@ -81,7 +81,7 @@ function DryerInformation() {
       options: addresses.map((a) => ({ value: a.name, phrase: a.name })),
     },
     {
-      label: "Capacity (Cavans)",
+      label: "Maximum Capacity (Cavans)",
       type: "number",
       name: "maximum_capacity",
       required: true,
@@ -217,7 +217,7 @@ function DryerInformation() {
         }
       );
 
-      const dryers = [res.data] || [];
+      const dryers = res.data !== null ? [res.data] : [];
 
       const formatted = dryers.map((dryer) => ({
         ...dryer,

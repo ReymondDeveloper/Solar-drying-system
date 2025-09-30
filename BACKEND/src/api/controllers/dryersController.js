@@ -89,6 +89,7 @@ export const createDryer = async (req, res) => {
           dryer_name,
           location,
           maximum_capacity,
+          available_capacity: maximum_capacity,
           rate,
           image_url,
           created_by_id,
