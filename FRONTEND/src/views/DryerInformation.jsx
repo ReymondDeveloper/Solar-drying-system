@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
@@ -27,6 +28,7 @@ function DryerInformation() {
   const [selectedDryer, setSelectedDryer] = useState(null);
   const { addresses } = useAddresses();
   const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   const tableHeadings = [
     "Dryer Name",
@@ -155,10 +157,10 @@ function DryerInformation() {
     return { addresses, loading };
   }
 
-  function handleView(dryer) {
-    setSelectedDryer(dryer);
-    setModalView(true);
-  }
+  // function handleView(dryer) {
+  //   setSelectedDryer(dryer);
+  //   setModalView(true);
+  // }
 
   function handleEdit(dryer) {
     setSelectedDryer(dryer);
@@ -237,7 +239,7 @@ function DryerInformation() {
               Edit
             </Button>
             <Button
-              onClick={() => handleView(dryer)}
+              onClick={() => navigate("/home/create-reservation/" + dryer.id)}
               className="bg-blue-400 hover:bg-blue-500 text-white"
             >
               View
@@ -369,13 +371,13 @@ function DryerInformation() {
           button_name={"Update"}
         />
       )}
-      {modalView && (
+      {/* {modalView && (
         <ViewModal
           setModal={setModalView}
           datas={datasView}
           title="Dryer Details"
         />
-      )}
+      )} */}
 
       <div
         className={`w-full h-[calc(100dvh-160px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${

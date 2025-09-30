@@ -96,11 +96,7 @@ const router = createBrowserRouter(
             },
             {
               path: "create-reservation/:id",
-              element: (
-                <Authentication role={"farmer"}>
-                  <Dryer />
-                </Authentication>
-              ),
+              element: <Dryer />,
             },
             {
               path: "reservation-history",
