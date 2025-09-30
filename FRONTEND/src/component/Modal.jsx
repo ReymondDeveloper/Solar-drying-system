@@ -74,59 +74,56 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     {field.label}
                   </label>
-
                   <div className="flex flex-col gap-3">
-                  <input
-                    type="file"
-                    name={field.name}
-                    accept="image/*"
-                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
-                    onChange={async (e) => {
-                      const file = e.target.files[0];
-                      if (!file) return;
-                      const localPreview = URL.createObjectURL(file);
-                      setPreviewUrls((prev) => ({
-                        ...prev,
-                        [field.name]: localPreview,
-                      }));
-                      setMainImage(localPreview);
+                    <input
+                      type="file"
+                      name={field.name}
+                      accept="image/*"
+                      className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const localPreview = URL.createObjectURL(file);
+                        setPreviewUrls((prev) => ({
+                          ...prev,
+                          [field.name]: localPreview,
+                        }));
+                        setMainImage(localPreview);
 
-                      const formData = new FormData();
-                      formData.append("file", file);
+                        const formData = new FormData();
+                        formData.append("file", file);
 
-                      try {
-                        const res = await fetch(
-                          `${import.meta.env.VITE_API}/upload`,
-                          {
-                            method: "POST",
-                            body: formData,
+                        try {
+                          const res = await fetch(
+                            `${import.meta.env.VITE_API}/upload`,
+                            {
+                              method: "POST",
+                              body: formData,
+                            }
+                          );
+                          const data = await res.json();
+                          if (data.url) {
+                            setPreviewUrls((prev) => ({
+                              ...prev,
+                              [field.name]: data.url,
+                            }));
+                            setMainImage(data.url);
                           }
-                        );
-                        const data = await res.json();
-                        if (data.url) {
-                          setPreviewUrls((prev) => ({
-                            ...prev,
-                            [field.name]: data.url,
-                          }));
-                          setMainImage(data.url);
+                        } catch (err) {
+                          console.error("Image upload failed:", err);
                         }
-                      } catch (err) {
-                        console.error("Image upload failed:", err);
-                      }
-                    }}
-                  />
-                </div>
+                      }}
+                    />
+                  </div>
                 </>
-                
               ) : field.type === "select" ? (
                 <>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
                     {field.label}
                   </label>
-
                   <select
                     name={field.name}
-                    className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500 capitalize"
+                    className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500"
                     defaultValue={field.defaultValue || ""}
                   >
                     {field.options.map((option, idx) => (
@@ -140,13 +137,11 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     ))}
                   </select>
                 </>
-                
               ) : field.name === "address" ? (
                 <>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
                     {field.label}
                   </label>
-
                   <div className="flex flex-col gap-2">
                     <input
                       className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
@@ -167,15 +162,14 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
               ) : field.name === "id" ? (
                 <input
                   name={field.name}
-                  type={field.type} 
+                  type={field.type}
                   value={field.value}
                 />
               ) : (
                 <>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
                     {field.label}
                   </label>
-
                   <input
                     className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
                     type={field.type}

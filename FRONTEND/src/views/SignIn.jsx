@@ -49,6 +49,8 @@ function SignIn() {
         first_name,
         middle_name,
         last_name,
+        profile_image,
+        mobile_number,
       } = user;
       if (message === "Account is not yet verified.") {
         toast.error(message);
@@ -66,6 +68,8 @@ function SignIn() {
         localStorage.setItem("email", email.toLowerCase());
         localStorage.setItem("address", address);
         localStorage.setItem("id", id);
+        profile_image && localStorage.setItem("profile_image", profile_image);
+        mobile_number && localStorage.setItem("mobile_number", mobile_number);
 
         toast.success(res.data.message);
         setTimeout(() => {

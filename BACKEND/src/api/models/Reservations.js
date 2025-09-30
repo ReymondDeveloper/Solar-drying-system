@@ -3,26 +3,32 @@ import { v4 as uuidv4 } from "uuid";
 
 const Reservations = {
   findAll: async ({ farmer_id } = {}) => {
-    let query = supabase.from("reservations").select(`
+    let query = supabase
+      .from("reservations")
+      .select(
+        `
       id,
       farmer_id:farmer_id (id, first_name, last_name, email, mobile_number),
-      dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity),
+      dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity, created_by_id),
       crop_type_id:crop_type_id (crop_type_id, crop_type_name, quantity, payment),
       status,
       created_at
-    `).order("created_at", { ascending: false });
-  
+    `
+      )
+      .order("created_at", { ascending: false });
+
     if (farmer_id) query = query.eq("farmer_id", farmer_id);
     const { data, error } = await query;
     if (error) throw error;
 
     return data;
-  }, 
-  
+  },
+
   findById: async (id) => {
     const { data, error } = await supabase
       .from("reservations")
-      .select(`
+      .select(
+        `
         id,
         farmer_id:farmer_id (
           id, first_name, last_name, email, mobile_number
@@ -35,7 +41,8 @@ const Reservations = {
         ),
         status,
         created_at
-      `)
+      `
+      )
       .eq("id", id)
       .single();
 
