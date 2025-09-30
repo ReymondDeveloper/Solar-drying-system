@@ -192,13 +192,11 @@ export const checkReservation = async (req, res) => {
 export const getReservationsByOwner = async (req, res) => {
   try {
     const { ownerId } = req.params;
-    const reservations = await Reservations.findAll();
+    let reservations = await Reservations.findAll();
 
     reservations = reservations.filter(
       (r) => r.dryer_id?.created_by_id === ownerId
     );
-
-    console.log(reservations);
 
     res.json(
       reservations.map((r) => ({
