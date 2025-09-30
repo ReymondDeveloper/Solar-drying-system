@@ -69,8 +69,26 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                 field.colspan === 2 ? "md:col-span-2" : ""
               }`}
             >
-              {field.name === "image_url" ? (
-                <>
+            {field.name === "crop_type" ? (
+              <>
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                    {field.label}
+                  </label>
+                  <select
+                    name={field.name}
+                    className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500"
+                    defaultValue={field.defaultValue || ""}
+                    required={field.required}
+                  >
+                    <option value="" disabled>
+                      Select crop type
+                    </option>
+                    <option value="corn">Corn</option>
+                    <option value="rice">Rice</option>
+                  </select>
+                </>
+              ) : field.name === "image_url" ? (
+              <>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     {field.label}
                   </label>
