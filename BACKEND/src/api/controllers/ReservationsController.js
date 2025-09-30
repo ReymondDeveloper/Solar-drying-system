@@ -191,32 +191,75 @@ export const checkReservation = async (req, res) => {
 
 export const getReservationsByOwner = async (req, res) => {
   try {
-    const { ownerId } = req.params;
-    let reservations = await Reservations.findAll();
+    const { ownerId } = req.query;
+    if (!ownerId) {
+      return res.status(400).json({ message: "ownerId is required" });
+    }
 
-    reservations = reservations.filter(
-      (r) => r.dryer_id?.created_by_id === ownerId
-    );
+    const { data: reservations, error: resError } = await supabase
+      .from("reservations")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-    res.json(
-      reservations.map((r) => ({
-        id: r.id,
-        farmer_id: r.farmer?.id || null,
-        farmer_name: r.farmer
-          ? `${r.farmer.first_name} ${r.farmer.last_name}`
-          : "N/A",
-        dryer_id: r.dryer?.id || null,
-        dryer_name: r.dryer?.dryer_name || "N/A",
-        location: r.dryer?.location || "N/A",
-        owner_id: r.owner?.id || null,
-        owner_name: r.owner
-          ? `${r.owner.first_name} ${r.owner.last_name}`
-          : "N/A",
-        status: r.status || "pending",
-        created_at: r.created_at,
-      }))
+    if (resError) throw resError;
+
+    const formatted = await Promise.all(
+      reservations.map(async (r) => {
+        const { data: dryer, error: dryerError } = await supabase
+          .from("dryers")
+          .select("*")
+          .eq("id", r.dryer_id)
+          .single();
+
+        if (dryerError) {
+          console.error("Error fetching dryer:", dryerError);
+          return null;
+        }
+
+        if (dryer.created_by_id !== ownerId) return null;
+
+        const { data: farmer, error: farmerError } = await supabase
+          .from("users")
+          .select("id, first_name, last_name")
+          .eq("id", r.farmer_id)
+          .single();
+
+        if (farmerError) {
+          console.error("Error fetching farmer:", farmerError);
+        }
+
+        const { data: cropType, error: cropTypeError } = await supabase
+          .from("crop_types")
+          .select("crop_type_name, quantity, payment")
+          .eq("crop_type_id", r.crop_type_id)
+          .single();
+
+        if (cropTypeError) {
+          console.error("Error fetching crop type:", cropTypeError);
+        }
+
+        return {
+          id: r.id,
+          farmer_id: farmer?.id || null,
+          farmer_name: farmer
+            ? `${farmer.first_name} ${farmer.last_name}`
+            : "N/A",
+          dryer_id: dryer?.id || null,
+          dryer_name: dryer?.dryer_name || "N/A",
+          dryer_location: dryer?.location || "N/A",
+          crop_type: cropType?.crop_type_name || "N/A",
+          quantity: r.quantity || cropType?.quantity || 0,
+          payment: cropType?.payment || "N/A",
+          rate: dryer?.rate || 0,
+          status: r.status || "pending",
+          created_at: r.created_at,
+        };
+      })
     );
+    const filtered = formatted.filter((f) => f !== null);
+    res.json(filtered);
   } catch (err) {
+    console.error("Error in getReservationsByOwner:", err);
     res.status(500).json({
       message: "Failed to fetch reservations by owner.",
       error: err.message,
