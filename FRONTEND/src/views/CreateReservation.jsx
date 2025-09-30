@@ -25,13 +25,11 @@ function CreateReservation() {
   const tableHeadings = [
     "Registered Dryer",
     "Location (Sablayan)",
+    "Date Created",
     "Status",
-    // "Available Slots",
     "Action",
   ];
-
-  // const tableDataCell = ["dryer_name", "location", "status", "available_slots", "action"];
-  const tableDataCell = ["dryer_name", "location", "status", "action"];
+  const tableDataCell = ["dryer_name", "location","created_at", "status", "action"];
 
   const fieldsFilter = [
     {
@@ -43,6 +41,7 @@ function CreateReservation() {
         { value: "available", phrase: "Available" },
         { value: "occupied", phrase: "Occupied" },
       ],
+      colspan: 2,
     },
   ];
 
@@ -63,10 +62,6 @@ function CreateReservation() {
 
       try {
         const res = await api.get(`${import.meta.env.VITE_API}/dryers`, {
-          params: {
-            offset: (currentPage - 1) * limit,
-            limit,
-          },
           headers: { 
             Authorization: `Bearer ${token}` 
           },
@@ -82,7 +77,13 @@ function CreateReservation() {
               dryer.available_capacity > 0
                 ? "available"
                 : "occupied",
-                // available_slots: dryer.available_capacity ?? 0, // 👈 NEW
+              created_at: dryer.created_at
+              ? new Date(dryer.created_at).toLocaleString("en-PH", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+              : "N/A",
             action: (
               <Button
                 onClick={() => navigate("/home/create-reservation/" + dryer.id)}
@@ -103,7 +104,7 @@ function CreateReservation() {
     };
 
     fetchData();
-  }, [currentPage, limit, token, navigate]);
+  }, [token, navigate]);
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =

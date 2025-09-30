@@ -190,3 +190,43 @@ export const getReservationsByOwner = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch reservations by owner.", error: err.message });
   }
 };
+
+export const getAllOwnersWithDryers = async (req, res) => {
+  try {
+    const { data: dryers, error } = await supabase
+      .from("dryers")
+      .select("id, dryer_name, location, created_by_id, created_at");
+
+    if (error) throw error;
+
+    const ownerIds = [...new Set(dryers.map(d => d.created_by_id))];
+    const { data: owners, error: ownersError } = await supabase
+      .from("users")
+      .select("id, first_name, last_name, email")
+      .in("id", ownerIds);
+
+    console.log("Owners fetched:", owners);
+
+    if (ownersError) throw ownersError;
+
+    const result = owners.map(owner => ({
+      id: owner.id,
+      name: `${owner.first_name} ${owner.last_name}`,
+      email: owner.email,
+      dryers: dryers
+        .filter(d => d.created_by_id === owner.id)
+        .map(d => ({
+          id: d.id,
+          name: d.dryer_name,
+          location: d.location,
+          created_at: d.created_at,
+        }))
+    }));
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({
+      message: "Failed to fetch owners with dryers",
+      error: err.message,
+    });
+  }
+};

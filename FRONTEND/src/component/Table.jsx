@@ -46,7 +46,7 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                         ? "text-center"
                         : "text-center"
                     }
-                    ${dataCell === "email" ? "lowercase" : "capitalize"}
+                    ${dataCell === "email" ? "lowercase" : dataCell === "created_at" ? "" : "capitalize"}
                   `}
                 >
                   {dataCell === "status" ? (
