@@ -1,5 +1,5 @@
 import Reservations from "../models/Reservations.js";
-import Dryers from "../models/dryersModel.js";  
+import Dryers from "../models/dryersModel.js";
 import CropTypes from "../models/cropTypes.js";
 import supabase from "../../database/supabase.db.js";
 
@@ -16,51 +16,54 @@ export const getReservations = async (req, res) => {
     const formatted = await Promise.all(
       reservations.map(async (r) => {
         console.log("Processing reservation:", r);
-    
+
         const { data: dryer, error: dryerError } = await supabase
           .from("dryers")
           .select("*")
           .eq("id", r.dryer_id)
           .single();
-    
+
         if (dryerError) {
           console.error("Error fetching dryer:", dryerError);
           return null;
         }
-    
+
         if (dryer_id && dryer.id !== dryer_id) return null;
-    
+
         const { data: farmer, error: farmerError } = await supabase
           .from("users")
           .select("id, first_name, last_name")
           .eq("id", r.farmer_id)
           .single();
-    
-        if (farmerError) console.error("Error fetching farmer:", farmerError);
-    
-        const { data: cropType, error: cropTypeError } = await supabase
-        .from("crop_types")
-        .select("crop_type_name, quantity, payment")  
-        .eq("crop_type_id", r.crop_type_id)   
-        .single();
 
-        if (cropTypeError) console.error("Error fetching crop type:", cropTypeError);
+        if (farmerError) console.error("Error fetching farmer:", farmerError);
+
+        const { data: cropType, error: cropTypeError } = await supabase
+          .from("crop_types")
+          .select("crop_type_name, quantity, payment")
+          .eq("crop_type_id", r.crop_type_id)
+          .single();
+
+        if (cropTypeError)
+          console.error("Error fetching crop type:", cropTypeError);
 
         const mapped = {
           id: r.id,
           farmer_id: farmer?.id || null,
-          farmer_name: farmer ? `${farmer.first_name} ${farmer.last_name}` : "N/A",
+          farmer_name: farmer
+            ? `${farmer.first_name} ${farmer.last_name}`
+            : "N/A",
           dryer_id: dryer?.id || null,
           dryer_name: dryer?.dryer_name || "N/A",
           dryer_location: dryer?.location || "N/A",
-          crop_type: cropType?.crop_type_name || "N/A",    
-          quantity: r.quantity || cropType?.quantity || 0, 
-          payment: cropType?.payment || "N/A", 
+          crop_type: cropType?.crop_type_name || "N/A",
+          quantity: r.quantity || cropType?.quantity || 0,
+          payment: cropType?.payment || "N/A",
           rate: dryer?.rate || 0,
           status: r.status || "pending",
           created_at: r.created_at,
         };
-    
+
         return mapped;
       })
     );
@@ -69,18 +72,23 @@ export const getReservations = async (req, res) => {
 
     res.json(filtered);
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch reservations", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch reservations", error: err.message });
   }
 };
- 
+
 export const getReservationById = async (req, res) => {
   try {
     const { id } = req.params;
     const reservation = await Reservations.findById(id);
-    if (!reservation) return res.status(404).json({ message: "Reservation not found." });
+    if (!reservation)
+      return res.status(404).json({ message: "Reservation not found." });
     res.json(reservation);
   } catch (err) {
-    res.status(404).json({ message: "Reservation not found.", error: err.message });
+    res
+      .status(404)
+      .json({ message: "Reservation not found.", error: err.message });
   }
 };
 
@@ -95,7 +103,9 @@ export const createReservation = async (req, res) => {
     const dryer = await Dryers.findById(dryer_id);
 
     if (dryer.available_capacity - quantity < 0) {
-      return res.status(400).json({ message: "Available capacity is not enough." });
+      return res
+        .status(400)
+        .json({ message: "Available capacity is not enough." });
     }
 
     const cropType = await CropTypes.create({
@@ -108,7 +118,7 @@ export const createReservation = async (req, res) => {
     const reservation = await Reservations.create({
       farmer_id,
       dryer_id,
-      crop_type_id: cropType.crop_type_id,  
+      crop_type_id: cropType.crop_type_id,
       status: "pending",
     });
 
@@ -116,11 +126,14 @@ export const createReservation = async (req, res) => {
       available_capacity: dryer.available_capacity - quantity,
     });
 
-    res.status(201).json({ message: "Reservation created successfully", reservation });
-
+    res
+      .status(201)
+      .json({ message: "Reservation created successfully", reservation });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Failed to create reservation", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to create reservation", error: err.message });
   }
 };
 
@@ -137,11 +150,18 @@ export const updateReservation = async (req, res) => {
 
     if (error) throw error;
     if (!data || data.length === 0)
-      return res.status(404).json({ message: "Reservation not found or not updated" });
+      return res
+        .status(404)
+        .json({ message: "Reservation not found or not updated" });
 
-    res.json({ message: "Reservation updated successfully.", reservation: data[0] });
+    res.json({
+      message: "Reservation updated successfully.",
+      reservation: data[0],
+    });
   } catch (err) {
-    res.status(400).json({ message: "Failed to update reservation.", error: err.message });
+    res
+      .status(400)
+      .json({ message: "Failed to update reservation.", error: err.message });
   }
 };
 
@@ -151,7 +171,9 @@ export const deleteReservation = async (req, res) => {
     await Reservations.delete(id);
     res.json({ message: "Reservation deleted successfully." });
   } catch (err) {
-    res.status(400).json({ message: "Failed to delete reservation.", error: err.message });
+    res
+      .status(400)
+      .json({ message: "Failed to delete reservation.", error: err.message });
   }
 };
 
@@ -161,7 +183,9 @@ export const checkReservation = async (req, res) => {
     const exists = await Reservations.checkReservation(farmer_id, dryer_id);
     res.json({ exists });
   } catch (err) {
-    res.status(500).json({ message: "Error checking reservation", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error checking reservation", error: err.message });
   }
 };
 
@@ -170,24 +194,35 @@ export const getReservationsByOwner = async (req, res) => {
     const { ownerId } = req.params;
     const reservations = await Reservations.findAll();
 
-    reservations = reservations.filter(r => r.owner?.id === ownerId);
+    reservations = reservations.filter(
+      (r) => r.dryer_id?.created_by_id === ownerId
+    );
+
+    console.log(reservations);
 
     res.json(
-      reservations.map(r => ({
+      reservations.map((r) => ({
         id: r.id,
         farmer_id: r.farmer?.id || null,
-        farmer_name: r.farmer ? `${r.farmer.first_name} ${r.farmer.last_name}` : "N/A",
+        farmer_name: r.farmer
+          ? `${r.farmer.first_name} ${r.farmer.last_name}`
+          : "N/A",
         dryer_id: r.dryer?.id || null,
         dryer_name: r.dryer?.dryer_name || "N/A",
         location: r.dryer?.location || "N/A",
         owner_id: r.owner?.id || null,
-        owner_name: r.owner ? `${r.owner.first_name} ${r.owner.last_name}` : "N/A",
+        owner_name: r.owner
+          ? `${r.owner.first_name} ${r.owner.last_name}`
+          : "N/A",
         status: r.status || "pending",
         created_at: r.created_at,
       }))
     );
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch reservations by owner.", error: err.message });
+    res.status(500).json({
+      message: "Failed to fetch reservations by owner.",
+      error: err.message,
+    });
   }
 };
 
@@ -199,7 +234,7 @@ export const getAllOwnersWithDryers = async (req, res) => {
 
     if (error) throw error;
 
-    const ownerIds = [...new Set(dryers.map(d => d.created_by_id))];
+    const ownerIds = [...new Set(dryers.map((d) => d.created_by_id))];
     const { data: owners, error: ownersError } = await supabase
       .from("users")
       .select("id, first_name, last_name, email")
@@ -209,18 +244,18 @@ export const getAllOwnersWithDryers = async (req, res) => {
 
     if (ownersError) throw ownersError;
 
-    const result = owners.map(owner => ({
+    const result = owners.map((owner) => ({
       id: owner.id,
       name: `${owner.first_name} ${owner.last_name}`,
       email: owner.email,
       dryers: dryers
-        .filter(d => d.created_by_id === owner.id)
-        .map(d => ({
+        .filter((d) => d.created_by_id === owner.id)
+        .map((d) => ({
           id: d.id,
           name: d.dryer_name,
           location: d.location,
           created_at: d.created_at,
-        }))
+        })),
     }));
     res.json(result);
   } catch (err) {

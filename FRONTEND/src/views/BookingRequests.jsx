@@ -11,7 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function BookingRequests() {
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
@@ -65,7 +65,7 @@ function BookingRequests() {
       setFilter((prev) => ({ ...prev, ...data }));
       setModalFilter(false);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -78,10 +78,9 @@ function BookingRequests() {
 
     try {
       setLoading(true);
-      await api.put(
-        `${import.meta.env.VITE_API}/reservations/${data.id}`,
-        { status: data.status }
-      );
+      await api.put(`${import.meta.env.VITE_API}/reservations/${data.id}`, {
+        status: data.status,
+      });
       toast.success("Booking is updated successfully!");
       setModalView(false);
       fetchData();
@@ -101,7 +100,7 @@ function BookingRequests() {
         label: "ID",
         type: "hidden",
         name: "id",
-        defaultValue: data.id,   
+        defaultValue: data.id,
       },
       {
         label: "Crop Type",
@@ -146,11 +145,15 @@ function BookingRequests() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await api.get(`${import.meta.env.VITE_API}/reservations`,{
-          headers: { 
-            Authorization: `Bearer ${token}` 
+      const res = await api.get(
+        `${import.meta.env.VITE_API}/reservations/owner`,
+        {
+          params: { ownerId: localStorage.getItem("id") },
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        });
+        }
+      );
 
       if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
 
