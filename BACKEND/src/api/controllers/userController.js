@@ -149,6 +149,8 @@ export const loginUser = async (req, res) => {
         role: user.role,
         address: user.address,
         email: user.email,
+        profile_image: user.profile_image,
+        mobile_number: user.mobile_number,
       },
       token: token,
     });
