@@ -75,7 +75,6 @@ function BookingRequests() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    console.log(data);
     try {
       setLoading(true);
       await api.put(`${import.meta.env.VITE_API}/reservations/${data.id}`, {
