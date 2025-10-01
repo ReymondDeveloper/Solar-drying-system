@@ -40,21 +40,18 @@ export default function Dryer() {
   const [modalAdd, setModalAdd] = useState(false);
   const navigate = useNavigate();
   const farmerId = localStorage.getItem("id");
-  const token = localStorage.getItem("token");   
-  
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
 
       try {
-        const res = await api.get(
-          `${import.meta.env.VITE_API}/dryers/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        );
+        const res = await api.get(`${import.meta.env.VITE_API}/dryers/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setData(res.data);
       } catch (error) {
         toast.error(error.response?.data?.message || "Error fetching data");
@@ -90,7 +87,7 @@ export default function Dryer() {
       placeholder: "ex. Rice",
       required: true,
       name: "crop_type",
-      colspan: 1
+      colspan: 1,
     },
     {
       label: "Quantity (Cavans)",
@@ -99,14 +96,14 @@ export default function Dryer() {
       placeholder: "ex. 50",
       required: true,
       name: "quantity",
-      colspan: 1
+      colspan: 1,
     },
     {
       label: "Payment Type",
       type: "select",
       name: "payment",
       options: [{ value: "gcash" }, { value: "cash" }],
-      colspan: 2
+      colspan: 2,
     },
   ];
 
@@ -171,14 +168,16 @@ export default function Dryer() {
           </>
         )}
         <div className="bg-gray-100 p-5 text-sm capitalize space-y-1 flex flex-col">
-          <Button
-            className={
-              "w-full md:w-1/2 lg:w-1/4 md:ms-auto rounded-full! bg-blue-400 hover:bg-blue-500 text-white"
-            }
-            onClick={() => setModalAdd(true)}
-          >
-            Reserve
-          </Button>
+          {data.owner !== localStorage.getItem("full_name") && (
+            <Button
+              className={
+                "w-full md:w-1/2 lg:w-1/4 md:ms-auto rounded-full! bg-blue-400 hover:bg-blue-500 text-white"
+              }
+              onClick={() => setModalAdd(true)}
+            >
+              Reserve
+            </Button>
+          )}
           <div>
             <span>Dryer: </span>
             <b>{data.dryer_name}</b>
@@ -188,7 +187,7 @@ export default function Dryer() {
             <b>{data.maximum_capacity}</b>
           </div>
           <div>
-            <span>Available Capacity: </span> 
+            <span>Available Capacity: </span>
             <b>{data.available_capacity}</b>
           </div>
           <div>
