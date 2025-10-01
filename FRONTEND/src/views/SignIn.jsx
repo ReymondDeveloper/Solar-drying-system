@@ -108,6 +108,7 @@ function SignIn() {
       type: "email",
       required: true,
       name: "email",
+      colspan: 2,
     },
   ];
 
@@ -221,7 +222,7 @@ function SignIn() {
       )}
       {otpVerify && (
         <OTP
-          setOtp={setOtp}
+          setOtp={setOtpVerify}
           onVerified={() => (setOtpVerify(false), setModalEdit(true))}
           loading={loading}
           setLoading={setLoading}
