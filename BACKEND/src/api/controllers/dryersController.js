@@ -8,7 +8,7 @@ export const getOwned = async (req, res) => {
       .from("dryers")
       .select("*")
       .eq("created_by_id", id)
-      .single();
+      .order("created_at", { ascending: false });
 
     if (error && error.code !== "PGRST116") throw error;
 

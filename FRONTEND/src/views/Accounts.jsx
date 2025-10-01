@@ -166,7 +166,7 @@ function Accounts() {
     try {
       const token = localStorage.getItem("token"); 
       const res = await axios.get(`${import.meta.env.VITE_API}/users`, {
-        params: { offset, limit },
+        params: { offset, limit, sort: "desc"  },
         headers: {
           Authorization: `Bearer ${token}`, 
         },

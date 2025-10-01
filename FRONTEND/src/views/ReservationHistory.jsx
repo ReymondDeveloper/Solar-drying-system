@@ -87,24 +87,24 @@ function ReservationHistory() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const res = await api.get(`${import.meta.env.VITE_API}/reservations`, {
-          params: {
-            farmer_id: localStorage.getItem("id"),
-          },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await api.get(
+          `${import.meta.env.VITE_API}/reservations/home?farmer_id=${localStorage.getItem("id")}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         if (!Array.isArray(res.data)) throw new Error("Invalid API response");
 
         setData(
           res.data.map((reservation) => ({
-            farmer_name: reservation.farmer_name || "N/A",
-            dryer_name: reservation.dryer_name || "N/A",
-            location: reservation.dryer_location || "N/A",
-            crop_type: reservation.crop_type || "N/A",
-            quantity: reservation.quantity || 0,
-            payment: reservation.payment || "N/A",
+            farmer_name: reservation.farmer_id.first_name || "N/A",
+            dryer_name: reservation.dryer_id.dryer_name || "N/A",
+            location: reservation.dryer_id.location || "N/A",
+            crop_type: reservation.crop_type_id.crop_type_name || "N/A",
+            quantity: reservation.crop_type_id.quantity || 0,
+            payment: reservation.crop_type_id.payment || "N/A",
             date: reservation.created_at
               ? new Date(reservation.created_at).toLocaleString("en-PH", {
                 year: "numeric",

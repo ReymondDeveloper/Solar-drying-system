@@ -43,7 +43,7 @@ const Reservations = {
         created_at
       `
       )
-      .eq("id", id)
+      .eq("farmer_id.id", id)
       .single();
 
     if (error) throw error;

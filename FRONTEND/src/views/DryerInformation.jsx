@@ -219,8 +219,8 @@ function DryerInformation() {
         }
       );
 
-      const dryers = res.data !== null ? [res.data] : [];
-
+      const dryers = res.data !== null ? res.data : [];
+      console.log(res.data);
       const formatted = dryers.map((dryer) => ({
         ...dryer,
         created_at: dryer.created_at

@@ -10,7 +10,6 @@ export const getReservations = async (req, res) => {
       .from("reservations")
       .select("*")
       .order("created_at", { ascending: false });
-
     if (resError) throw resError;
 
     const formatted = await Promise.all(
@@ -80,17 +79,20 @@ export const getReservations = async (req, res) => {
 
 export const getReservationById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const reservation = await Reservations.findById(id);
-    if (!reservation)
-      return res.status(404).json({ message: "Reservation not found." });
-    res.json(reservation);
+    const { farmer_id } = req.query;  
+    if (!farmer_id) return res.status(400).json({ message: "farmer_id is required" });
+
+    const reservations = await Reservations.findAll({ farmer_id });  
+    // if (!reservations || reservations.length === 0) {
+    //   return res.status(404).json({ message: "No reservations found for this farmer." });
+    // }
+
+    res.json(reservations);
   } catch (err) {
-    res
-      .status(404)
-      .json({ message: "Reservation not found.", error: err.message });
+    res.status(500).json({ message: "Reservation fetch failed.", error: err.message });
   }
 };
+
 
 export const createReservation = async (req, res) => {
   try {

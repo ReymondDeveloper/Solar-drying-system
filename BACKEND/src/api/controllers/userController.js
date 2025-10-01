@@ -13,11 +13,18 @@ const generateToken = (id) => {
 export const getUsers = async (req, res, next) => {
   try {
     const role = req.query.role;
-    let users = await User.findAll();
+    const sort = req.query.sort || "desc";  
 
-    if (role) {
-      users = users.filter((u) => u.role?.toLowerCase() === role.toLowerCase());
+    let query = supabase.from("users").select("*");
+
+    if (role && role !== "all") {
+      query = query.eq("role", role.toLowerCase());
     }
+
+    query = query.order("created_at", { ascending: sort !== "desc" });
+
+    const { data: users, error } = await query;
+    if (error) throw error;
 
     res.json(users);
   } catch (err) {

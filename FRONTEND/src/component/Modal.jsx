@@ -206,12 +206,12 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
           {datas ? (
             <div className="col-span-1 md:col-span-2">
               <div className="flex flex-col items-center text-sm">
-                <b className="uppercase text-md">{datas.dryer_name}</b>
+                <b className="uppercase text-md">{datas.dryer_id.dryer_name}</b>
                 <p className="capitalize">
-                  {String(datas.dryer_location).includes("Sablayan") ||
-                  String(datas.dryer_location).includes("Occidental Mindoro")
-                    ? datas.dryer_location
-                    : datas.dryer_location + ", Sablayan, Occidental Mindoro"}
+                  {String(datas.dryer_id.location).includes("Sablayan") ||
+                  String(datas.dryer_id.location).includes("Occidental Mindoro")
+                    ? datas.dryer_id.location
+                    : datas.dryer_id.location + ", Sablayan, Occidental Mindoro"}
                 </p>
                 <div className="w-full text-start mt-5 overflow-auto">
                   <p>
@@ -221,7 +221,7 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                   <p>
                     Reserved by:{" "}
                     <span className="capitalize font-bold">
-                      {datas.farmer_name}
+                      {datas.farmer_id.first_name}
                     </span>
                   </p>
                   <p>
@@ -254,17 +254,17 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                       <tr>
                         <td className="border-b border-x text-center">1</td>
                         <td className="border-b border-x ps-5 capitalize">
-                          {datas.crop_type}
+                          {datas.crop_type_id.crop_type_name}
                         </td>
                         <td className="border-b border-x pe-5 text-end">
-                          {datas.quantity}
+                          {datas.crop_type_id.quantity}
                         </td>
                         <td className="border-b border-x pe-5 text-end">
-                          {datas.rate}
+                          {datas.dryer_id.rate}
                         </td>
                         <td className="border-b border-x pe-5 text-end">
-                          {safeNumber(datas?.rate) *
-                            safeNumber(datas?.quantity)}
+                          {safeNumber(datas?.dryer_id.rate) *
+                            safeNumber(datas?.crop_type_id.quantity)}
                         </td>
                       </tr>
                     </tbody>
@@ -274,12 +274,12 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                           <p>
                             Amount Due:{" "}
                             <span>
-                              {safeNumber(datas?.rate) *
-                                safeNumber(datas?.quantity)}
+                              {safeNumber(datas?.dryer_id.rate) *
+                                safeNumber(datas?.crop_type_id.quantity)}
                             </span>
                           </p>
                           <p className="capitalize">
-                            Payment Method: <span>{datas?.payment}</span>
+                            Payment Method: <span>{datas?.crop_type_id.payment}</span>
                           </p>
                         </td>
                       </tr>
