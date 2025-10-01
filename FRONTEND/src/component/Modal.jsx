@@ -6,7 +6,7 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
   const [address, setAddress] = useState("");
   const [previewUrls, setPreviewUrls] = useState({});
   const [mainImage, setMainImage] = useState("");
-
+  const userRole = localStorage.getItem("role");
   const handleLocation = () => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -69,10 +69,56 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                 field.colspan === 2 ? "md:col-span-2" : ""
               }`}
             >
-            {field.name === "crop_type" ? (
+
+            {field.name === "payment" ? (
+              <>
+               <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                {field.name === "payment" && userRole === "farmer"
+                  ? "Paraan ng Pagbabayad"
+                  : field.label}
+              </label>
+                <select
+                  name={field.name}
+                  className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
+                  defaultValue={field.defaultValue || ""}
+                  required={field.required}
+                >
+                  {userRole === "farmer" ? (
+                    <>
+                      <option value="cash">
+                        Cash
+                      </option>
+                      <option value="gcash">
+                        GCash
+                      </option> 
+                    </>
+                  ) : (
+                    <>
+                      <option value="cash">Cash</option>
+                      <option value="gcash">GCash</option>
+                    </>
+                  )}
+                </select>
+              </>
+            ) : field.name === "quantity" ? (
+               <> 
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                    {userRole === "farmer" ? "Dami (Canvans)" : "Quantity (Canvans)"}
+                  </label>
+                  <input
+                    type="number"
+                    name={field.name}
+                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
+                    defaultValue={field.defaultValue || ""}
+                    required={field.required}
+                    min={0}
+                    step={1}
+                  />
+                  </>
+                ) : field.name === "crop_type" ? (
               <>
                   <label className="text-[rgba(0,100,0,255)] font-bold text-md">
-                    {field.label}
+                    {userRole === "farmer" ? "Uri ng pananim" : field.label}
                   </label>
                   <select
                     name={field.name}
@@ -80,11 +126,29 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     defaultValue={field.defaultValue || ""}
                     required={field.required}
                   >
-                    <option value="" disabled>
-                      Select crop type
-                    </option>
-                    <option value="corn">Corn</option>
-                    <option value="rice">Rice</option>
+                    {(() => {
+                      if (userRole === "farmer") {
+                        return (
+                          <>
+                            <option value="" disabled>
+                              {userRole === "farmer" ? "Pumili ng uri ng pananim" : field.label}
+                            </option>
+                            <option value="mais">Mais</option> 
+                            <option value="rice">Palay</option>
+                          </>
+                        );
+                      } else {
+                        return (
+                          <>
+                            <option value="" disabled>
+                              Select crop type
+                            </option>
+                            <option value="corn">Corn</option>
+                            <option value="rice">Rice</option>
+                          </>
+                        );
+                      }
+                    })()}
                   </select>
                 </>
               ) : field.name === "image_url" ? (

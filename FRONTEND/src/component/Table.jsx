@@ -52,8 +52,8 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                   {dataCell === "status" ? (
                     el.status?.toLowerCase().includes("available") ? (
                       <span className="flex items-center gap-2 justify-center">
-                        <span className="w-3.5 h-3.5 rounded-full bg-blue-500" />
-                        <span className="hidden md:inline text-blue-600 font-medium">
+                        <span className="w-3.5 h-3.5 rounded-full bg-green-600" />
+                        <span className="hidden md:inline text-green-600 font-medium">
                           Available
                         </span>
                       </span>
@@ -119,8 +119,8 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                   </span>{" "}
                   {dataCell === "status" ? (
                     el.status?.toLowerCase().includes("available") ? (
-                      <span className="inline-flex items-center gap-2 text-blue-600">
-                        <span className="w-3.5 h-3.5 rounded-full bg-blue-500" />
+                      <span className="inline-flex items-center gap-2 text-green-600">
+                        <span className="w-3.5 h-3.5 rounded-full bg-green-600" />
                         Available
                       </span>
                     ) : el.status?.toLowerCase().includes("occupied") ? (
