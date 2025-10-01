@@ -75,11 +75,14 @@ function BookingRequests() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-
+    console.log(data);
     try {
       setLoading(true);
       await api.put(`${import.meta.env.VITE_API}/reservations/${data.id}`, {
         status: data.status,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       toast.success("Booking is updated successfully!");
       setModalView(false);
@@ -97,10 +100,9 @@ function BookingRequests() {
   const handleView = useCallback((data) => {
     setFieldsView([
       {
-        label: "ID",
         type: "hidden",
         name: "id",
-        defaultValue: data.id,
+        value: data.id,
       },
       {
         label: "Crop Type",
@@ -158,7 +160,7 @@ function BookingRequests() {
       if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
 
       setData(
-        res.data.map((res) => ({
+        res.data?.map((res) => ({
           id: res.id,
           farmer_name: res.farmer_name || "N/A",
           location: res.dryer_location || "N/A",
