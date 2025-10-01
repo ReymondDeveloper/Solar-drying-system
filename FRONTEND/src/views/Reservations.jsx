@@ -17,15 +17,13 @@ function Reservations() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const tableHeadings = [
-    "Owner",
-    "Email",
+    "Farmer",
     "Dryers",
     "Location",
     "Date Created",
   ];
   const tableDataCell = [
-    "owner_name",
-    "email",
+    "farmer_name",
     "dryer_name",
     "location",
     "created_at",
@@ -85,28 +83,25 @@ function Reservations() {
     setIsLoading(true);
     try {
       const res = await api.get(
-        `${import.meta.env.VITE_API}/reservations/owners`,
+        `${import.meta.env.VITE_API}/reservations`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
 
       const results = res.data;
-      const formattedData = results.flatMap((owner) =>
-        owner.dryers.map((dryer) => ({
-          owner_name: owner.name,
-          email: owner.email,
-          dryer_name: dryer.name,
-          location: dryer.location,
-          created_at: dryer.created_at
-            ? new Date(dryer.created_at).toLocaleString("en-PH", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
-            : "N/A",
-        }))
-      );
+      const formattedData = results.map((owner) => ({
+        farmer_name: owner.farmer_name,
+        dryer_name: owner.dryer_name,
+        location: owner.dryer_location,
+        created_at: owner.created_at
+          ? new Date(owner.created_at).toLocaleString("en-PH", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
+          : "N/A",
+      }));
 
       setData(formattedData);
     } catch (err) {
