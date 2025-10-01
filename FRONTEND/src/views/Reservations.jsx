@@ -16,14 +16,26 @@ function Reservations() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-  const tableHeadings = ["Owner", "Email", "Dryers", "Location", "Date Created"];  
-  const tableDataCell = ["owner_name", "owner_email", "dryer_name", "location", "created_at"];
+  const tableHeadings = [
+    "Owner",
+    "Email",
+    "Dryers",
+    "Location",
+    "Date Created",
+  ];
+  const tableDataCell = [
+    "owner_name",
+    "email",
+    "dryer_name",
+    "location",
+    "created_at",
+  ];
   const { addresses } = useAddresses();
-  
+
   function useAddresses() {
     const [addresses, setAddresses] = useState([]);
     const [loading, setLoading] = useState(false);
-  
+
     useEffect(() => {
       const fetchAddresses = async () => {
         setLoading(true);
@@ -38,7 +50,7 @@ function Reservations() {
       };
       fetchAddresses();
     }, []);
-  
+
     return { addresses, loading };
   }
 
@@ -47,7 +59,10 @@ function Reservations() {
       label: "Location (Sablayan)",
       type: "select",
       name: "location",
-      options: [{ value: 'all', phrase: 'All' }, ...addresses.map((a) => ({ value: a.name, phrase: a.name }))],
+      options: [
+        { value: "all", phrase: "All" },
+        ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
+      ],
       colspan: 2,
     },
   ];
@@ -60,7 +75,7 @@ function Reservations() {
       setFilter(data.location);
       setModal(false);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -69,15 +84,18 @@ function Reservations() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await api.get(`${import.meta.env.VITE_API}/reservations/owners`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-  
+      const res = await api.get(
+        `${import.meta.env.VITE_API}/reservations/owners`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
       const results = res.data;
       const formattedData = results.flatMap((owner) =>
         owner.dryers.map((dryer) => ({
           owner_name: owner.name,
-          owner_email: owner.email,
+          email: owner.email,
           dryer_name: dryer.name,
           location: dryer.location,
           created_at: dryer.created_at
@@ -89,7 +107,7 @@ function Reservations() {
             : "N/A",
         }))
       );
-  
+
       setData(formattedData);
     } catch (err) {
       console.error(err);
@@ -121,11 +139,11 @@ function Reservations() {
   const totalPages = Math.max(1, Math.ceil(FilteredData.length / limit));
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
- 
+
   return (
     <>
       {loading && <Loading />}
-      {modal && (  
+      {modal && (
         <Modal
           setModal={setModal}
           handleSubmit={handleSubmit}

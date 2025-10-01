@@ -18,7 +18,12 @@ function Availability() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const tableHeadings = ["Registered Dryer", "Location (Sablayan)", "Date Created" ,"Status"];
+  const tableHeadings = [
+    "Registered Dryer",
+    "Location (Sablayan)",
+    "Date Created",
+    "Status",
+  ];
   const tableDataCell = ["dryer_name", "location", "created_at", "status"];
 
   const fields = [
@@ -43,7 +48,7 @@ function Availability() {
       setFilter(data.status);
       setModal(false);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -56,7 +61,7 @@ function Availability() {
 
       try {
         const res = await api.get(`${import.meta.env.VITE_API}/dryers`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },  
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
 
         const dryers = res.data.Results || res.data;
@@ -64,7 +69,7 @@ function Availability() {
         const formatted = dryers.map((dryer) => ({
           dryer_name: dryer.dryer_name,
           location: dryer.location,
-          status: dryer.status?.trim() || "available",
+          status: dryer.available_capacity > 0 ? "available" : "occupied",
           created_at: dryer.created_at
             ? new Date(dryer.created_at).toLocaleString("en-PH", {
                 year: "numeric",
@@ -76,7 +81,10 @@ function Availability() {
 
         setData(formatted);
       } catch (error) {
-        console.error("Error fetching dryers:", error.response?.data?.message || error.message);
+        console.error(
+          "Error fetching dryers:",
+          error.response?.data?.message || error.message
+        );
         setIsError(true);
       } finally {
         setIsLoading(false);
@@ -91,7 +99,7 @@ function Availability() {
       filter && filter !== "all"
         ? info.status.toLowerCase().includes(filter.toLowerCase())
         : true;
-  
+
     const filterBySearch = search
       ? Object.entries(info)
           .filter(([key]) => key !== "status")
