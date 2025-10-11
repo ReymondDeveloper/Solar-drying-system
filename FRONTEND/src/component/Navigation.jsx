@@ -2,8 +2,7 @@ import { NavLink } from "react-router-dom";
 import Links from "../utils/Links";
 
 function Navigation({ button, setButton }) {
-  const baseIMG =
-    import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system/";
+  
   return (
     <>
       <div
@@ -30,7 +29,7 @@ function Navigation({ button, setButton }) {
                 !button && "h-[30px]"
               }`}
             >
-              <img src={`${baseIMG}logo.png`} />
+              <img src="/logo.png" />
             </div>
           </div>
         )}

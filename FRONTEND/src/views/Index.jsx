@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 import pckg from '../../package.json';
 
 function Index() {
-    const baseIMG = import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system/";
     const currentVersion = pckg.version;
     return(
         <>
@@ -27,7 +26,7 @@ function Index() {
 
                 <img
                     className="object-cover w-full h-full flex-grow rotate-y-180"
-                    src={`${baseIMG}landing_page.avif`}
+                    src="/landing_page.avif"
                 />
             </div>
 
