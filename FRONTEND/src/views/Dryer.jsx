@@ -19,12 +19,12 @@ export function DynamicMap({ location }) {
   const mapSrc = `https://maps.google.com/maps?q=${encodedLocation}&output=embed`;
 
   return (
-    <div>
-      <span>Location: </span>
+    <div className="w-full h-64">
+      <span className="text-lg font-semibold">Location: </span>
       <b>{Location}</b>
       <iframe
         src={mapSrc}
-        className="border-0 w-full h-full"
+        className="border-0 w-full h-full mt-2"
         allowFullScreen=""
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
@@ -70,8 +70,7 @@ export default function Dryer() {
     {
       user: "User0001",
       rating: 5,
-      comment:
-        "As someone who values quality, I wholeheartedly recommend this.",
+      comment: "As someone who values quality, I wholeheartedly recommend this.",
     },
     {
       user: "User0002",
@@ -79,6 +78,10 @@ export default function Dryer() {
       comment: "Using their tools, we streamlined our operations.",
     },
   ];
+
+  const uniqueFarmers = data.farmers ? [
+    ...new Map(data.farmers.map(farmer => [farmer.farmer_id, farmer])).values()
+  ] : [];
 
   const fieldsAdd = [
     {
@@ -132,6 +135,7 @@ export default function Dryer() {
       setLoading(false);
     }
   };
+
   return (
     <>
       {loading && <Loading />}
@@ -145,141 +149,111 @@ export default function Dryer() {
           button_name={"Reserve"}
         />
       )}
-      <div
-        className={`w-full h-[calc(100dvh-170px)] ${
-          modalAdd ? "overflow-hidden" : "overflow-auto"
-        }`}
-      >
-        {data.image_url ? (
-          <div className="w-full h-[300px] flex items-center justify-center bg-gray-200 relative">
+      
+      <div className={`w-full h-[calc(100dvh-170px)]`}>
+        <div className="w-full h-[300px] flex justify-center items-center bg-gray-200 relative rounded-lg shadow-md">
+          {data.image_url ? (
             <img
               src={data.image_url}
-              className="object-contain h-full"
+              className="object-cover w-full h-full rounded-lg"
               onError={() => setData((prev) => ({ ...prev, image_url: "" }))}
             />
-          </div>
-        ) : (
-          <>
-            <div className="w-full h-[300px] flex items-center justify-center bg-gray-200 relative">
-              <div className="absolute z-1 w-100 h-0.5 bg-gray-100 rotate-45" />
-              <div className="absolute z-1 w-100 h-0.5 bg-gray-100 -rotate-45" />
-              <b className="z-2 text-sm font-bold">NO IMAGE AVAILABLE</b>
+          ) : (
+            <div className="flex justify-center items-center w-full h-full bg-gray-300 rounded-lg">
+              <b className="text-gray-600">No Image Available</b>
             </div>
-          </>
-        )}
-        <div className="bg-gray-100 p-5 text-sm capitalize space-y-1 flex flex-col">
-          {data.owner !== localStorage.getItem("full_name") && (
+          )}
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
+          <h2 className="text-2xl font-semibold text-center">Dryer Details</h2>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-gray-700">Dryer: </span>
+              <b>{data.dryer_name}</b>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-700">Maximum Capacity: </span>
+              <b>{data.maximum_capacity}</b>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-700">Available Capacity: </span>
+              <b>{data.available_capacity}</b>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-700">Rate: </span>
+              <b>PHP {data.rate}</b>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-700">Created: </span>
+              <b>{new Date(data.created_at).toLocaleString()}</b>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-700">Owner: </span>
+              <b>{data.owner}</b>
+            </div>
+          </div>
+
+           {data.available_capacity > 0 && data.owner !== localStorage.getItem("full_name") && (
             <Button
-              className={
-                "w-full md:w-1/2 lg:w-1/4 md:ms-auto rounded-full! bg-blue-400 hover:bg-blue-500 text-white"
-              }
+              className="w-full bg-blue-500 text-white py-3 rounded-full hover:bg-blue-600 mt-4"
               onClick={() => setModalAdd(true)}
             >
               Reserve
             </Button>
           )}
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
+          <h3 className="text-xl font-semibold">Farmers Who Reserved</h3>
           <div>
-            <span>Dryer: </span>
-            <b>{data.dryer_name}</b>
-          </div>
-          <div>
-            <span>Maximum Capacity: </span>
-            <b>{data.maximum_capacity}</b>
-          </div>
-          <div>
-            <span>Available Capacity: </span>
-            <b>{data.available_capacity}</b>
-          </div>
-          <div>
-            <span>Rate: </span>
-            <b>PHP{data.rate}</b>
-          </div>
-          <div>
-            <span>Created: </span>
-            <b>{new Date(data.created_at).toLocaleString()}</b>
-          </div>
-          <div>
-            <span>Owned: </span>
-            <b>{data.owner}</b>
-          </div>
-          <DynamicMap location={data.location} />
-          <div className="mt-3">
-            <div className="flex gap-3">
-              <div className="flex gap-1 items-center">
-                <b>Ratings: </b>
-                <b>
-                  {data.rating_overall && data.rating_count
-                    ? data.rating_overall / data.rating_count
-                    : "4.5"}
-                </b>
-                {parseFloat(data.ratings ?? "5.0") % 1 >= 0.5 ||
-                parseFloat(data.ratings ?? "5.0") % 1 === 0.0 ? (
-                  <CgArrowUp />
-                ) : (
-                  <CgArrowDown />
-                )}
-                (
-                {data.rating_overall && data.rating_count
-                  ? data.rating_overall / data.rating_count
-                  : "9 / 2"}
-                )
-              </div>
-              <div className="flex grow items-center gap-5">
-                {Array.from(
-                  {
-                    length: Math.round(
-                      parseFloat(
-                        data.rating_overall && data.rating_count
-                          ? data.rating_overall / data.rating_count
-                          : "4.5"
-                      )
-                    ),
-                  },
-                  (_, i) => i
-                ).map((_, index) => (
-                  <div
+            {uniqueFarmers && uniqueFarmers.length > 0 ? (
+              <ul className="space-y-2">
+                {uniqueFarmers.map((farmer, index) => (
+                  <li
                     key={index}
-                    className="relative flex items-center justify-center"
+                    className="flex justify-between items-center border-b border-gray-300 py-2"
                   >
-                    <AiFillStar className="absolute text-[15px]" />
-                    <AiFillStar className="absolute text-[12px] text-green-500" />
-                  </div>
+                    <span>
+                      <b>{farmer.farmer_name}</b>
+                    </span>
+                  </li>
                 ))}
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              {ratings.map((data, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-200 rounded p-5 flex flex-col"
-                >
-                  <div className="flex gap-3">
-                    <div className="flex gap-1 items-center">
-                      <div className="hover:text-green-500 transition-all duration-300 cursor-pointer">
-                        {data.user}
-                      </div>
-                      <b className="text-gray-400">|</b>
-                    </div>
-                    <div className="flex grow items-center gap-5">
-                      {Array.from(
-                        {
-                          length: Math.round(parseFloat(data.rating ?? "5.0")),
-                        },
-                        (_, i) => i
-                      ).map((_, index) => (
-                        <div
-                          key={index}
-                          className="relative flex items-center justify-center"
-                        >
-                          <AiFillStar className="absolute text-[15px] text-green-500" />
-                        </div>
-                      ))}
-                    </div>
+              </ul>
+            ) : (
+              <p>No farmers associated with this dryer.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
+          <h3 className="text-xl font-semibold">Location</h3>
+          <DynamicMap location={data.location} />
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md space-y-4 ">
+          <h3 className="text-xl font-semibold">Ratings</h3>
+          <div className="space-y-4">
+            {ratings.length > 0 ? (
+              ratings.map((rating, index) => (
+                <div key={index} className="flex gap-3 border-b pb-3 mb-3">
+                  <div className="flex flex-col">
+                    <b className="text-lg">{rating.user}</b>
+                    <p className="text-gray-500">{rating.comment}</p>
                   </div>
-                  <i className="font-bold">"{data.comment}"</i>
+                  <div className="flex items-center gap-1">
+                    {[...Array(rating.rating)].map((_, i) => (
+                      <AiFillStar key={i} className="text-yellow-500" />
+                    ))}
+                    {[...Array(5 - rating.rating)].map((_, i) => (
+                      <AiFillStar key={i + 5} className="text-gray-300" />
+                    ))}
+                  </div>
                 </div>
-              ))}
-            </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No ratings yet.</p>
+            )}
           </div>
         </div>
       </div>

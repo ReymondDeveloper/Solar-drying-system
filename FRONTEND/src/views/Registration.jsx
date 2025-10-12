@@ -102,6 +102,7 @@ function Registration() {
       toast.success(res.data.message);
       setTimeout(() => {
         setEmail(email);
+        localStorage.setItem("email", email); 
         setOtp(true);
       }, 2000);
     } catch (err) {

@@ -53,18 +53,47 @@ export const getDryerById = async (req, res) => {
 
     if (error) throw error;
 
-    const { data: owners, error: resError } = await supabase
+    const { data: owner, error: ownerError } = await supabase
       .from("users")
       .select("first_name, middle_name, last_name")
       .eq("id", data.created_by_id)
       .single();
 
-    if (resError) throw resError;
+    if (ownerError) throw ownerError;
+
+    const { data: reservations, error: reservationsError } = await supabase
+      .from("reservations")
+      .select("farmer_id")
+      .eq("dryer_id", id);
+
+    if (reservationsError) throw reservationsError;
+
+    const farmers = await Promise.all(
+      reservations.map(async (reservation) => {
+        const { data: farmer, error: farmerError } = await supabase
+          .from("users")
+          .select("first_name, last_name")
+          .eq("id", reservation.farmer_id)
+          .single();
+
+        if (farmerError) {
+          console.error("Error fetching farmer:", farmerError);
+          return null;
+        }
+
+        return {
+          farmer_name: `${farmer.first_name} ${farmer.last_name}`,
+          farmer_id: farmer.id,
+        };
+      })
+    );
+
+    const validFarmers = farmers.filter(Boolean);
 
     res.json({
       ...data,
-      owner:
-        owners.last_name + ", " + owners.first_name + " " + owners.middle_name,
+      owner: `${owner.last_name}, ${owner.first_name} ${owner.middle_name}`,
+      farmers: validFarmers,
     });
   } catch (err) {
     res.status(404).json({ message: "Dryer not found.", error: err.message });
