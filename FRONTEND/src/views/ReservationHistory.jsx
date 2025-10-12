@@ -22,31 +22,45 @@ function ReservationHistory() {
   const [loading, setLoading] = useState(false);
   const [datasView, setDatasView] = useState([]);
   const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
 
-  const tableHeadings = [
-    "Farmer",
-    "Booked Dryer",
-    "Location (Sablayan)",
-    "Crop Type",
-    "Quantity",
-    "Payment",
-    "Date",
-    "Status",
-    "Action",
-  ];
+  const tableHeadings =
+  role === "farmer"
+    ? [
+        "Magsasaka",  
+        "Pinag-book na Patuyuan",  
+        "Lokasyon", 
+        "Uri ng Pananim", 
+        "Dami (Canvans)",  
+        "Paraan ng Pagbabayad",  
+        "Petsa", 
+        "Katayuan",  
+        "Aksyon", 
+      ]
+    : [
+        "Farmer",
+        "Booked Dryer",
+        "Location",
+        "Crop Type",
+        "Quantity",
+        "Payment",
+        "Date",
+        "Status",
+        "Action",
+      ];
 
-  const tableDataCell = [
-    "farmer_name",
-    "dryer_name",
-    "location",
-    "crop_type",
-    "quantity",
-    "payment",
-    "date",
-    "status",
-    "action",
-  ];
-
+      const tableDataCell = [
+        "farmer_name",
+        "dryer_name",
+        "location",
+        "crop_type",
+        "quantity",
+        "payment",
+        "date", 
+        "status",
+        "action",
+      ];
+      
   const fieldsFilter = [
     {
       label: "Status",
@@ -171,8 +185,8 @@ function ReservationHistory() {
           setModal={setModalView}
           handleSubmit={handleSubmitView}
           datas={datasView}
-          title={"Reservation Details"}
-          button_name={"Done"}
+          title={role === "farmer" ? "Mga Detalye ng Reperbasyon" : "Reservation Details"}
+          button_name={role === "farmer" ? "Tapos" : "Done"}
         />
       )}
       <div
@@ -195,7 +209,9 @@ function ReservationHistory() {
                 />
                 {FilteredData?.length === 0 && (
                   <div className="flex justify-center items-center font-bold py-5">
-                    Your transaction history is empty.
+                    {role === "farmer"
+                  ? "Wala ka pang kasaysayan ng transaksyon."
+                  : "Your transaction history is empty."}
                   </div>
                 )}
               </>

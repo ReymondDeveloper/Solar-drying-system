@@ -11,6 +11,7 @@ import api from "../api/api.js";
 
 function CreateReservation() {
   const token = localStorage.getItem("token"); 
+  const role = localStorage.getItem("role");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
@@ -22,15 +23,37 @@ function CreateReservation() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const tableHeadings = [
-    "Registered Dryer",
-    "Location (Sablayan)",
-    "Date Created",
-    "Status",
-    "Action",
-  ];
-  const tableDataCell = ["dryer_name", "location","created_at", "status", "action"];
+  const tableHeadings =
+  role === "farmer"
+    ? [
+        "Rehistradong Patuyuan",  
+        "Lokasyon (Sablayan)",   
+        "Kabuuang Kapasidad", 
+        "Magagamit na Kapasidad",
+        "Petsa ng Pagkakagawa", 
+        "Katayuan",               
+        "Aksyon",                 
+      ]
+    : [
+        "Registered Dryer",
+        "Location (Sablayan)",
+        "Maximum Capacity",
+        "Available Capacity",
+        "Date Created",
+        "Status",
+        "Action",
+      ];
 
+      const tableDataCell = [
+        "dryer_name",
+        "location",
+        "maximum_capacity", 
+        "available_capacity",  
+        "created_at",
+        "status",
+        "action",
+      ];
+      
   const fieldsFilter = [
     {
       label: "Status",
@@ -73,6 +96,8 @@ function CreateReservation() {
             id: dryer.id,
             dryer_name: dryer.dryer_name,
             location: dryer.location,
+            maximum_capacity: dryer.maximum_capacity,
+            available_capacity: dryer.available_capacity, 
             status:
               dryer.available_capacity > 0
                 ? "available"

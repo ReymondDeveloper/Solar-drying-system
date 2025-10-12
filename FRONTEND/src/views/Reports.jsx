@@ -160,6 +160,5 @@ function Reports() {
       </div>
     </div>
   );
-}
-
+} 
 export default Reports;
