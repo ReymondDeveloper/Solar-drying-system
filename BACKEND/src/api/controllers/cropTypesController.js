@@ -1,5 +1,5 @@
 import Reservations from "../models/Reservations.js";
-import CropTypes from "../models/cropTypes.js";
+import CropTypes from "../models/CropTypes.js";
 
 export const checkReservation = async (req, res) => {
     try {

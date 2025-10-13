@@ -21,8 +21,6 @@ import Settings from "./views/Settings";
 import DryerInformation from "./views/DryerInformation";
 import Dryer from "./views/Dryer";
 
-const baseName =
-  import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system";
 const router = createBrowserRouter(
   [
     {
@@ -131,7 +129,6 @@ const router = createBrowserRouter(
       element: <Notfound />,
     },
   ],
-  { basename: baseName }
 );
 
 createRoot(document.getElementById("root")).render(
