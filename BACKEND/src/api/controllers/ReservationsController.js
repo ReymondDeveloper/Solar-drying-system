@@ -1,6 +1,6 @@
 import Reservations from "../models/Reservations.js";
 import Dryers from "../models/dryersModel.js";
-import CropTypes from "../models/cropTypes.js";
+import CropTypes from "../models/CropTypes.js";
 import supabase from "../../database/supabase.db.js";
 
 export const getReservations = async (req, res) => {
