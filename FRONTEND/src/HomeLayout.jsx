@@ -10,8 +10,7 @@ function HomeLayout() {
   const [button, setButton] = useState(false);
   const [accountModal, setAccountModal] = useState(false);
   const Home = location.pathname === "/home";
-  const baseIMG =
-    import.meta.env.MODE === "development" ? "/" : "/Solar-drying-system/";
+
   return (
     <div className="h-screen w-screen flex overflow-hidden relative">
       {!Home && <Navigation button={button} setButton={setButton} />}
@@ -34,7 +33,7 @@ function HomeLayout() {
                 absolute -z-1 object-contain opacity-[50%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2 select-none
                 md:top-[56px] md:-translate-y-0
               "
-              src={`${baseIMG}logo.png`}
+              src="logo.png"
             />
 
             <div className="bg-[rgba(0,0,0,0.1)] backdrop-blur-[6px] rounded-lg p-5 w-full text-md text-[rgba(0,100,0,255)] abril-fatface">
