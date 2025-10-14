@@ -25,7 +25,8 @@ function SignIn() {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.target);
-    const { email, password } = Object.fromEntries(formData.entries());
+    const { email, password, selected_role } = Object.fromEntries(formData.entries());
+
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API}/users/login`,
@@ -59,6 +60,11 @@ function SignIn() {
           setOtp(true);
         }, 2000);
       } else {
+        if (role !== selected_role) {
+          toast.error(`Access denied: You are not authorized as ${selected_role}.`);
+          setLoading(false);
+          return;
+        }
         localStorage.setItem("token", token);
         localStorage.setItem("role", role);
         localStorage.setItem("full_name", full_name);
@@ -73,7 +79,10 @@ function SignIn() {
 
         toast.success(res.data.message);
         setTimeout(() => {
-          navigate("/home");
+          if (role === "admin") navigate("/home");
+          else if (role === "owner") navigate("/home");
+          else if (role === "farmer") navigate("/home");
+          else navigate("/home");
         }, 2000);
       }
     } catch (err) {
@@ -254,6 +263,22 @@ function SignIn() {
                     </div>
                   </div>
                 ))}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700" htmlFor="role">
+                    Role
+                  </label>
+                  <div className="mt-2">
+                    <select
+                      name="selected_role"
+                      required
+                      className="outline-0 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                    >
+                      <option value="admin">Admin</option>
+                      <option value="owner">Owner</option>
+                      <option value="farmer">Farmer</option>
+                    </select>
+                  </div>
+                </div>
 
                 <Button
                   type={`submit`}
