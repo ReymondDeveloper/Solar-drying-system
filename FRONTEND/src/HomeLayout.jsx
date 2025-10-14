@@ -2,25 +2,28 @@ import { Outlet } from "react-router-dom";
 import { useState } from "react";
 import Header from "./component/Header";
 import Navigation from "./component/Navigation";
-import { useLocation } from "react-router-dom";
 import AccountModal from "./component/AccountModal";
+import NotificationModal from "./component/NotificationModal";
 
 function HomeLayout() {
-  const location = useLocation();
   const [button, setButton] = useState(false);
   const [accountModal, setAccountModal] = useState(false);
-  const Home = location.pathname === "/home";
+  const [notificationModal, setNotificationModal] = useState(false);
 
   return (
     <div className="h-screen w-screen flex overflow-hidden relative">
-      {!Home && <Navigation button={button} setButton={setButton} />}
+      {<Navigation button={button} setButton={setButton} />}
       {accountModal && <AccountModal setAccountModal={setAccountModal} />}
+      {notificationModal && (
+        <NotificationModal setNotificationModal={setNotificationModal} />
+      )}
       <div className="flex-1 overflow-auto">
         <div className="h-full flex flex-col">
           <Header
             button={button}
             setButton={setButton}
             setAccountModal={setAccountModal}
+            setNotificationModal={setNotificationModal}
           />
           <div
             className="
