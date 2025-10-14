@@ -31,7 +31,7 @@ Install dependecies for front-end
 Run the project's' front-end
 
 ```bash
-  npm dev
+  npm run dev
 ```
 
 _This will open a tab in default browser._
