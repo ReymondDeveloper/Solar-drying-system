@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
@@ -10,7 +10,7 @@ import Button from "../component/Button";
 import api from "../api/api.js";
 
 function CreateReservation() {
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
@@ -24,36 +24,36 @@ function CreateReservation() {
   const navigate = useNavigate();
 
   const tableHeadings =
-  role === "farmer"
-    ? [
-        "Rehistradong Patuyuan",  
-        "Lokasyon (Sablayan)",   
-        "Kabuuang Kapasidad", 
-        "Magagamit na Kapasidad",
-        "Petsa ng Pagkakagawa", 
-        "Katayuan",               
-        "Aksyon",                 
-      ]
-    : [
-        "Registered Dryer",
-        "Location (Sablayan)",
-        "Maximum Capacity",
-        "Available Capacity",
-        "Date Created",
-        "Status",
-        "Action",
-      ];
+    role === "farmer"
+      ? [
+          "Rehistradong Patuyuan",
+          "Lokasyon (Sablayan)",
+          "Kabuuang Kapasidad",
+          "Magagamit na Kapasidad",
+          "Petsa ng Pagkakagawa",
+          "Katayuan",
+          "Aksyon",
+        ]
+      : [
+          "Registered Dryer",
+          "Location (Sablayan)",
+          "Maximum Capacity",
+          "Available Capacity",
+          "Date Created",
+          "Status",
+          "Action",
+        ];
 
-      const tableDataCell = [
-        "dryer_name",
-        "location",
-        "maximum_capacity", 
-        "available_capacity",  
-        "created_at",
-        "status",
-        "action",
-      ];
-      
+  const tableDataCell = [
+    "dryer_name",
+    "location",
+    "maximum_capacity",
+    "available_capacity",
+    "created_at",
+    "status",
+    "action",
+  ];
+
   const fieldsFilter = [
     {
       label: "Status",
@@ -78,40 +78,69 @@ function CreateReservation() {
     setModalFilter(false);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setIsError(false);
-
-      try {
-        const res = await api.get(`${import.meta.env.VITE_API}/dryers`, {
-          headers: { 
-            Authorization: `Bearer ${token}` 
-          },
-        });
-        if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
-
-        setData(
-          res.data.map((dryer) => ({
-            id: dryer.id,
-            dryer_name: dryer.dryer_name,
-            location: dryer.location,
-            maximum_capacity: dryer.maximum_capacity,
-            available_capacity: dryer.available_capacity, 
-            status:
-              dryer.available_capacity > 0
-                ? "available"
-                : "occupied",
-              created_at: dryer.created_at
-              ? new Date(dryer.created_at).toLocaleString("en-PH", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
+  const fetchData = useCallback(async () => {
+    const local = localStorage.getItem("create_reservation_data");
+    const data = JSON.parse(local);
+    setData(
+      Array.isArray(data)
+        ? data?.map((res) => ({
+            id: res.id,
+            dryer_name: res.dryer_name,
+            location: res.location,
+            maximum_capacity: res.maximum_capacity,
+            available_capacity: res.available_capacity,
+            status: res.available_capacity > 0 ? "available" : "occupied",
+            created_at: res.created_at
+              ? new Date(res.created_at).toLocaleString("en-PH", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
               : "N/A",
             action: (
               <Button
-                onClick={() => navigate("/home/create-reservation/" + dryer.id)}
+                onClick={() => navigate("/home/create-reservation/" + res.id)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
+              >
+                View
+              </Button>
+            ),
+          }))
+        : []
+    );
+
+    if (!Array.isArray(data)) setIsLoading(true);
+
+    try {
+      const result = await api.get(`${import.meta.env.VITE_API}/dryers`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      const isDifferent =
+        JSON.stringify(data) !==
+        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+      if (isDifferent) {
+        setData(
+          result.data?.map((res) => ({
+            id: res.id,
+            dryer_name: res.dryer_name,
+            location: res.location,
+            maximum_capacity: res.maximum_capacity,
+            available_capacity: res.available_capacity,
+            status: res.available_capacity > 0 ? "available" : "occupied",
+            created_at: res.created_at
+              ? new Date(res.created_at).toLocaleString("en-PH", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "N/A",
+            action: (
+              <Button
+                onClick={() => navigate("/home/create-reservation/" + res.id)}
                 className="bg-blue-400 hover:bg-blue-500 text-white"
               >
                 View
@@ -119,17 +148,28 @@ function CreateReservation() {
             ),
           }))
         );
-      } catch (error) {
-        console.error(error);
-        setIsError(true);
-        setData([]);
-      } finally {
-        setIsLoading(false);
+        localStorage.setItem(
+          "create_reservation_data",
+          JSON.stringify(result.data)
+        );
       }
-    };
+    } catch (error) {
+      console.error(error);
+      setData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
+  useEffect(() => {
     fetchData();
-  }, [token, navigate]);
+
+    const interval = setInterval(() => {
+      fetchData();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =

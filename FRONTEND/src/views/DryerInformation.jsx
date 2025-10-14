@@ -27,7 +27,6 @@ function DryerInformation() {
   const [loading, setLoading] = useState(false);
   const [selectedDryer, setSelectedDryer] = useState(null);
   const { addresses } = useAddresses();
-  const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
   const tableHeadings = [
@@ -157,11 +156,6 @@ function DryerInformation() {
     return { addresses, loading };
   }
 
-  // function handleView(dryer) {
-  //   setSelectedDryer(dryer);
-  //   setModalView(true);
-  // }
-
   function handleEdit(dryer) {
     setSelectedDryer(dryer);
     setModalEdit(true);
@@ -202,10 +196,43 @@ function DryerInformation() {
   };
 
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setIsError(false);
+    const local = localStorage.getItem("dryer_information_data");
+    const data = JSON.parse(local);
+    setData(
+      Array.isArray(data)
+        ? data?.map((res) => ({
+            ...res,
+            created_at: res.created_at
+              ? new Date(res.created_at).toLocaleString("en-PH", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "N/A",
+            action: (
+              <div className="flex justify-center gap-2">
+                <Button
+                  onClick={() => handleEdit(res)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  Edit
+                </Button>
+                <Button
+                  onClick={() => navigate("/home/create-reservation/" + res.id)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  View
+                </Button>
+              </div>
+            ),
+          }))
+        : []
+    );
+
+    if (!Array.isArray(data)) setIsLoading(true);
+
     try {
-      const res = await api.get(
+      const result = await api.get(
         "/dryers/owned",
         {
           user: {
@@ -214,51 +241,65 @@ function DryerInformation() {
         },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
 
-      const dryers = res.data !== null ? res.data : [];
-      console.log(res.data);
-      const formatted = dryers.map((dryer) => ({
-        ...dryer,
-        created_at: dryer.created_at
-          ? new Date(dryer.created_at).toLocaleString("en-PH", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          : "N/A",
-        action: (
-          <div className="flex justify-center gap-2">
-            <Button
-              onClick={() => handleEdit(dryer)}
-              className="bg-blue-400 hover:bg-blue-500 text-white"
-            >
-              Edit
-            </Button>
-            <Button
-              onClick={() => navigate("/home/create-reservation/" + dryer.id)}
-              className="bg-blue-400 hover:bg-blue-500 text-white"
-            >
-              View
-            </Button>
-          </div>
-        ),
-      }));
-
-      setData(formatted);
+      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      const isDifferent =
+        JSON.stringify(data) !==
+        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+      if (isDifferent) {
+        setData(
+          result.data?.map((res) => ({
+            ...res,
+            created_at: res.created_at
+              ? new Date(res.created_at).toLocaleString("en-PH", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "N/A",
+            action: (
+              <div className="flex justify-center gap-2">
+                <Button
+                  onClick={() => handleEdit(res)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  Edit
+                </Button>
+                <Button
+                  onClick={() => navigate("/home/create-reservation/" + res.id)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  View
+                </Button>
+              </div>
+            ),
+          }))
+        );
+        localStorage.setItem(
+          "dryer_information_data",
+          JSON.stringify(result.data)
+        );
+      }
     } catch (err) {
       console.error(err.response?.data?.message || err.message);
       setIsError(true);
     } finally {
       setIsLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     fetchData();
+
+    const interval = setInterval(() => {
+      fetchData();
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [fetchData]);
 
   const fieldsEdit = [

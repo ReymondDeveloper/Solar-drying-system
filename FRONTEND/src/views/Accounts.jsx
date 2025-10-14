@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
@@ -21,6 +21,7 @@ function Accounts() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+
   const tableHeadings = [
     "First Name",
     "Middle Name",
@@ -29,6 +30,7 @@ function Accounts() {
     "Email",
     "Role",
   ];
+
   const tableDataCell = [
     "first_name",
     "middle_name",
@@ -61,7 +63,7 @@ function Accounts() {
       setFilter(data.role);
       setModalFilter(false);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
       setLoading(false);
     }
@@ -159,76 +161,69 @@ function Accounts() {
     }
   };
 
-  const fetchData = async () => {
-    setIsLoading(true);
-    setIsError(false);
-    const offset = (currentPage - 1) * limit;
+  const fetchData = useCallback(async () => {
+    const local = localStorage.getItem("accounts_data");
+    const data = JSON.parse(local);
+    setData(
+      Array.isArray(data)
+        ? data?.map((res) => ({
+            id: res.id,
+            first_name: res.first_name,
+            middle_name: res.middle_name,
+            last_name: res.last_name,
+            address: res.address,
+            email: res.email,
+            role: res.role,
+            user_profile: res.user_profile,
+          }))
+        : []
+    );
+
+    if (!Array.isArray(data)) setIsLoading(true);
+
     try {
-      const token = localStorage.getItem("token"); 
-      const res = await axios.get(`${import.meta.env.VITE_API}/users`, {
-        params: { offset, limit, sort: "desc"  },
+      const result = await axios.get(`${import.meta.env.VITE_API}/users`, {
         headers: {
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setData(
-        Array.isArray(res.data)
-          ? res.data.map((data) => ({
-              id: data.id,
-              first_name: data.first_name,
-              middle_name: data.middle_name,
-              last_name: data.last_name,
-              address: data.address,
-              email: data.email,
-              role: data.role,
-              user_profile: data.user_profile,
-            }))
-          : []
-      );
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Unauthorized request");
-      setIsError(true);
+
+      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      const isDifferent =
+        JSON.stringify(data) !==
+        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+      if (isDifferent) {
+        setData(
+          result.data?.map((res) => ({
+            id: res.id,
+            first_name: res.first_name,
+            middle_name: res.middle_name,
+            last_name: res.last_name,
+            address: res.address,
+            email: res.email,
+            role: res.role,
+            user_profile: res.user_profile,
+          }))
+        );
+        localStorage.setItem("accounts_data", JSON.stringify(result.data));
+      }
+    } catch (error) {
+      console.error(error);
+      setData([]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setIsError(false);
-      const offset = (currentPage - 1) * limit;
-      try {
-        const token = localStorage.getItem("token");  
-        const res = await axios.get(`${import.meta.env.VITE_API}/users`, {
-          params: { offset, limit },
-          headers: {
-            Authorization: `Bearer ${token}`, 
-          },
-        });
-        setData(
-          Array.isArray(res.data)
-            ? res.data.map((data) => ({
-                id: data.id,
-                first_name: data.first_name,
-                middle_name: data.middle_name,
-                last_name: data.last_name,
-                address: data.address,
-                email: data.email,
-                role: data.role,
-                user_profile: data.user_profile,
-              }))
-            : []
-        );
-      } catch (err) {
-        toast.error(err.response?.data?.message || "Unauthorized request");
-        setIsError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchData();
-  }, [limit, currentPage]);
+
+    const interval = setInterval(() => {
+      fetchData();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =

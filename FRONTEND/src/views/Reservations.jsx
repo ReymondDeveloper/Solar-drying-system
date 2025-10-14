@@ -16,18 +16,8 @@ function Reservations() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-  const tableHeadings = [
-    "Farmer",
-    "Dryers",
-    "Location",
-    "Date Created",
-  ];
-  const tableDataCell = [
-    "farmer_name",
-    "dryer_name",
-    "location",
-    "created_at",
-  ];
+  const tableHeadings = ["Farmer", "Dryers", "Location", "Date Created"];
+  const tableDataCell = ["farmer_name", "dryer_name", "location", "created_at"];
   const { addresses } = useAddresses();
 
   function useAddresses() {
@@ -80,32 +70,58 @@ function Reservations() {
   };
 
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
+    const local = localStorage.getItem("reservation_data");
+    const data = JSON.parse(local);
+    setData(
+      Array.isArray(data)
+        ? data?.map((res) => ({
+            farmer_name: res.farmer_name,
+            dryer_name: res.dryer_name,
+            location: res.dryer_location,
+            created_at: res.created_at
+              ? new Date(res.created_at).toLocaleString("en-PH", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "N/A",
+          }))
+        : []
+    );
+
+    if (!Array.isArray(data)) setIsLoading(true);
+
     try {
-      const res = await api.get(
-        `${import.meta.env.VITE_API}/reservations`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
+      const result = await api.get(`${import.meta.env.VITE_API}/reservations`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
-      const results = res.data;
-      const formattedData = results.map((owner) => ({
-        farmer_name: owner.farmer_name,
-        dryer_name: owner.dryer_name,
-        location: owner.dryer_location,
-        created_at: owner.created_at
-          ? new Date(owner.created_at).toLocaleString("en-PH", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          : "N/A",
-      }));
-
-      setData(formattedData);
-    } catch (err) {
-      console.error(err);
+      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      const isDifferent =
+        JSON.stringify(data) !==
+        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+      if (isDifferent) {
+        setData(
+          result.data?.map((res) => ({
+            farmer_name: res.farmer_name,
+            dryer_name: res.dryer_name,
+            location: res.dryer_location,
+            created_at: res.created_at
+              ? new Date(res.created_at).toLocaleString("en-PH", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "N/A",
+          }))
+        );
+        localStorage.setItem("reservation_data", JSON.stringify(result.data));
+      }
+    } catch (error) {
+      console.error(error);
+      setData([]);
     } finally {
       setIsLoading(false);
     }
@@ -113,6 +129,12 @@ function Reservations() {
 
   useEffect(() => {
     fetchData();
+
+    const interval = setInterval(() => {
+      fetchData();
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [fetchData]);
 
   const FilteredData = data.filter((info) => {
