@@ -76,12 +76,15 @@ function BookingRequests() {
     const data = Object.fromEntries(formData.entries());
     try {
       setLoading(true);
-      await api.put(`${import.meta.env.VITE_API}/reservations/${data.id}`, {
-        status: data.status,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await api.put(
+        `${import.meta.env.VITE_API}/reservations/${data.id}`,
+        { status: data.status, notes: data.notes || null },  
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       toast.success("Booking is updated successfully!");
       setModalView(false);
       fetchData();
@@ -95,6 +98,30 @@ function BookingRequests() {
 
   const [fieldsView, setFieldsView] = useState([]);
 
+  const handleStatusChange = (e) => {
+    const status = e.target.value;
+  
+    setFieldsView((prev) => {
+      // Remove any existing notes field
+      const fieldsWithoutNotes = prev.filter((f) => f.name !== "notes");
+  
+      // Add notes field if status is denied
+      if (status === "denied") {
+        fieldsWithoutNotes.push({
+          label: "Notes",
+          type: "textarea",
+          name: "notes",
+          defaultValue: "",
+          placeholder: "Please enter reason for denial",
+          required: true,
+          colspan: 2,
+        });
+      }
+  
+      return fieldsWithoutNotes;
+    });
+  };
+  
   const handleView = useCallback((data) => {
     setFieldsView([
       {
@@ -137,7 +164,8 @@ function BookingRequests() {
           { value: "denied", phrase: "Denied" },
         ],
         colspan: 2,
-      },
+        onChange: handleStatusChange,
+      }, 
     ]);
     setModalView(true);
   }, []);

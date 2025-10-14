@@ -207,6 +207,8 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     name={field.name}
                     className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500"
                     defaultValue={field.defaultValue || ""}
+                    onChange={(e) => field.onChange && field.onChange(e)} // <-- add this
+
                   >
                     {field.options.map((option, idx) => (
                       <option
