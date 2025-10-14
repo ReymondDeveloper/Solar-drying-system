@@ -109,7 +109,7 @@ function Accounts() {
       label: "Role",
       type: "select",
       name: "role",
-      options: [{ value: "owner" }, { value: "farmer" }],
+      options: [{ value: "owner" }, { value: "farmer" }, { value: "admin" }],
       colspan: 2,
     },
     {
