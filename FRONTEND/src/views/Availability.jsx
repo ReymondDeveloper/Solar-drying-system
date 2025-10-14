@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
@@ -54,45 +54,73 @@ function Availability() {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setIsError(false);
+  const fetchData = useCallback(async () => {
+    const local = localStorage.getItem("availability_data");
+    const data = JSON.parse(local);
+    setData(
+      Array.isArray(data)
+        ? data?.map((res) => ({
+            dryer_name: res.dryer_name,
+            location: res.location,
+            status: res.available_capacity > 0 ? "available" : "occupied",
+            created_at: res.created_at
+              ? new Date(res.created_at).toLocaleString("en-PH", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "N/A",
+          }))
+        : []
+    );
 
-      try {
-        const res = await api.get(`${import.meta.env.VITE_API}/dryers`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+    if (!Array.isArray(data)) setIsLoading(true);
 
-        const dryers = res.data.Results || res.data;
+    try {
+      const result = await api.get(`${import.meta.env.VITE_API}/dryers`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
 
-        const formatted = dryers.map((dryer) => ({
-          dryer_name: dryer.dryer_name,
-          location: dryer.location,
-          status: dryer.available_capacity > 0 ? "available" : "occupied",
-          created_at: dryer.created_at
-            ? new Date(dryer.created_at).toLocaleString("en-PH", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
-            : "N/A",
-        }));
-
-        setData(formatted);
-      } catch (error) {
-        console.error(
-          "Error fetching dryers:",
-          error.response?.data?.message || error.message
+      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      const isDifferent =
+        JSON.stringify(data) !==
+        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+      if (isDifferent) {
+        setData(
+          result.data?.map((res) => ({
+            dryer_name: res.dryer_name,
+            location: res.location,
+            status: res.available_capacity > 0 ? "available" : "occupied",
+            created_at: res.created_at
+              ? new Date(res.created_at).toLocaleString("en-PH", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "N/A",
+          }))
         );
-        setIsError(true);
-      } finally {
-        setIsLoading(false);
+        localStorage.setItem("availability_data", JSON.stringify(result.data));
       }
-    };
-
-    fetchData();
+    } catch (error) {
+      console.error(error);
+      setData([]);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchData();
+
+    const interval = setInterval(() => {
+      fetchData();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =

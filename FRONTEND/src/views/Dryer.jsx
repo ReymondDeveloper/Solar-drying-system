@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Loading from "../component/Loading";
 import { ToastContainer, toast } from "react-toastify";
@@ -40,37 +40,54 @@ export default function Dryer() {
   const [modalAdd, setModalAdd] = useState(false);
   const navigate = useNavigate();
   const farmerId = localStorage.getItem("id");
-  const token = localStorage.getItem("token");
+
+  const fetchData = useCallback(async () => {
+    const local = localStorage.getItem("dryer_data");
+    const data = JSON.parse(local);
+    setData(data ? data : []);
+
+    if (!data) setLoading(true);
+
+    try {
+      const result = await api.get(`${import.meta.env.VITE_API}/dryers/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!result.data) throw new Error("Invalid data from API");
+      const isDifferent =
+        JSON.stringify(data) !== JSON.stringify(result.data ? result.data : []);
+      if (isDifferent) {
+        setData(result.data);
+        localStorage.setItem("dryer_data", JSON.stringify(result.data));
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+      setTimeout(() => {
+        navigate("/home/dryer-information");
+      }, 2000);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-
-      try {
-        const res = await api.get(`${import.meta.env.VITE_API}/dryers/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setData(res.data);
-      } catch (error) {
-        toast.error(error.response?.data?.message || "Error fetching data");
-        setTimeout(() => {
-          navigate("/home/create-reservation");
-        }, 2000);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
-  }, [id, token, navigate]);
+
+    const interval = setInterval(() => {
+      fetchData();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const ratings = [
     {
       user: "User0001",
       rating: 5,
-      comment: "As someone who values quality, I wholeheartedly recommend this.",
+      comment:
+        "As someone who values quality, I wholeheartedly recommend this.",
     },
     {
       user: "User0002",
@@ -79,9 +96,13 @@ export default function Dryer() {
     },
   ];
 
-  const uniqueFarmers = data.farmers ? [
-    ...new Map(data.farmers.map(farmer => [farmer.farmer_id, farmer])).values()
-  ] : [];
+  const uniqueFarmers = data.farmers
+    ? [
+        ...new Map(
+          data.farmers.map((farmer) => [farmer.farmer_id, farmer])
+        ).values(),
+      ]
+    : [];
 
   const fieldsAdd = [
     {
@@ -149,7 +170,7 @@ export default function Dryer() {
           button_name={"Reserve"}
         />
       )}
-      
+
       <div className={`w-full h-[calc(100dvh-170px)]`}>
         <div className="w-full h-[300px] flex justify-center items-center bg-gray-200 relative rounded-lg shadow-md">
           {data.image_url ? (
@@ -194,14 +215,15 @@ export default function Dryer() {
             </div>
           </div>
 
-           {data.available_capacity > 0 && data.owner !== localStorage.getItem("full_name") && (
-            <Button
-              className="w-full bg-blue-500 text-white py-3 rounded-full hover:bg-blue-600 mt-4"
-              onClick={() => setModalAdd(true)}
-            >
-              Reserve
-            </Button>
-          )}
+          {data.available_capacity > 0 &&
+            data.owner !== localStorage.getItem("full_name") && (
+              <Button
+                className="w-full bg-blue-500 text-white py-3 rounded-full hover:bg-blue-600 mt-4"
+                onClick={() => setModalAdd(true)}
+              >
+                Reserve
+              </Button>
+            )}
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
