@@ -11,7 +11,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function BookingRequests() {
-  const token = localStorage.getItem("token");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
@@ -77,12 +76,15 @@ function BookingRequests() {
     const data = Object.fromEntries(formData.entries());
     try {
       setLoading(true);
-      await api.put(`${import.meta.env.VITE_API}/reservations/${data.id}`, {
-        status: data.status,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await api.put(
+        `${import.meta.env.VITE_API}/reservations/${data.id}`,
+        { status: data.status, notes: data.notes || null },  
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       toast.success("Booking is updated successfully!");
       setModalView(false);
       fetchData();
@@ -96,6 +98,30 @@ function BookingRequests() {
 
   const [fieldsView, setFieldsView] = useState([]);
 
+  const handleStatusChange = (e) => {
+    const status = e.target.value;
+  
+    setFieldsView((prev) => {
+      // Remove any existing notes field
+      const fieldsWithoutNotes = prev.filter((f) => f.name !== "notes");
+  
+      // Add notes field if status is denied
+      if (status === "denied") {
+        fieldsWithoutNotes.push({
+          label: "Notes",
+          type: "textarea",
+          name: "notes",
+          defaultValue: "",
+          placeholder: "Please enter reason for denial",
+          required: true,
+          colspan: 2,
+        });
+      }
+  
+      return fieldsWithoutNotes;
+    });
+  };
+  
   const handleView = useCallback((data) => {
     setFieldsView([
       {
@@ -138,61 +164,104 @@ function BookingRequests() {
           { value: "denied", phrase: "Denied" },
         ],
         colspan: 2,
-      },
+        onChange: handleStatusChange,
+      }, 
     ]);
     setModalView(true);
   }, []);
 
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
+    const local = localStorage.getItem("book_requests_data");
+    const data = JSON.parse(local);
+    setData(
+      Array.isArray(data)
+        ? data?.map((res) => ({
+            id: res.id,
+            farmer_name: res.farmer_name || "N/A",
+            location: res.dryer_location || "N/A",
+            crop_type: res.crop_type || "N/A",
+            quantity: res.quantity || "N/A",
+            created_at: res.created_at
+              ? new Date(res.created_at).toLocaleString("en-PH", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "N/A",
+            status: res.status || "pending",
+            action: (
+              <Button
+                onClick={() => handleView(res)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
+              >
+                View
+              </Button>
+            ),
+          }))
+        : []
+    );
+
+    if (!Array.isArray(data)) setIsLoading(true);
+
     try {
-      const res = await api.get(
+      const result = await api.get(
         `${import.meta.env.VITE_API}/reservations/owner`,
         {
           params: { ownerId: localStorage.getItem("id") },
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
 
-      if (!Array.isArray(res.data)) throw new Error("Invalid data from API");
-
-      setData(
-        res.data?.map((res) => ({
-          id: res.id,
-          farmer_name: res.farmer_name || "N/A",
-          location: res.dryer_location || "N/A",
-          crop_type: res.crop_type || "N/A",
-          quantity: res.quantity || "N/A",
-          created_at: res.created_at
-            ? new Date(res.created_at).toLocaleString("en-PH", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
-            : "N/A",
-          status: res.status || "pending",
-          action: (
-            <Button
-              onClick={() => handleView(res)}
-              className="bg-blue-400 hover:bg-blue-500 text-white"
-            >
-              View
-            </Button>
-          ),
-        }))
-      );
+      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      const isDifferent =
+        JSON.stringify(data) !==
+        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+      if (isDifferent) {
+        setData(
+          result.data?.map((res) => ({
+            id: res.id,
+            farmer_name: res.farmer_name || "N/A",
+            location: res.dryer_location || "N/A",
+            crop_type: res.crop_type || "N/A",
+            quantity: res.quantity || "N/A",
+            created_at: res.created_at
+              ? new Date(res.created_at).toLocaleString("en-PH", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "N/A",
+            status: res.status || "pending",
+            action: (
+              <Button
+                onClick={() => handleView(res)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
+              >
+                View
+              </Button>
+            ),
+          }))
+        );
+        localStorage.setItem("book_requests_data", JSON.stringify(result.data));
+      }
     } catch (error) {
       console.error(error);
       setData([]);
     } finally {
       setIsLoading(false);
     }
-  }, [handleView, token]);
+  }, [handleView]);
 
   useEffect(() => {
     fetchData();
+
+    const interval = setInterval(() => {
+      fetchData();
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [fetchData]);
 
   const FilteredData = data.filter((info) => {

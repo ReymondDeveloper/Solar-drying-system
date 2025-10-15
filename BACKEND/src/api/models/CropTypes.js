@@ -21,7 +21,7 @@ const CropTypes = {
     return data;
   },
 
-  create: async ({ crop_type_name, quantity, payment, created_by_id }) => {
+  create: async ({ crop_type_name, quantity, payment, created_by_id, notes }) => {
     const { data, error } = await supabase
       .from("crop_types")
       .insert([
@@ -31,6 +31,7 @@ const CropTypes = {
           quantity,
           payment,
           created_by_id,
+          notes: notes || null,
           created_at: new Date().toISOString(),
         },
       ])
@@ -40,7 +41,8 @@ const CropTypes = {
     return data;
   },
 
-  update: async (id, { crop_type_name, quantity, payment, updated_by_id }) => {
+  update: async (id, { crop_type_name, quantity, payment, updated_by_id, notes }) => {
+    console.log("CropTypes.update called with:", { id, crop_type_name, quantity, payment, updated_by_id, notes });
     const { data, error } = await supabase
       .from("crop_types")
       .update({
@@ -48,12 +50,18 @@ const CropTypes = {
         quantity,
         payment,
         updated_by_id,
+        notes: notes || null,
         updated_at: new Date().toISOString(),
       })
       .eq("crop_type_id", id)
       .select()
       .single();
-    if (error) throw error;
+      if (error) {
+        console.error("Error updating crop type:", error);
+        throw error;
+      }
+    
+      console.log("CropTypes.update result:", data);
     return data;
   },
 

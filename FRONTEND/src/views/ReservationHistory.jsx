@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
@@ -25,42 +25,42 @@ function ReservationHistory() {
   const role = localStorage.getItem("role");
 
   const tableHeadings =
-  role === "farmer"
-    ? [
-        "Magsasaka",  
-        "Pinag-book na Patuyuan",  
-        "Lokasyon", 
-        "Uri ng Pananim", 
-        "Dami (Canvans)",  
-        "Paraan ng Pagbabayad",  
-        "Petsa", 
-        "Katayuan",  
-        "Aksyon", 
-      ]
-    : [
-        "Farmer",
-        "Booked Dryer",
-        "Location",
-        "Crop Type",
-        "Quantity",
-        "Payment",
-        "Date",
-        "Status",
-        "Action",
-      ];
+    role === "farmer"
+      ? [
+          "Magsasaka",
+          "Pinag-book na Patuyuan",
+          "Lokasyon",
+          "Uri ng Pananim",
+          "Dami (Canvans)",
+          "Paraan ng Pagbabayad",
+          "Petsa",
+          "Katayuan",
+          "Aksyon",
+        ]
+      : [
+          "Farmer",
+          "Booked Dryer",
+          "Location",
+          "Crop Type",
+          "Quantity",
+          "Payment",
+          "Date",
+          "Status",
+          "Action",
+        ];
 
-      const tableDataCell = [
-        "farmer_name",
-        "dryer_name",
-        "location",
-        "crop_type",
-        "quantity",
-        "payment",
-        "date", 
-        "status",
-        "action",
-      ];
-      
+  const tableDataCell = [
+    "farmer_name",
+    "dryer_name",
+    "location",
+    "crop_type",
+    "quantity",
+    "payment",
+    "date",
+    "status",
+    "action",
+  ];
+
   const fieldsFilter = [
     {
       label: "Status",
@@ -92,44 +92,81 @@ function ReservationHistory() {
     setModalView(false);
   };
 
-  useEffect(() => {
-    function handleView(reservation) {
-      setDatasView(() => reservation);
-      setModalView(true);
-    }
+  const handleView = useCallback((data) => {
+    setDatasView(() => data);
+    setModalView(true);
+  }, []);
 
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const res = await api.get(
-          `${import.meta.env.VITE_API}/reservations/home?farmer_id=${localStorage.getItem("id")}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (!Array.isArray(res.data)) throw new Error("Invalid API response");
-
-        setData(
-          res.data.map((reservation) => ({
-            farmer_name: reservation.farmer_id.first_name || "N/A",
-            dryer_name: reservation.dryer_id.dryer_name || "N/A",
-            location: reservation.dryer_id.location || "N/A",
-            crop_type: reservation.crop_type_id.crop_type_name || "N/A",
-            quantity: reservation.crop_type_id.quantity || 0,
-            payment: reservation.crop_type_id.payment || "N/A",
-            date: reservation.created_at
-              ? new Date(reservation.created_at).toLocaleString("en-PH", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
+  const fetchData = useCallback(async () => {
+    const local = localStorage.getItem("reservation_history_data");
+    const data = JSON.parse(local);
+    setData(
+      Array.isArray(data)
+        ? data?.map((res) => ({
+            farmer_name: res.farmer_id.first_name || "N/A",
+            dryer_name: res.dryer_id.dryer_name || "N/A",
+            location: res.dryer_id.location || "N/A",
+            crop_type: res.crop_type_id.crop_type_name || "N/A",
+            quantity: res.crop_type_id.quantity || 0,
+            payment: res.crop_type_id.payment || "N/A",
+            date: res.created_at
+              ? new Date(res.created_at).toLocaleString("en-PH", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
               : "N/A",
-            status: reservation.status || "pending",
+            status: res.status || "pending",
             action: (
               <Button
-                onClick={() => handleView(reservation)}
+                onClick={() => handleView(res)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
+              >
+                View
+              </Button>
+            ),
+          }))
+        : []
+    );
+
+    if (!Array.isArray(data)) setIsLoading(true);
+
+    try {
+      const result = await api.get(
+        `${
+          import.meta.env.VITE_API
+        }/reservations/home?farmer_id=${localStorage.getItem("id")}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      const isDifferent =
+        JSON.stringify(data) !==
+        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+      if (isDifferent) {
+        setData(
+          result.data?.map((res) => ({
+            farmer_name: res.farmer_id.first_name || "N/A",
+            dryer_name: res.dryer_id.dryer_name || "N/A",
+            location: res.dryer_id.location || "N/A",
+            crop_type: res.crop_type_id.crop_type_name || "N/A",
+            quantity: res.crop_type_id.quantity || 0,
+            payment: res.crop_type_id.payment || "N/A",
+            date: res.created_at
+              ? new Date(res.created_at).toLocaleString("en-PH", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+              : "N/A",
+            status: res.status || "pending",
+            action: (
+              <Button
+                onClick={() => handleView(res)}
                 className="bg-blue-400 hover:bg-blue-500 text-white"
               >
                 View
@@ -137,15 +174,28 @@ function ReservationHistory() {
             ),
           }))
         );
-      } catch (error) {
-        toast.error(error.response?.data?.message || error.message);
-      } finally {
-        setIsLoading(false);
+        localStorage.setItem(
+          "reservation_history_data",
+          JSON.stringify(result.data)
+        );
       }
-    };
+    } catch (error) {
+      console.error(error);
+      setData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [handleView]);
 
+  useEffect(() => {
     fetchData();
-  }, [token]);
+
+    const interval = setInterval(() => {
+      fetchData();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =
@@ -185,7 +235,11 @@ function ReservationHistory() {
           setModal={setModalView}
           handleSubmit={handleSubmitView}
           datas={datasView}
-          title={role === "farmer" ? "Mga Detalye ng Reperbasyon" : "Reservation Details"}
+          title={
+            role === "farmer"
+              ? "Mga Detalye ng Reserbasyon"
+              : "Reservation Details"
+          }
           button_name={role === "farmer" ? "Tapos" : "Done"}
         />
       )}
@@ -210,8 +264,8 @@ function ReservationHistory() {
                 {FilteredData?.length === 0 && (
                   <div className="flex justify-center items-center font-bold py-5">
                     {role === "farmer"
-                  ? "Wala ka pang kasaysayan ng transaksyon."
-                  : "Your transaction history is empty."}
+                      ? "Wala ka pang kasaysayan ng transaksyon."
+                      : "Your transaction history is empty."}
                   </div>
                 )}
               </>

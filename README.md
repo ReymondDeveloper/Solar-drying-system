@@ -1,6 +1,7 @@
 <div align="center">
 
 ![](./FRONTEND/public/logo.png)
+
 # Solar Drying System
 
 </div>
@@ -35,7 +36,6 @@ Run the project's' front-end
 
 _This will open a tab in default browser._
 
-
 Open a new terminal connected to the project source directory - `Shortcut key:` Ctrl + Shift + `
 
 ```bash
@@ -51,7 +51,7 @@ Install dependecies for back-end
 Run the project's back-end
 
 ```bash
-  npm run start
+  npm start
 ```
 
 _This will handle the behind-the-scene proccesses of the opened tab in default browser._
@@ -66,23 +66,23 @@ _This endpoint makes an HTTP POST request to create a new user._
 
 #### Form data
 
-| Name                | Location | Type    | Required |
-| ------------------- | -------- | ------- | -------- |
-| first_name          | body     | varchar | yes      |
-| middle_name         | body     | varchar | yes      |
-| last_name           | body     | varchar | yes      |
-| email               | body     | varchar | yes      |
-| password            | body     | varchar | yes      |
-| role                | body     | varchar | yes      |
-| address             | body     | varchar | yes      |
+| Name        | Location | Type    | Required |
+| ----------- | -------- | ------- | -------- |
+| first_name  | body     | varchar | yes      |
+| middle_name | body     | varchar | yes      |
+| last_name   | body     | varchar | yes      |
+| email       | body     | varchar | yes      |
+| password    | body     | varchar | yes      |
+| role        | body     | varchar | yes      |
+| address     | body     | varchar | yes      |
 
 #### Response
 
-| HTTP Status Code | Description                                             |
-| ---------------- | ------------------------------------------------------- |
-| 201              | Successdul creation of an user.                         |
-| 400              | User already exist.                       |
-| 500              | Unsuccessful creation of an user.                       |
+| HTTP Status Code | Description                      |
+| ---------------- | -------------------------------- |
+| 201              | Successful creation of a user.   |
+| 400              | User already exists.             |
+| 500              | Unsuccessful creation of a user. |
 
 #### Sample Response
 
@@ -108,9 +108,9 @@ _This endpoint makes an HTTP POST request to create a new user._
 
 ## Built with
 
--   React ✨
--   Tailwind ✨
--   Node JS ✨
--   Express JS ✨
--   Supabase ✨
--   PostgreSQL ✨
+- React ✨
+- Tailwind ✨
+- Node JS ✨
+- Express JS ✨
+- Supabase ✨
+- PostgreSQL ✨

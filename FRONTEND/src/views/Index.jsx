@@ -26,7 +26,7 @@ function Index() {
 
                 <img
                     className="object-cover w-full h-full flex-grow rotate-y-180"
-                    src="/landing_page.avif"
+                    src="landing_page.avif"
                 />
             </div>
 

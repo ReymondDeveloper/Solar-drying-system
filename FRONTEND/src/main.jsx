@@ -128,7 +128,7 @@ const router = createBrowserRouter(
       path: "*",
       element: <Notfound />,
     },
-  ]
+  ],
 );
 
 createRoot(document.getElementById("root")).render(
