@@ -9,7 +9,7 @@ import NotificationModal from "./component/NotificationModal";
 function HomeLayout() {
   const [button, setButton] = useState(false);
   const [accountModal, setAccountModal] = useState(false);
-  const [notificationModal, setNotificationModal] = useState(false);
+  const [notificationModal, setNotificationModal] = useState(true);
   const location = useLocation();
 
   return (

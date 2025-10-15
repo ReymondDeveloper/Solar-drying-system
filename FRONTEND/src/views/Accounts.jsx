@@ -9,6 +9,7 @@ import Button from "../component/Button";
 import Loading from "../component/Loading";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import api from "../api/api";
 
 function Accounts() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -137,19 +138,31 @@ function Accounts() {
       password,
     } = Object.fromEntries(formData.entries());
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API}/users/register`,
-        {
-          first_name,
-          middle_name,
-          last_name,
-          address,
-          email,
-          password,
-          role,
-        }
-      );
+      const res = await api.post(`${import.meta.env.VITE_API}/users/register`, {
+        first_name,
+        middle_name,
+        last_name,
+        address,
+        email,
+        password,
+        role,
+      });
       toast.success(res.data.message);
+
+      axios.post(`${import.meta.env.VITE_API}/notification`, {
+        user: localStorage.getItem("id"),
+        context:
+          `You've successfully created an account for ${res.data.email} at ` +
+          new Date().toLocaleString(),
+      });
+
+      axios.post(`${import.meta.env.VITE_API}/notification`, {
+        user: res.data.id,
+        context:
+          `Administrator successfully created your account at ` +
+          new Date().toLocaleString(),
+      });
+
       setTimeout(() => {
         setModalAdd(false);
         fetchData();
@@ -182,11 +195,7 @@ function Accounts() {
     if (!Array.isArray(data)) setIsLoading(true);
 
     try {
-      const result = await axios.get(`${import.meta.env.VITE_API}/users`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const result = await api.get(`${import.meta.env.VITE_API}/users`);
 
       if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
       const isDifferent =
