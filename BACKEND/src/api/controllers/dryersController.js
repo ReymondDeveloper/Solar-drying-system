@@ -45,45 +45,49 @@ export const getDryerById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { data, error } = await supabase
+    const { data: dryer, error: dryerError } = await supabase
       .from("dryers")
       .select("*")
       .eq("id", id)
       .single();
-
-    if (error) throw error;
+    if (dryerError) throw dryerError;
 
     const { data: owner, error: ownerError } = await supabase
       .from("users")
       .select("first_name, middle_name, last_name")
-      .eq("id", data.created_by_id)
+      .eq("id", dryer.created_by_id)
       .single();
-
     if (ownerError) throw ownerError;
 
     const { data: reservations, error: reservationsError } = await supabase
       .from("reservations")
-      .select("farmer_id")
+      .select(`
+        id,
+        farmer_id,
+        status,
+        created_at,
+        crop_type_id,
+        crop_types(crop_type_name, quantity)
+      `)
       .eq("dryer_id", id);
-
     if (reservationsError) throw reservationsError;
 
     const farmers = await Promise.all(
       reservations.map(async (reservation) => {
         const { data: farmer, error: farmerError } = await supabase
           .from("users")
-          .select("first_name, last_name")
+          .select("first_name, last_name, id")
           .eq("id", reservation.farmer_id)
           .single();
-
-        if (farmerError) {
-          console.error("Error fetching farmer:", farmerError);
-          return null;
-        }
+        if (farmerError) return null;
 
         return {
-          farmer_name: `${farmer.first_name} ${farmer.last_name}`,
           farmer_id: farmer.id,
+          farmer_name: `${farmer.first_name} ${farmer.last_name}`,
+          crop_type: reservation.crop_types.crop_type_name,
+          quantity: reservation.crop_types.quantity,
+          status: reservation.status,
+          reservation_date: reservation.created_at, 
         };
       })
     );
@@ -91,14 +95,15 @@ export const getDryerById = async (req, res) => {
     const validFarmers = farmers.filter(Boolean);
 
     res.json({
-      ...data,
-      owner: `${owner.last_name}, ${owner.first_name} ${owner.middle_name}`,
+      ...dryer,
+      owner: `${owner.last_name}, ${owner.first_name} ${owner.middle_name || ""}`,
       farmers: validFarmers,
     });
   } catch (err) {
     res.status(404).json({ message: "Dryer not found.", error: err.message });
   }
 };
+
 
 export const createDryer = async (req, res) => {
   try {

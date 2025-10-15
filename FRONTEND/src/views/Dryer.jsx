@@ -157,6 +157,22 @@ export default function Dryer() {
     }
   };
 
+  const farmersGrouped = data.farmers
+  ? Object.values(
+      data.farmers.reduce((acc, curr) => {
+        if (!acc[curr.farmer_id]) acc[curr.farmer_id] = { ...curr, reservations: [] };
+        acc[curr.farmer_id].reservations.push({
+          crop_type: curr.crop_type,
+          quantity: curr.quantity,
+          status: curr.status,
+          reservation_date: curr.reservation_date,
+        });
+        return acc;
+      }, {})
+    )
+  : [];
+
+
   return (
     <>
       {loading && <Loading />}
@@ -187,59 +203,92 @@ export default function Dryer() {
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
-          <h2 className="text-2xl font-semibold text-center">Dryer Details</h2>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-700">Dryer: </span>
-              <b>{data.dryer_name}</b>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700">Maximum Capacity: </span>
-              <b>{data.maximum_capacity}</b>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700">Available Capacity: </span>
-              <b>{data.available_capacity}</b>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700">Rate: </span>
-              <b>PHP {data.rate}</b>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700">Created: </span>
-              <b>{new Date(data.created_at).toLocaleString()}</b>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700">Owner: </span>
-              <b>{data.owner}</b>
-            </div>
-          </div>
-
-          {data.available_capacity > 0 &&
-            data.owner !== localStorage.getItem("full_name") && (
-              <Button
-                className="w-full bg-blue-500 text-white py-3 rounded-full hover:bg-blue-600 mt-4"
-                onClick={() => setModalAdd(true)}
-              >
-                Reserve
-              </Button>
-            )}
+        <div className="flex items-center text-center border-b pb-2 mb-4">
+          <h2 className="text-2xl font-bold text-gray-800">Dryer Details</h2>
         </div>
+        <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
+          <span className="font-medium text-gray-700">Dryer:</span>
+          <span className=" text-gray-900">{data.dryer_name}</span>
+        </div>
+
+        <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
+          <span className="font-medium text-gray-700">Maximum Capacity:</span>
+          <span className=" text-gray-900">{data.maximum_capacity}</span>
+        </div>
+
+        <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
+          <span className="font-medium text-gray-700">Available Capacity:</span>
+          <span className="text-gray-900">{data.available_capacity}</span>
+        </div>
+
+        <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
+          <span className="font-medium text-gray-700">Rate:</span>
+          <span className="text-gray-900">PHP {data.rate}</span>
+        </div>
+
+        <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
+          <span className="font-medium text-gray-700">Created:</span>
+          <span className="text-gray-900">
+            {new Date(data.created_at).toLocaleString()}
+          </span>
+        </div>
+
+        <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
+          <span className="font-medium text-gray-700">Owner:</span>
+          <span className="text-gray-900">{data.owner}</span>
+        </div>
+
+        {data.available_capacity > 0 &&
+          data.owner !== localStorage.getItem("full_name") && (
+            <Button
+              className="w-full bg-blue-500 text-white py-3 rounded-full hover:bg-blue-600 mt-4"
+              onClick={() => setModalAdd(true)}
+            >
+              Reserve
+            </Button>
+          )}
+      </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
           <h3 className="text-xl font-semibold">Farmers Who Reserved</h3>
           <div>
-            {uniqueFarmers && uniqueFarmers.length > 0 ? (
-              <ul className="space-y-2">
-                {uniqueFarmers.map((farmer, index) => (
-                  <li
-                    key={index}
-                    className="flex justify-between items-center border-b border-gray-300 py-2"
+            {farmersGrouped.length > 0 ? (
+              <ul className="space-y-4">
+                {farmersGrouped.map((farmer, index) => (
+              <li key={index} className="border-b border-gray-300 pb-4">
+              <div className="mb-2">
+                <span className="font-bold text-lg text-gray-800">{farmer.farmer_name}</span>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {farmer.reservations.map((res, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all"
                   >
-                    <span>
-                      <b>{farmer.farmer_name}</b>
-                    </span>
-                  </li>
+                    <div className="flex-1 min-w-[120px]">
+                      <span className="text-gray-700 font-medium">Crop Type:</span>{" "}
+                      <span className="text-gray-900">{res.crop_type}</span>
+                    </div>
+                    <div className="flex-1 min-w-[100px]">
+                      <span className="text-gray-700 font-medium">Quantity:</span>{" "}
+                      <span className="text-gray-900">{res.quantity}</span>
+                    </div>
+                    <div className="flex-1 min-w-[100px]">
+                      <span className="text-gray-700 font-medium">Status:</span>{" "}
+                      <span className="text-gray-900">{res.status}</span>
+                    </div>
+                    
+                    <div className="flex-1 min-w-[180px]">
+                      <span className="text-gray-700 font-medium">Reserved On:</span>{" "}
+                      <span className="text-gray-900">
+                        {new Date(res.reservation_date).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              </li>
                 ))}
               </ul>
             ) : (
@@ -249,12 +298,16 @@ export default function Dryer() {
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
-          <h3 className="text-xl font-semibold">Location</h3>
+          <div className="flex items-center text-center border-b pb-2 mb-4">
+            <h2 className="text-2xl font-bold text-gray-800">Location</h2>
+          </div>
           <DynamicMap location={data.location} />
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4 ">
-          <h3 className="text-xl font-semibold">Ratings</h3>
+          <div className="flex items-center text-center border-b pb-2 mb-4">
+            <h2 className="text-2xl font-bold text-gray-800">Ratings</h2>
+          </div>
           <div className="space-y-4">
             {ratings.length > 0 ? (
               ratings.map((rating, index) => (
