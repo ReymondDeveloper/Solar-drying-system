@@ -98,11 +98,18 @@ function Registration() {
           role,
         }
       );
-
       toast.success(res.data.message);
+
+      axios.post(`${import.meta.env.VITE_API}/notification`, {
+        user: res.data.id,
+        context:
+          `You've successfully created your account at ` +
+          new Date().toLocaleString(),
+      });
+
       setTimeout(() => {
         setEmail(email);
-        localStorage.setItem("email", email); 
+        localStorage.setItem("email", email);
         setOtp(true);
       }, 2000);
     } catch (err) {

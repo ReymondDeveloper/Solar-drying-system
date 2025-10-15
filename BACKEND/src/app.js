@@ -10,9 +10,10 @@ import uploadRoutes from "../src/api/routes/uploadRoutes.js";
 import cropTypesRoutes from "../src/api/routes/cropTypesRoutes.js";
 
 import { errorHandler } from "../src/api/middleware/errorHandler.js";
-import { protect } from "../src/api/middleware/authMiddleware.js"; 
+import { protect } from "../src/api/middleware/authMiddleware.js";
 import { fileURLToPath } from "url";
 import addressRoutes from "../src/api/routes/addressRoutes.js";
+import notificationRoutes from "../src/api/routes/notificationRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -30,6 +31,7 @@ app.use("/api/reservations", protect, reservationRoutes);
 app.use("/api/upload", protect, uploadRoutes);
 app.use("/api/crop-types", protect, cropTypesRoutes);
 app.use("/api/addresses", protect, addressRoutes);
+app.use("/api/notification", notificationRoutes);
 
 app.use(errorHandler);
 

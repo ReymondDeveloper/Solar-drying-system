@@ -13,7 +13,7 @@ const generateToken = (id) => {
 export const getUsers = async (req, res, next) => {
   try {
     const role = req.query.role;
-    const sort = req.query.sort || "desc";  
+    const sort = req.query.sort || "desc";
 
     let query = supabase.from("users").select("*");
 
@@ -105,6 +105,8 @@ export const registerUser = async (req, res, next) => {
     await sendOtpEmail(email, otp);
 
     res.status(201).json({
+      id: data.id,
+      email: data.email,
       message: "Registered successfully. Please verify with OTP.",
     });
   } catch (err) {
