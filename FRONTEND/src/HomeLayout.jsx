@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import Header from "./component/Header";
 import Navigation from "./component/Navigation";
 import AccountModal from "./component/AccountModal";
@@ -9,6 +10,7 @@ function HomeLayout() {
   const [button, setButton] = useState(false);
   const [accountModal, setAccountModal] = useState(false);
   const [notificationModal, setNotificationModal] = useState(false);
+  const location = useLocation();
 
   return (
     <div className="h-screen w-screen flex overflow-hidden relative">
