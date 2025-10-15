@@ -39,7 +39,7 @@ export const getReservations = async (req, res) => {
 
         const { data: cropType, error: cropTypeError } = await supabase
           .from("crop_types")
-          .select("crop_type_name, quantity, payment")
+          .select("crop_type_name, quantity, payment, notes")
           .eq("crop_type_id", r.crop_type_id)
           .single();
 
@@ -58,6 +58,7 @@ export const getReservations = async (req, res) => {
           crop_type: cropType?.crop_type_name || "N/A",
           quantity: r.quantity || cropType?.quantity || 0,
           payment: cropType?.payment || "N/A",
+          notes: cropType?.notes || r.notes || "", 
           rate: dryer?.rate || 0,
           status: r.status || "pending",
           created_at: r.created_at,
@@ -142,30 +143,48 @@ export const createReservation = async (req, res) => {
 export const updateReservation = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, notes, payment, quantity } = req.body;
 
-    const { data, error } = await supabase
+    const { data: updatedReservations, error: resError } = await supabase
       .from("reservations")
       .update({ status })
       .eq("id", id)
       .select();
 
-    if (error) throw error;
-    if (!data || data.length === 0)
-      return res
-        .status(404)
-        .json({ message: "Reservation not found or not updated" });
+    if (resError) throw resError;
+    if (!updatedReservations || updatedReservations.length === 0) {
+      return res.status(404).json({ message: "Reservation not found" });
+    }
+
+    const reservation = updatedReservations[0];
+
+    const cropUpdate = {};
+    if (notes !== undefined) cropUpdate.notes = notes;
+    if (payment !== undefined) cropUpdate.payment = payment;
+    if (quantity !== undefined) cropUpdate.quantity = quantity;
+
+    if (Object.keys(cropUpdate).length > 0) {
+      const { error: cropError } = await supabase
+        .from("crop_types")
+        .update(cropUpdate)
+        .eq("crop_type_id", reservation.crop_type_id);
+
+      if (cropError) throw cropError;
+    }
 
     res.json({
       message: "Reservation updated successfully.",
-      reservation: data[0],
+      reservation,
     });
   } catch (err) {
-    res
-      .status(400)
-      .json({ message: "Failed to update reservation.", error: err.message });
+    console.error("Error updating reservation:", err);
+    res.status(400).json({
+      message: "Failed to update reservation.",
+      error: err.message,
+    });
   }
 };
+
 
 export const deleteReservation = async (req, res) => {
   try {
@@ -232,7 +251,7 @@ export const getReservationsByOwner = async (req, res) => {
 
         const { data: cropType, error: cropTypeError } = await supabase
           .from("crop_types")
-          .select("crop_type_name, quantity, payment")
+          .select("crop_type_name, quantity, payment, notes") 
           .eq("crop_type_id", r.crop_type_id)
           .single();
 
@@ -252,6 +271,7 @@ export const getReservationsByOwner = async (req, res) => {
           crop_type: cropType?.crop_type_name || "N/A",
           quantity: r.quantity || cropType?.quantity || 0,
           payment: cropType?.payment || "N/A",
+          notes: cropType?.notes || r.notes || "", 
           rate: dryer?.rate || 0,
           status: r.status || "pending",
           created_at: r.created_at,

@@ -100,6 +100,8 @@ function ReservationHistory() {
   const fetchData = useCallback(async () => {
     const local = localStorage.getItem("reservation_history_data");
     const data = JSON.parse(local);
+    console.log("🧩 LOG: Local cached data:", data);
+
     setData(
       Array.isArray(data)
         ? data?.map((res) => ({
@@ -109,6 +111,7 @@ function ReservationHistory() {
             crop_type: res.crop_type_id.crop_type_name || "N/A",
             quantity: res.crop_type_id.quantity || 0,
             payment: res.crop_type_id.payment || "N/A",
+            notes: res.notes || res.crop_type_id.notes || "",
             date: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",
@@ -147,6 +150,9 @@ function ReservationHistory() {
       const isDifferent =
         JSON.stringify(data) !==
         JSON.stringify(Array.isArray(result.data) ? result.data : []);
+        
+    console.log("🧩 LOG: Local cached data1:", result.data);
+
       if (isDifferent) {
         setData(
           result.data?.map((res) => ({
@@ -156,6 +162,7 @@ function ReservationHistory() {
             crop_type: res.crop_type_id.crop_type_name || "N/A",
             quantity: res.crop_type_id.quantity || 0,
             payment: res.crop_type_id.payment || "N/A",
+            notes: res.notes || res.crop_type_id.notes || "",  
             date: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",

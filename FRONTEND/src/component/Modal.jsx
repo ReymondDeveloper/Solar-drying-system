@@ -207,7 +207,7 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     name={field.name}
                     className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500"
                     defaultValue={field.defaultValue || ""}
-                    onChange={(e) => field.onChange && field.onChange(e)} // <-- add this
+                    onChange={(e) => field.onChange && field.onChange(e)}  
 
                   >
                     {field.options.map((option, idx) => (
@@ -244,11 +244,22 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                   </div>
                 </>
               ) : field.name === "id" ? (
-                <input
-                  name={field.name}
-                  type={field.type}
-                  value={field.value}
-                />
+                <input name={field.name} type={field.type} value={field.value} />
+              ) : field.type === "textarea" ? (  
+                <>
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                    {field.label}
+                  </label>
+                  <textarea
+                    name={field.name}
+                    placeholder={field.placeholder || ""}
+                    required={field.required}
+                    disabled={field.disabled}
+                    defaultValue={field.defaultValue || ""}
+                    autoFocus={field.name === "notes"}  
+                    className="w-full h-32 border border-gray-300 rounded-lg p-2 text-sm resize-none focus:ring-2 focus:ring-green-500"
+                  />
+                </>
               ) : (
                 <>
                   <label className="text-[rgba(0,100,0,255)] font-bold text-md">
@@ -351,6 +362,14 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                       </tr>
                     </tfoot>
                   </table>
+                  {datas.status === "denied" && (
+                    <div className="mt-4 p-3 border border-red-400 bg-red-50 rounded-md">
+                      <p className="font-semibold text-red-700">Reason for Denial:</p>
+                      <p className="text-sm text-gray-800 mt-1 whitespace-pre-line">
+                        {datas?.notes || datas?.crop_type_id?.notes || "No notes provided."}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -78,7 +78,13 @@ function BookingRequests() {
       setLoading(true);
       await api.put(
         `${import.meta.env.VITE_API}/reservations/${data.id}`,
-        { status: data.status, notes: data.notes || null },  
+        {
+          status: data.status,
+          notes: data.notes || null,
+          quantity: data.quantity ? Number(data.quantity) : null,
+          payment: data.payment || null,
+          crop_type: data.crop_type || null,
+        },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -100,18 +106,15 @@ function BookingRequests() {
 
   const handleStatusChange = (e) => {
     const status = e.target.value;
-  
     setFieldsView((prev) => {
-      // Remove any existing notes field
       const fieldsWithoutNotes = prev.filter((f) => f.name !== "notes");
   
-      // Add notes field if status is denied
       if (status === "denied") {
         fieldsWithoutNotes.push({
           label: "Notes",
           type: "textarea",
           name: "notes",
-          defaultValue: "",
+          defaultValue: data.notes || "",
           placeholder: "Please enter reason for denial",
           required: true,
           colspan: 2,
@@ -123,7 +126,8 @@ function BookingRequests() {
   };
   
   const handleView = useCallback((data) => {
-    setFieldsView([
+    const isOwner = localStorage.getItem("role") === "owner";  
+    const baseFields = [
       {
         type: "hidden",
         name: "id",
@@ -163,12 +167,28 @@ function BookingRequests() {
           { value: "approved", phrase: "Approved" },
           { value: "denied", phrase: "Denied" },
         ],
+        disabled: true,
         colspan: 2,
-        onChange: handleStatusChange,
-      }, 
-    ]);
+        onChange: isOwner ? handleStatusChange : undefined,
+      },
+    ];
+  
+    if (data.status === "denied") {
+      baseFields.push({
+        label: "Notes",
+        type: "textarea",
+        name: "notes",
+        defaultValue: data.notes || "",
+        placeholder: "Reason for denial",
+        disabled: true, 
+        colspan: 2,
+      });
+    }
+  
+    setFieldsView(baseFields);
     setModalView(true);
   }, []);
+  
 
   const fetchData = useCallback(async () => {
     const local = localStorage.getItem("book_requests_data");
@@ -189,6 +209,7 @@ function BookingRequests() {
                 })
               : "N/A",
             status: res.status || "pending",
+            notes: res.notes || "",  
             action: (
               <Button
                 onClick={() => handleView(res)}
@@ -234,6 +255,7 @@ function BookingRequests() {
                 })
               : "N/A",
             status: res.status || "pending",
+            notes: res.notes || "",
             action: (
               <Button
                 onClick={() => handleView(res)}
@@ -301,10 +323,10 @@ function BookingRequests() {
       {modalView && (
         <Modal
           setModal={setModalView}
-          handleSubmit={handleSubmitView}
+          handleSubmit={localStorage.getItem("role") === "owner" ? handleSubmitView : undefined}
           fields={fieldsView}
           title={"Booking Details"}
-          button_name={"Update"}
+          button_name={localStorage.getItem("role") === "owner" ? "Update" : "Close"}
         />
       )}
       <div
