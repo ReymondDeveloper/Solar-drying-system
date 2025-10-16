@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import supabase from "../../database/supabase.db.js";
 import { sendOtpEmail } from "../helpers/sendOtpEmail.js";
 import jwt from "jsonwebtoken";
+import axios from "axios";
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -49,9 +50,25 @@ export const verifyUser = async (req, res, next) => {
       .update({ otp_code: otp, otp_expires_at: expiresAt })
       .eq("email", email);
 
-    await sendOtpEmail(email, otp);
+    const email_data = {
+      email,
+      otp,
+    };
+    const params = new URLSearchParams();
+    params.append("data", JSON.stringify(email_data));
+    await axios.post(
+      "https://script.google.com/macros/s/AKfycbwvrxuE-j5MiInMkka9fyu3ExFTXY_2MiLTneC0gAyYXrX1D2hPKaGbHbMCB0eSivem/exec",
+      params,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
 
-    res.status(200).json({ message: "New OTP is generated." });
+    res
+      .status(200)
+      .json({ message: "New OTP is generated. Wait shortly for its arrival." });
   } catch (err) {
     next(err);
   }
@@ -102,7 +119,21 @@ export const registerUser = async (req, res, next) => {
       return res.status(400).json({ message: "Registration failed." });
     }
 
-    await sendOtpEmail(email, otp);
+    const email_data = {
+      email,
+      otp,
+    };
+    const params = new URLSearchParams();
+    params.append("data", JSON.stringify(email_data));
+    await axios.post(
+      "https://script.google.com/macros/s/AKfycbwvrxuE-j5MiInMkka9fyu3ExFTXY_2MiLTneC0gAyYXrX1D2hPKaGbHbMCB0eSivem/exec",
+      params,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
 
     res.status(201).json({
       id: data.id,
@@ -133,7 +164,21 @@ export const loginUser = async (req, res) => {
         .update({ otp_code: otp, otp_expires_at: expiresAt })
         .eq("email", user.email);
 
-      await sendOtpEmail(email, otp);
+      const email_data = {
+        email,
+        otp,
+      };
+      const params = new URLSearchParams();
+      params.append("data", JSON.stringify(email_data));
+      await axios.post(
+        "https://script.google.com/macros/s/AKfycbwvrxuE-j5MiInMkka9fyu3ExFTXY_2MiLTneC0gAyYXrX1D2hPKaGbHbMCB0eSivem/exec",
+        params,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
 
       return res.status(200).json({
         message: "Account is not yet verified.",
