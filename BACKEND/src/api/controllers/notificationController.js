@@ -4,7 +4,13 @@ export const getNotifications = async (req, res) => {
   try {
     const user = req.user.id;
     const data = await Notification.findAll(user);
-    res.status(200).json(data);
+
+    if (data.length > 5) {
+      const filtered = data.filter(notification => !notification.seen);
+      res.status(200).json(filtered);
+    } else {
+      res.status(200).json(data);
+    }
   } catch (err) {
     console.log(err);
   }

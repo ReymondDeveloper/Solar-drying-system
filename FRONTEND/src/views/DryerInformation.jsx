@@ -9,7 +9,6 @@ import Loading from "../component/Loading";
 import Button from "../component/Button";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ViewModal from "../component/ViewModal.jsx";
 import api from "../api/api";
 
 function DryerInformation() {
@@ -19,7 +18,6 @@ function DryerInformation() {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
-  const [modalView, setModalView] = useState(false);
   const [modalEdit, setModalEdit] = useState(false);
   const [modalAdd, setModalAdd] = useState(false);
   const [filter, setFilter] = useState("all");
@@ -108,7 +106,6 @@ function DryerInformation() {
         const uploadRes = await api.post("/upload", uploadForm, {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -125,6 +122,7 @@ function DryerInformation() {
       });
 
       toast.success(res.data.message);
+
       fetchData();
       setModalAdd(false);
     } catch (err) {
@@ -238,11 +236,6 @@ function DryerInformation() {
           user: {
             id: localStorage.getItem("id"),
           },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
         }
       );
 
@@ -290,7 +283,7 @@ function DryerInformation() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     fetchData();
@@ -338,20 +331,6 @@ function DryerInformation() {
       name: "image_url",
     },
   ];
-
-  const datasView = selectedDryer
-    ? [
-        { label: "Dryer Name", value: selectedDryer.dryer_name },
-        { label: "Location", value: selectedDryer.location },
-        { label: "Capacity", value: selectedDryer.maximum_capacity },
-        {
-          label: "Available Capacity",
-          value: selectedDryer.available_capacity,
-        },
-        { label: "Rate (PHP)", value: selectedDryer.rate },
-        { label: "Image", image_url: selectedDryer.image_url },
-      ]
-    : [];
 
   const FilteredData = data.filter((info) => {
     const filterByFilters =
@@ -412,17 +391,10 @@ function DryerInformation() {
           button_name={"Update"}
         />
       )}
-      {/* {modalView && (
-        <ViewModal
-          setModal={setModalView}
-          datas={datasView}
-          title="Dryer Details"
-        />
-      )} */}
 
       <div
         className={`w-full h-[calc(100dvh-160px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${
-          modalFilter || modalView ? "overflow-hidden" : "overflow-auto"
+          modalFilter ? "overflow-hidden" : "overflow-auto"
         }`}
       >
         <Search setSearch={setSearch} setModal={setModalFilter} />

@@ -87,7 +87,7 @@ export const getDryerById = async (req, res) => {
           crop_type: reservation.crop_types.crop_type_name,
           quantity: reservation.crop_types.quantity,
           status: reservation.status,
-          reservation_date: reservation.created_at, 
+          reservation_date: reservation.created_at
         };
       })
     );

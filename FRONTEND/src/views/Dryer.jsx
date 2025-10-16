@@ -8,6 +8,7 @@ import { CgArrowUp, CgArrowDown } from "react-icons/cg";
 import Button from "../component/Button";
 import Modal from "../component/Modal";
 import api from "../api/api.js";
+import axios from "axios";
 
 export function DynamicMap({ location }) {
   let Location =
@@ -49,11 +50,7 @@ export default function Dryer() {
     if (!data) setLoading(true);
 
     try {
-      const result = await api.get(`${import.meta.env.VITE_API}/dryers/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const result = await api.get(`${import.meta.env.VITE_API}/dryers/${id}`);
 
       if (!result.data) throw new Error("Invalid data from API");
       const isDifferent =
@@ -70,7 +67,7 @@ export default function Dryer() {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, navigate]);
 
   useEffect(() => {
     fetchData();
@@ -95,14 +92,6 @@ export default function Dryer() {
       comment: "Using their tools, we streamlined our operations.",
     },
   ];
-
-  const uniqueFarmers = data.farmers
-    ? [
-        ...new Map(
-          data.farmers.map((farmer) => [farmer.farmer_id, farmer])
-        ).values(),
-      ]
-    : [];
 
   const fieldsAdd = [
     {
@@ -146,6 +135,15 @@ export default function Dryer() {
         payment: payment,
       });
       toast.success(res.data.message);
+
+      axios.post(`${import.meta.env.VITE_API}/notification`, {
+        user: JSON.parse(localStorage.getItem("dryer_data")).created_by_id,
+        context:
+          `A farmer successfully reserved your dryer located on "${JSON.parse(localStorage.getItem("dryer_data")).location}" at ` +
+          new Date().toLocaleString(),
+        url: '/home/booking-requests'
+      });
+
       setModalAdd(false);
       setTimeout(() => {
         navigate("/home/reservation-history");
@@ -171,7 +169,6 @@ export default function Dryer() {
       }, {})
     )
   : [];
-
 
   return (
     <>

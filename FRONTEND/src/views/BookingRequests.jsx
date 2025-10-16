@@ -9,6 +9,7 @@ import Button from "../component/Button";
 import api from "../api/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
 
 function BookingRequests() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -91,7 +92,17 @@ function BookingRequests() {
           },
         }
       );
+
       toast.success("Booking is updated successfully!");
+
+      axios.post(`${import.meta.env.VITE_API}/notification`, {
+        user: localStorage.getItem('booking_requests_farmer_id'),
+        context:
+          `Dryer's owner of "${localStorage.getItem('booking_requests_dryer_name').toUpperCase()}" successfully updated your reservation status at ` +
+          new Date().toLocaleString(),
+        url: '/home/reservation-history'
+      });
+
       setModalView(false);
       fetchData();
     } catch (err) {
@@ -104,28 +115,32 @@ function BookingRequests() {
 
   const [fieldsView, setFieldsView] = useState([]);
 
-  const handleStatusChange = (e) => {
-    const status = e.target.value;
-    setFieldsView((prev) => {
-      const fieldsWithoutNotes = prev.filter((f) => f.name !== "notes");
-  
-      if (status === "denied") {
-        fieldsWithoutNotes.push({
-          label: "Notes",
-          type: "textarea",
-          name: "notes",
-          defaultValue: data.notes || "",
-          placeholder: "Please enter reason for denial",
-          required: true,
-          colspan: 2,
-        });
-      }
-  
-      return fieldsWithoutNotes;
-    });
-  };
-  
   const handleView = useCallback((data) => {
+
+    localStorage.setItem('booking_requests_farmer_id', data.farmer_id);
+    localStorage.setItem('booking_requests_dryer_name', data.dryer_name);
+
+    const handleStatusChange = (e) => {
+      const status = e.target.value;
+      setFieldsView((prev) => {
+        const fieldsWithoutNotes = prev.filter((f) => f.name !== "notes");
+    
+        if (status === "denied") {
+          fieldsWithoutNotes.push({
+            label: "Notes",
+            type: "textarea",
+            name: "notes",
+            defaultValue: data.notes || "",
+            placeholder: "Please enter reason for denial",
+            required: true,
+            colspan: 2,
+          });
+        }
+    
+        return fieldsWithoutNotes;
+      });
+    };
+
     const isOwner = localStorage.getItem("role") === "owner";  
     const baseFields = [
       {
@@ -189,9 +204,8 @@ function BookingRequests() {
     setModalView(true);
   }, []);
   
-
   const fetchData = useCallback(async () => {
-    const local = localStorage.getItem("book_requests_data");
+    const local = localStorage.getItem("booking_requests_data");
     const data = JSON.parse(local);
     setData(
       Array.isArray(data)
@@ -229,9 +243,6 @@ function BookingRequests() {
         `${import.meta.env.VITE_API}/reservations/owner`,
         {
           params: { ownerId: localStorage.getItem("id") },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
         }
       );
 
@@ -266,7 +277,7 @@ function BookingRequests() {
             ),
           }))
         );
-        localStorage.setItem("book_requests_data", JSON.stringify(result.data));
+        localStorage.setItem("booking_requests_data", JSON.stringify(result.data));
       }
     } catch (error) {
       console.error(error);
