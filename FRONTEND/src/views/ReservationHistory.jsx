@@ -7,8 +7,6 @@ import Loading from "../component/Loading";
 import Modal from "../component/Modal";
 import Button from "../component/Button";
 import api from "../api/api.js";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 function ReservationHistory() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,7 +19,6 @@ function ReservationHistory() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [datasView, setDatasView] = useState([]);
-  const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
   const tableHeadings =
@@ -100,7 +97,6 @@ function ReservationHistory() {
   const fetchData = useCallback(async () => {
     const local = localStorage.getItem("reservation_history_data");
     const data = JSON.parse(local);
-    console.log("🧩 LOG: Local cached data:", data);
 
     setData(
       Array.isArray(data)
@@ -151,8 +147,6 @@ function ReservationHistory() {
         JSON.stringify(data) !==
         JSON.stringify(Array.isArray(result.data) ? result.data : []);
         
-    console.log("🧩 LOG: Local cached data1:", result.data);
-
       if (isDifferent) {
         setData(
           result.data?.map((res) => ({
@@ -227,7 +221,6 @@ function ReservationHistory() {
   return (
     <>
       {loading && <Loading />}
-      <ToastContainer position="top-center" autoClose={3000} />
       {modalFilter && (
         <Modal
           setModal={setModalFilter}

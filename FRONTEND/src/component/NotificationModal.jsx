@@ -3,13 +3,15 @@ import api from "../api/api";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Notification({ index, item }) {
+function Notification({ index, item, setNotificationModal }) {
   const navigate = useNavigate();
   function handleClick() {
     item.seen === false &&
       api.put(`${import.meta.env.VITE_API}/notification/${item.id}`);
 
     item.url && navigate(item.url);
+
+    item.url && setNotificationModal(false);
   }
   return (
     <div
@@ -79,7 +81,7 @@ function NotificationModal({ setNotificationModal }) {
         >
           <div className="bg-gray-300 p-5 rounded-md flex flex-col gap-2 justify-between items-start">
             {data.map((item, index) => (
-              <Notification key={index} item={item} />
+              <Notification key={index} item={item} setNotificationModal={setNotificationModal} />
             ))}
             <Button
               className={"w-full bg-green-600 hover:bg-green-700 text-white"}

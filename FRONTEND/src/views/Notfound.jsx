@@ -13,13 +13,7 @@ function Notfound() {
     if (navigationType === "PUSH") {
       navigate(-1);
     } else {
-      localStorage.removeItem("code");
-      localStorage.removeItem("code_name");
-      localStorage.removeItem("role");
-      localStorage.removeItem("full_name");
-      localStorage.removeItem("first_name");
-      localStorage.removeItem("last_name");
-      localStorage.removeItem("email");
+      localStorage.clear();
       navigate("/");
     }
   };

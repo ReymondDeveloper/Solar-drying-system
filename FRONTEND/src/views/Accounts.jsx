@@ -218,6 +218,7 @@ function Accounts() {
       }
     } catch (error) {
       console.error(error);
+      setIsError(true);
       setData([]);
     } finally {
       setIsLoading(false);
