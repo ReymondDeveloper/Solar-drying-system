@@ -1,13 +1,14 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Links from "../utils/Links";
+import { FaCog } from "react-icons/fa";
 
 function Navigation({ button, setButton }) {
-  
+  const navigate = useNavigate(); 
+
   return (
     <>
       <div
-        className={`
-          z-5 top-[56px] h-screen flex flex-col items-center gap-[2px] text-gray-500 font-bold w-screen max-w-[320px] bg-gradient-to-t from-[rgba(0,100,0,255)] via-green-600 to-[rgba(0,100,0,255)] absolute transition-all duration-500
+        className={`z-5 top-[56px] h-screen flex flex-col items-center gap-[2px] text-gray-500 font-bold w-screen max-w-[320px] bg-gradient-to-t from-[rgba(0,100,0,255)] via-green-600 to-[rgba(0,100,0,255)] absolute transition-all duration-500
           md:bg-none md:top-0 md:bg-[rgba(0,100,0,255)] md:relative md:left-0 ${
             button ? "left-0" : "-left-[100%] md:w-auto"
           }`}
@@ -17,7 +18,7 @@ function Navigation({ button, setButton }) {
             button ? "" : "md:hidden"
           }`}
         >
-          <b className="text-5xl abril-fatface">
+          <b className="text-2xl abril-fatface">
             Solar-Drying Reservation System
           </b>
         </div>
@@ -57,6 +58,17 @@ function Navigation({ button, setButton }) {
               </NavLink>
             ))
         )}
+
+        <div className="mt-auto w-full flex items-center justify-center !py-3 transition-all duration-300">
+          <span
+            onClick={() => navigate("/home/settings")}   
+            className="ms-auto bg-[rgba(255,255,255,0.2)] p-5 transition-all duration-300 hover:bg-[rgba(255,255,255,0.3)]"
+          >
+            <div className="w-5 text-white flex items-center justify-center relative">
+              <FaCog />  
+            </div>
+          </span>
+        </div>
       </div>
     </>
   );

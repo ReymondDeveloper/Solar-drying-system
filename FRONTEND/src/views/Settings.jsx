@@ -3,6 +3,7 @@ import Button from "../component/Button";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 function Settings() {
   const [profileImage, setProfileImage] = useState(null);
@@ -14,9 +15,16 @@ function Settings() {
     last_name: localStorage.getItem("last_name") || "",
     mobile_number: localStorage.getItem("mobile_number") || "",
     email: localStorage.getItem("email") || "",
-    // no password input field, but keep it for API
     password: localStorage.getItem("password") || "********",
   });
+
+  const navigate = useNavigate();  
+  const handleLogout = (e) => {
+    e.preventDefault();
+    localStorage.clear();  
+    navigate("/"); 
+    toast.success("Successfully logged out!");
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -103,6 +111,8 @@ function Settings() {
       );
     }
   };
+
+  // Define form fields
   const formFields = [
     {
       label: "First Name",
@@ -178,9 +188,15 @@ function Settings() {
         </div>
 
         <div className="flex-2 w-full bg-white p-6 rounded-lg shadow-lg overflow-auto">
-          <h2 className="font-semibold text-2xl mb-6 border-b pb-2">
-            Profile Settings
-          </h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="font-semibold text-2xl border-b pb-2">Profile Settings</h2>
+            <Button
+              onClick={handleLogout}  // Add this onClick to trigger logout
+              className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md text-lg"
+            >
+              Logout
+            </Button>
+          </div>
 
           <form
             onSubmit={handleSubmit}
@@ -195,9 +211,7 @@ function Settings() {
                     : "col-span-2 lg:col-span-1"
                 }`}
               >
-                <label className="text-gray-700 mb-1 w-full">
-                  {field.label}
-                </label>
+                <label className="text-gray-700 mb-1 w-full">{field.label}</label>
                 <input
                   type={field.type}
                   name={field.name}
