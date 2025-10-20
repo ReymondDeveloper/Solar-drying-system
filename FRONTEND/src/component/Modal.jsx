@@ -34,11 +34,11 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
       }
     );
   };
-
   const safeNumber = (val) => {
     const cleaned = (val || "0").toString().replace(/[^0-9.-]+/g, "");
     return isNaN(cleaned) ? 0 : Number(cleaned);
   };
+  console.log(datas);  // Add this to see the full datas object
 
   return (
     <div

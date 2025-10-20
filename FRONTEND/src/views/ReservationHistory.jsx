@@ -97,7 +97,6 @@ function ReservationHistory() {
   const fetchData = useCallback(async () => {
     const local = localStorage.getItem("reservation_history_data");
     const data = JSON.parse(local);
-
     setData(
       Array.isArray(data)
         ? data?.map((res) => ({
