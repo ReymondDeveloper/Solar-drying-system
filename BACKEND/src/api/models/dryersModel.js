@@ -6,7 +6,7 @@ const Dryers = {
     const { data, error } = await supabase
       .from("dryers")
       .select(`
-        id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url,
+        id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, isverified,
         created_at, updated_at, created_by_id, updated_by_id
       `);
     if (error) throw error;
@@ -17,7 +17,7 @@ const Dryers = {
     const { data, error } = await supabase
       .from("dryers")
       .select(`
-        id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url,
+        id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url,isverified,
         created_at, updated_at, created_by_id, updated_by_id
       `)
       .eq("id", id)
@@ -26,7 +26,7 @@ const Dryers = {
     return data;
   },
 
-  create: async ({ dryer_name, location, available_capacity, maximum_capacity, rate, image_url = null, created_by_id = null }) => {
+  create: async ({ dryer_name, location, available_capacity, maximum_capacity, rate, image_url = null, created_by_id = null, isverified = false }) => {
     const { data, error } = await supabase
       .from("dryers")
       .insert([
@@ -39,18 +39,19 @@ const Dryers = {
           rate,
           image_url,
           created_by_id,
+          isverified
         },
       ])
       .select(`
         id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url,
-        created_at, created_by_id
+        created_at, created_by_id, isverified
       `)
       .single();
     if (error) throw error;
     return data;
   },
 
-  update: async (id, { dryer_name, location, available_capacity, maximum_capacity, rate, image_url, updated_by_id }) => {
+  update: async (id, { dryer_name, location, available_capacity, maximum_capacity, rate, image_url, updated_by_id, isverified }) => {
     const { data, error } = await supabase
       .from("dryers")
       .update({
@@ -61,12 +62,13 @@ const Dryers = {
         rate,
         image_url,
         updated_by_id,
+        isverified,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
       .select(`
         id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url,
-        updated_at, updated_by_id
+        updated_at, updated_by_id, isverified
       `)
       .single();
     if (error) throw error;

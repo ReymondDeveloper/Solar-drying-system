@@ -114,6 +114,7 @@ export const createDryer = async (req, res) => {
       rate,
       image_url,
       created_by_id,
+      isverified
     } = req.body;
 
     const { data, error } = await supabase
@@ -127,6 +128,7 @@ export const createDryer = async (req, res) => {
           rate,
           image_url,
           created_by_id,
+          isverified
         },
       ])
       .select()
@@ -154,7 +156,9 @@ export const updateDryer = async (req, res) => {
       rate,
       available_capacity,
       image_url,
+      isverified,
     } = req.body;
+    const updatedIsVerified = isverified === "true"; 
     const { data, error } = await supabase
       .from("dryers")
       .update({
@@ -164,6 +168,7 @@ export const updateDryer = async (req, res) => {
         rate,
         available_capacity,
         image_url,
+        isverified: updatedIsVerified, 
       })
       .eq("id", id)
       .select()
