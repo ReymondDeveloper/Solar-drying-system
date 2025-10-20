@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import Links from "../utils/Links";
 import { FaCog } from "react-icons/fa";
+import { FaArrowCircleLeft} from "react-icons/fa";
 
 function Navigation({ button, setButton }) {
   const navigate = useNavigate(); 
@@ -24,13 +25,14 @@ function Navigation({ button, setButton }) {
         </div>
 
         {!button && (
-          <div className="bg-[rgba(255,255,255,0.2)] w-full flex !ps-5 !py-3">
+          <div className="bg-[rgba(255,255,255,0.2)] w-full flex !ps-5 !py-3 transition-all duration-300 hover:bg-[rgba(255,255,255,0.3)]"
+            onClick={() => navigate(-1)}>
             <div
               className={`w-5 me-5 text-white flex items-center justify-center ${
                 !button && "h-[30px]"
               }`}
             >
-              <img src="/logo.png" />
+              <FaArrowCircleLeft />
             </div>
           </div>
         )}
@@ -59,16 +61,23 @@ function Navigation({ button, setButton }) {
             ))
         )}
 
-        <div className="mt-auto w-full flex items-center justify-center !py-3 transition-all duration-300">
-          <span
-            onClick={() => navigate("/home/settings")}   
-            className="ms-auto bg-[rgba(255,255,255,0.2)] p-5 transition-all duration-300 hover:bg-[rgba(255,255,255,0.3)]"
+        <NavLink
+          onClick={() => setButton(false)}
+          to={"/home/settings"}
+          className="bg-[rgba(255,255,255,0.2)] w-full flex !ps-5 !py-3 transition-all duration-300 hover:bg-[rgba(255,255,255,0.3)] mt-auto"
+        >
+          <div className={`w-5 me-5 text-white ${!button && "h-[30px]"}`}>
+            <FaCog />  
+          </div>
+          <h1
+            className={`bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent transition-all duration-300 capitalize ${
+              button ? "md:w-auto" : "md:w-0"
+            }`}
           >
-            <div className="w-5 text-white flex items-center justify-center relative">
-              <FaCog />  
-            </div>
-          </span>
-        </div>
+            Settings
+          </h1>
+        </NavLink>
+
       </div>
     </>
   );
