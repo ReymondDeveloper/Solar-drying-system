@@ -20,7 +20,7 @@ import BookingRequests from "./views/BookingRequests";
 import Settings from "./views/Settings";
 import DryerInformation from "./views/DryerInformation";
 import Dryer from "./views/Dryer";
-
+import Archive from "./views/Archive";
 const router = createBrowserRouter(
   [
     {
@@ -53,6 +53,14 @@ const router = createBrowserRouter(
               element: (
                 <Authentication role={"admin"}>
                   <Reservations />
+                </Authentication>
+              ),
+            },
+            {
+              path: "archive",
+              element: (
+                <Authentication role={"admin"}>
+                  <Archive />
                 </Authentication>
               ),
             },

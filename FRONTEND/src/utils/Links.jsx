@@ -3,7 +3,7 @@ import { FaMapMarkedAlt, FaFileMedicalAlt } from "react-icons/fa";
 import { IoPeopleSharp } from "react-icons/io5";
 import { HiClipboardDocumentList } from "react-icons/hi2";
 import { BiSolidDashboard } from "react-icons/bi";
-
+import { BsFillArchiveFill } from 'react-icons/bs'
 const Links = [
   {
     role: "admin",
@@ -36,6 +36,12 @@ const Links = [
         title: "reports",
         description: "Generate reports.",
         to: "/home/reports",
+      },
+      {
+        icon: <BsFillArchiveFill className="w-full h-full" />,  
+        title: "archive",
+        description: "View archived reservations.",
+        to: "/home/archive",  
       },
     ],
   },
