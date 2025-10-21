@@ -33,7 +33,6 @@ function DryerInformation() {
     "Capacity (Cavans)",
     "Available Capacity (Cavans)",
     "Rate",
-    "Verified", 
     "Date Created",
     "Action",
   ];
@@ -44,7 +43,6 @@ function DryerInformation() {
     "maximum_capacity",
     "available_capacity",
     "rate",
-    "isverified", 
     "created_at",
     "action",
   ];
@@ -89,16 +87,6 @@ function DryerInformation() {
     },
     { label: "Rate (PHP)", type: "number", name: "rate", required: true },
     { label: "Dryer Image", type: "file", name: "image_url" },
-    {
-      label: "Verified",
-      type: "select",
-      name: "isverified",
-      options: [
-        { value: "true", phrase: "Verified" },
-        { value: "false", phrase: "Not Verified" },
-      ],
-      required: true,
-    },
   ];
 
   const handleSubmitAdd = async (e) => {
@@ -132,7 +120,6 @@ function DryerInformation() {
         rate: dryerData.rate,
         image_url: dryerData.image_url,
         created_by_id: createdById,
-        isverified: dryerData.isverified,  
       });
 
       toast.success(res.data.message);
@@ -345,16 +332,6 @@ function DryerInformation() {
       label: "Dryer Image",
       type: "file",
       name: "image_url",
-    },
-    {
-      label: "Verified",
-      type: "select",
-      name: "isverified",
-      options: [
-        { value: "true", phrase: "Verified" },
-        { value: "false", phrase: "Not Verified" },
-      ],
-      defaultValue: selectedDryer?.isverified ? "true" : "false", 
     },
   ];
 
