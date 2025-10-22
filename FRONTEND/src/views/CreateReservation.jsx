@@ -10,7 +10,6 @@ import Button from "../component/Button";
 import api from "../api/api.js";
 
 function CreateReservation() {
-  const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);

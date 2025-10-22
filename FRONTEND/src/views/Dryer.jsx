@@ -133,15 +133,17 @@ export default function Dryer() {
         crop_type: crop_type,
         quantity: quantity,
         payment: payment,
+        owner_id: JSON.parse(localStorage.getItem("dryer_data")).created_by_id,
       });
       toast.success(res.data.message);
 
       axios.post(`${import.meta.env.VITE_API}/notification`, {
         user: JSON.parse(localStorage.getItem("dryer_data")).created_by_id,
         context:
-          `A farmer successfully reserved your dryer located on "${JSON.parse(localStorage.getItem("dryer_data")).location}" at ` +
-          new Date().toLocaleString(),
-        url: '/home/booking-requests'
+          `A farmer successfully reserved your dryer located on "${
+            JSON.parse(localStorage.getItem("dryer_data")).location
+          }" at ` + new Date().toLocaleString(),
+        url: "/home/booking-requests",
       });
 
       setModalAdd(false);
@@ -156,19 +158,20 @@ export default function Dryer() {
   };
 
   const farmersGrouped = data.farmers
-  ? Object.values(
-      data.farmers.reduce((acc, curr) => {
-        if (!acc[curr.farmer_id]) acc[curr.farmer_id] = { ...curr, reservations: [] };
-        acc[curr.farmer_id].reservations.push({
-          crop_type: curr.crop_type,
-          quantity: curr.quantity,
-          status: curr.status,
-          reservation_date: curr.reservation_date,
-        });
-        return acc;
-      }, {})
-    )
-  : [];
+    ? Object.values(
+        data.farmers.reduce((acc, curr) => {
+          if (!acc[curr.farmer_id])
+            acc[curr.farmer_id] = { ...curr, reservations: [] };
+          acc[curr.farmer_id].reservations.push({
+            crop_type: curr.crop_type,
+            quantity: curr.quantity,
+            status: curr.status,
+            reservation_date: curr.reservation_date,
+          });
+          return acc;
+        }, {})
+      )
+    : [];
 
   return (
     <>
@@ -200,51 +203,53 @@ export default function Dryer() {
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
-        <div className="flex items-center text-center border-b pb-2 mb-4">
-          <h2 className="text-2xl font-bold text-gray-800">Dryer Details</h2>
-        </div>
-        <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
-          <span className="font-medium text-gray-700">Dryer:</span>
-          <span className=" text-gray-900">{data.dryer_name}</span>
-        </div>
+          <div className="flex items-center text-center border-b pb-2 mb-4">
+            <h2 className="text-2xl font-bold text-gray-800">Dryer Details</h2>
+          </div>
+          <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
+            <span className="font-medium text-gray-700">Dryer:</span>
+            <span className=" text-gray-900">{data.dryer_name}</span>
+          </div>
 
-        <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
-          <span className="font-medium text-gray-700">Maximum Capacity:</span>
-          <span className=" text-gray-900">{data.maximum_capacity}</span>
-        </div>
+          <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
+            <span className="font-medium text-gray-700">Maximum Capacity:</span>
+            <span className=" text-gray-900">{data.maximum_capacity}</span>
+          </div>
 
-        <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
-          <span className="font-medium text-gray-700">Available Capacity:</span>
-          <span className="text-gray-900">{data.available_capacity}</span>
-        </div>
+          <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
+            <span className="font-medium text-gray-700">
+              Available Capacity:
+            </span>
+            <span className="text-gray-900">{data.available_capacity}</span>
+          </div>
 
-        <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
-          <span className="font-medium text-gray-700">Rate:</span>
-          <span className="text-gray-900">PHP {data.rate}</span>
-        </div>
+          <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
+            <span className="font-medium text-gray-700">Rate:</span>
+            <span className="text-gray-900">PHP {data.rate}</span>
+          </div>
 
-        <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
-          <span className="font-medium text-gray-700">Created:</span>
-          <span className="text-gray-900">
-            {new Date(data.created_at).toLocaleString()}
-          </span>
-        </div>
+          <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
+            <span className="font-medium text-gray-700">Created:</span>
+            <span className="text-gray-900">
+              {new Date(data.created_at).toLocaleString()}
+            </span>
+          </div>
 
-        <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
-          <span className="font-medium text-gray-700">Owner:</span>
-          <span className="text-gray-900">{data.owner}</span>
-        </div>
+          <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
+            <span className="font-medium text-gray-700">Owner:</span>
+            <span className="text-gray-900">{data.owner}</span>
+          </div>
 
-        {data.available_capacity > 0 &&
-          data.owner !== localStorage.getItem("full_name") && (
-            <Button
-              className="w-full bg-blue-500 text-white py-3 rounded-full hover:bg-blue-600 mt-4"
-              onClick={() => setModalAdd(true)}
-            >
-              Reserve
-            </Button>
-          )}
-      </div>
+          {data.available_capacity > 0 &&
+            data.owner !== localStorage.getItem("full_name") && (
+              <Button
+                className="w-full bg-blue-500 text-white py-3 rounded-full hover:bg-blue-600 mt-4"
+                onClick={() => setModalAdd(true)}
+              >
+                Reserve
+              </Button>
+            )}
+        </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
           <h3 className="text-xl font-semibold">Farmers Who Reserved</h3>
@@ -252,40 +257,54 @@ export default function Dryer() {
             {farmersGrouped.length > 0 ? (
               <ul className="space-y-4">
                 {farmersGrouped.map((farmer, index) => (
-              <li key={index} className="border-b border-gray-300 pb-4">
-              <div className="mb-2">
-                <span className="font-bold text-lg text-gray-800">{farmer.farmer_name}</span>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                {farmer.reservations.map((res, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all"
-                  >
-                    <div className="flex-1 min-w-[120px]">
-                      <span className="text-gray-700 font-medium">Crop Type:</span>{" "}
-                      <span className="text-gray-900">{res.crop_type}</span>
-                    </div>
-                    <div className="flex-1 min-w-[100px]">
-                      <span className="text-gray-700 font-medium">Quantity:</span>{" "}
-                      <span className="text-gray-900">{res.quantity}</span>
-                    </div>
-                    <div className="flex-1 min-w-[100px]">
-                      <span className="text-gray-700 font-medium">Status:</span>{" "}
-                      <span className="text-gray-900">{res.status}</span>
-                    </div>
-                    
-                    <div className="flex-1 min-w-[180px]">
-                      <span className="text-gray-700 font-medium">Reserved On:</span>{" "}
-                      <span className="text-gray-900">
-                        {new Date(res.reservation_date).toLocaleString()}
+                  <li key={index} className="border-b border-gray-300 pb-4">
+                    <div className="mb-2">
+                      <span className="font-bold text-lg text-gray-800">
+                        {farmer.farmer_name}
                       </span>
                     </div>
-                  </div>
-                ))}
-              </div>
-              </li>
+
+                    <div className="flex flex-col gap-2">
+                      {farmer.reservations.map((res, i) => (
+                        <div
+                          key={i}
+                          className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all"
+                        >
+                          <div className="flex-1 min-w-[120px]">
+                            <span className="text-gray-700 font-medium">
+                              Crop Type:
+                            </span>{" "}
+                            <span className="text-gray-900">
+                              {res.crop_type}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-[100px]">
+                            <span className="text-gray-700 font-medium">
+                              Quantity:
+                            </span>{" "}
+                            <span className="text-gray-900">
+                              {res.quantity}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-[100px]">
+                            <span className="text-gray-700 font-medium">
+                              Status:
+                            </span>{" "}
+                            <span className="text-gray-900">{res.status}</span>
+                          </div>
+
+                          <div className="flex-1 min-w-[180px]">
+                            <span className="text-gray-700 font-medium">
+                              Reserved On:
+                            </span>{" "}
+                            <span className="text-gray-900">
+                              {new Date(res.reservation_date).toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </li>
                 ))}
               </ul>
             ) : (

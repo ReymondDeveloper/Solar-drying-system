@@ -99,9 +99,17 @@ export const getReservationById = async (req, res) => {
 
 export const createReservation = async (req, res) => {
   try {
-    const { farmer_id, dryer_id, crop_type, quantity, payment } = req.body;
+    const { farmer_id, dryer_id, crop_type, quantity, payment, owner_id } =
+      req.body;
 
-    if (!farmer_id || !dryer_id || !crop_type || !quantity || !payment) {
+    if (
+      !farmer_id ||
+      !dryer_id ||
+      !crop_type ||
+      !quantity ||
+      !payment ||
+      !owner_id
+    ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -125,6 +133,7 @@ export const createReservation = async (req, res) => {
       dryer_id,
       crop_type_id: cropType.crop_type_id,
       status: "pending",
+      owner_id,
     });
 
     await Dryers.update(dryer_id, {

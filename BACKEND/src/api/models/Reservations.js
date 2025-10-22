@@ -51,7 +51,7 @@ const Reservations = {
     return data;
   },
 
-  create: async ({ farmer_id, dryer_id, crop_type_id }) => {
+  create: async ({ farmer_id, dryer_id, crop_type_id, owner_id }) => {
     const { data, error } = await supabase
       .from("reservations")
       .insert([
@@ -61,6 +61,7 @@ const Reservations = {
           dryer_id,
           crop_type_id,
           status: "pending",
+          owner_id,
         },
       ])
       .select()
