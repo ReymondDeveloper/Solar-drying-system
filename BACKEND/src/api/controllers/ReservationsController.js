@@ -2,6 +2,7 @@ import Reservations from "../models/Reservations.js";
 import Dryers from "../models/dryersModel.js";
 import CropTypes from "../models/CropTypes.js";
 import supabase from "../../database/supabase.db.js";
+import { subMonths } from 'date-fns';  
 
 export const getReservations = async (req, res) => {
   try {
@@ -69,7 +70,6 @@ export const getReservations = async (req, res) => {
     );
 
     const filtered = formatted.filter((f) => f !== null);
-
     res.json(filtered);
   } catch (err) {
     res
@@ -94,6 +94,51 @@ export const getReservationById = async (req, res) => {
     res
       .status(500)
       .json({ message: "Reservation fetch failed.", error: err.message });
+  }
+};
+
+export const getArchivedReservations = async (req, res) => {
+  try {
+    const oneMonthAgo = subMonths(new Date(), 1); 
+
+    const { data, error } = await supabase
+      .from("reservations")
+      .select(`
+        id,
+        farmer_id:farmer_id(id, first_name, last_name, email, mobile_number),
+        dryer_id:dryer_id(id, dryer_name, location, rate, available_capacity, created_by_id),
+        crop_type_id:crop_type_id(crop_type_name, quantity, payment, notes),
+        status,
+        created_at
+      `)
+      .lt('created_at', oneMonthAgo.toISOString())   
+      .order('created_at', { ascending: false }); 
+
+    if (error) throw error;   
+
+    const formattedData = data.map((r) => {
+      return {
+        id: r.id,
+        farmer_id: r.farmer_id.id || null,
+        farmer_name: `${r.farmer_id.first_name} ${r.farmer_id.last_name}`,
+        dryer_id: r.dryer_id.id || null,
+        dryer_name: r.dryer_id.dryer_name || "N/A",
+        dryer_location: r.dryer_id.location || "N/A",
+        crop_type: r.crop_type_id.crop_type_name || "N/A",
+        quantity: r.crop_type_id.quantity || 0,
+        payment: r.crop_type_id.payment || "N/A",
+        notes: r.crop_type_id.notes || r.notes || "",
+        rate: r.dryer_id.rate || 0,
+        status: r.status || "pending",
+        created_at: r.created_at,
+      };
+    });
+    console.log("Archived reservations fetched:", formattedData);
+    res.status(200).json(formattedData);
+
+  } catch (error) {
+    console.error("Error fetching archived reservations:", error);
+    res.status(500).json({ message: "Failed to fetch archived reservations", error: error.message });
   }
 };
 

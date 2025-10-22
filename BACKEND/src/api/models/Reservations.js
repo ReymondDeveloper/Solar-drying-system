@@ -1,8 +1,9 @@
 import supabase from "../../database/supabase.db.js";
 import { v4 as uuidv4 } from "uuid";
-
+import { subMonths } from 'date-fns';  
 const Reservations = {
   findAll: async ({ farmer_id } = {}) => {
+    const oneMonthAgo = subMonths(new Date(), 1).toISOString();  
     let query = supabase
       .from("reservations")
       .select(
@@ -18,7 +19,9 @@ const Reservations = {
       )
       .order("created_at", { ascending: false });
 
-    if (farmer_id) query = query.eq("farmer_id", farmer_id);
+    if (farmer_id) query = query.eq("farmer_id", farmer_id);  // Filter by farmer_id
+    query = query.gte("created_at", oneMonthAgo);  // Filter to get only reservations from the last month
+
     const { data, error } = await query;
     if (error) throw error;
 

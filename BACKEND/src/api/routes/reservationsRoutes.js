@@ -8,6 +8,7 @@ import {
   checkReservation,
   getReservationsByOwner,
   getAllOwnersWithDryers,
+  getArchivedReservations
 } from "../controllers/ReservationsController.js";
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.post("/", createReservation);
 router.put("/:id", updateReservation);
 router.delete("/:id", deleteReservation);
 router.get("/home", getReservationById); 
+router.get("/archive", getArchivedReservations);
 
 export default router;
