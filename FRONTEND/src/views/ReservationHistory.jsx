@@ -7,6 +7,7 @@ import Loading from "../component/Loading";
 import Modal from "../component/Modal";
 import Button from "../component/Button";
 import api from "../api/api.js";
+import GcashModal from "../component/GcashModal.jsx";
 
 function ReservationHistory() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -15,6 +16,7 @@ function ReservationHistory() {
   const [isLoading, setIsLoading] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
   const [modalView, setModalView] = useState(false);
+  const [gcashModal, setGcashModal] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -72,6 +74,41 @@ function ReservationHistory() {
     },
   ];
 
+  const fieldsGcash = [
+    { type: "file", name: "image", accept: "image/*" },
+    {
+      type: "tel",
+      label: "Number",
+      name: "sender",
+      pattern: `^\\+63\\s?9\\d{2}\\s?\\d{3}\\s?\\d{4}$`,
+      placeholder: "ex. +63 9XX XXX XXXX",
+      required: true,
+    },
+    {
+      type: "number",
+      label: "Amount",
+      name: "amount",
+      step: "0.01",
+      min: "0.01",
+      placeholder: "ex. 1000.00",
+      required: true,
+    },
+    {
+      type: "text",
+      label: "Reference No.",
+      name: "reference",
+      inputMode: "numeric",
+      placeholder: "ex. 1234 567 891011",
+      required: true,
+    },
+    {
+      type: "text",
+      label: "Date",
+      name: "date",
+      required: true,
+    },
+  ];
+
   const handleSubmitFilter = (e) => {
     e.preventDefault();
     setLoading(true);
@@ -80,6 +117,24 @@ function ReservationHistory() {
     setFilter(data.status);
     setLoading(false);
     setModalFilter(false);
+  };
+
+  const handleSubmitGcash = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const fields = Object.fromEntries(formData.entries());
+
+    setLoading(true);
+    const newEntry = {
+      to: fields.sender,
+      amount: fields.amount,
+      refNo: fields.reference,
+      date: fields.date,
+    };
+
+    console.log(newEntry);
+    setGcashModal(false);
+    setLoading(false);
   };
 
   const handleSubmitView = (e) => {
@@ -145,7 +200,7 @@ function ReservationHistory() {
       const isDifferent =
         JSON.stringify(data) !==
         JSON.stringify(Array.isArray(result.data) ? result.data : []);
-        
+
       if (isDifferent) {
         setData(
           result.data?.map((res) => ({
@@ -155,7 +210,7 @@ function ReservationHistory() {
             crop_type: res.crop_type_id.crop_type_name || "N/A",
             quantity: res.crop_type_id.quantity || 0,
             payment: res.crop_type_id.payment || "N/A",
-            notes: res.notes || res.crop_type_id.notes || "",  
+            notes: res.notes || res.crop_type_id.notes || "",
             date: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",
@@ -233,6 +288,7 @@ function ReservationHistory() {
         <Modal
           setModal={setModalView}
           handleSubmit={handleSubmitView}
+          setGcashModal={setGcashModal}
           datas={datasView}
           title={
             role === "farmer"
@@ -240,6 +296,15 @@ function ReservationHistory() {
               : "Reservation Details"
           }
           button_name={role === "farmer" ? "Tapos" : "Done"}
+        />
+      )}
+      {gcashModal && (
+        <GcashModal
+          onSubmit={handleSubmitGcash}
+          onClick={() => setGcashModal(() => false)}
+          field={fieldsGcash}
+          setLoading={setLoading}
+          buttonName={"Save Record"}
         />
       )}
       <div
@@ -281,6 +346,8 @@ function ReservationHistory() {
           totalPages={totalPages}
         />
       </div>
+
+      {loading && <Loading />}
     </>
   );
 }

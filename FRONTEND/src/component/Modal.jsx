@@ -4,7 +4,15 @@ import { RiCloseLargeLine, RiQrCodeLine } from "react-icons/ri";
 import { FaLocationArrow } from "react-icons/fa";
 import { ImFolderUpload } from "react-icons/im";
 
-function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
+function Modal({
+  setModal,
+  handleSubmit,
+  title,
+  button_name,
+  fields,
+  datas,
+  setGcashModal,
+}) {
   const [address, setAddress] = useState("");
   const [previewUrls, setPreviewUrls] = useState({});
   const [mainImage, setMainImage] = useState("");
@@ -283,13 +291,15 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
           {datas ? (
             <div className="col-span-1 md:col-span-2">
               <div className="flex flex-col text-sm">
-                <div
-                  className="ms-auto bg-[rgba(0,0,0,0.1)] hover:bg-[rgba(0,0,0,0.2)] p-3 rounded-full relative cursor-pointer"
-                  title="Gcash QR Code"
-                  onClick={() => setQrmodal((prev) => !prev)}
-                >
-                  <RiQrCodeLine />
-                </div>
+                {userRole === "farmer" && (
+                  <div
+                    className="ms-auto bg-[rgba(0,0,0,0.1)] hover:bg-[rgba(0,0,0,0.2)] p-3 rounded-full relative cursor-pointer"
+                    title="Gcash QR Code"
+                    onClick={() => setQrmodal((prev) => !prev)}
+                  >
+                    <RiQrCodeLine />
+                  </div>
+                )}
 
                 {qrModal && (
                   <div className="mx-auto text-auto border p-1 bg-white max-w-1/2">
@@ -422,12 +432,20 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                   </div>
                   <div className="bg-green-400 p-1 h-[46px] text-white flex gap-2">
                     <textarea className="bg-[rgba(255,255,255,0.9)] flex-grow p-2 text-black resize-none"></textarea>
-                    <span className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer">
-                      <span className="max-[768px]:hidden">
-                        {userRole === "farmer" ? "I-upload" : "Upload"}
+                    {userRole === "farmer" && (
+                      <span
+                        onClick={() => {
+                          setGcashModal(true);
+                          setModal(false);
+                        }}
+                        className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer"
+                      >
+                        <span className="max-[768px]:hidden">
+                          {userRole === "farmer" ? "I-upload" : "Upload"}
+                        </span>
+                        <ImFolderUpload />
                       </span>
-                      <ImFolderUpload />
-                    </span>
+                    )}
                     <span className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer">
                       <span className="max-[768px]:hidden">
                         {userRole === "farmer" ? "Ipadala" : "Send"}
