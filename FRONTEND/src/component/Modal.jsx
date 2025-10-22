@@ -85,18 +85,10 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
                     defaultValue={field.defaultValue || ""}
                     required={field.required}
+                    disabled={field.disabled}
                   >
-                    {userRole === "farmer" ? (
-                      <>
-                        <option value="cash">Cash</option>
-                        <option value="gcash">GCash</option>
-                      </>
-                    ) : (
-                      <>
-                        <option value="cash">Cash</option>
-                        <option value="gcash">GCash</option>
-                      </>
-                    )}
+                    <option value="cash">Cash</option>
+                    <option value="gcash">GCash</option>
                   </select>
                 </>
               ) : field.name === "quantity" ? (
@@ -112,6 +104,7 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
                     defaultValue={field.defaultValue || ""}
                     required={field.required}
+                    disabled={field.disabled}
                     min={0}
                     step={1}
                   />
@@ -125,6 +118,7 @@ function Modal({ setModal, handleSubmit, title, button_name, fields, datas }) {
                     name={field.name}
                     className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500"
                     defaultValue={field.defaultValue || ""}
+                    disabled={field.disabled}
                     required={field.required}
                   >
                     {(() => {

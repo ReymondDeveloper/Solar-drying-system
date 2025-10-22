@@ -12,12 +12,16 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 
 function BookingRequests() {
+  const role = localStorage.getItem("role");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
   const [modalView, setModalView] = useState(false);
+  const [datasView, setDatasView] = useState([]);
+  const [fieldsEdit, setFieldsEdit] = useState([]);
+  const [modalEdit, setModalEdit] = useState(false);
   const [filter, setFilter] = useState({ status: "all", location: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -71,7 +75,7 @@ function BookingRequests() {
     }
   };
 
-  const handleSubmitView = async (e) => {
+  const handleSubmitEdit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
@@ -82,9 +86,6 @@ function BookingRequests() {
         {
           status: data.status,
           notes: data.notes || null,
-          quantity: data.quantity ? Number(data.quantity) : null,
-          payment: data.payment || null,
-          crop_type: data.crop_type || null,
         },
         {
           headers: {
@@ -96,14 +97,16 @@ function BookingRequests() {
       toast.success("Booking is updated successfully!");
 
       axios.post(`${import.meta.env.VITE_API}/notification`, {
-        user: localStorage.getItem('booking_requests_farmer_id'),
+        user: localStorage.getItem("booking_requests_farmer_id"),
         context:
-          `Dryer's owner of "${localStorage.getItem('booking_requests_dryer_name').toUpperCase()}" successfully updated your reservation status at ` +
+          `Dryer's owner of "${localStorage
+            .getItem("booking_requests_dryer_name")
+            .toUpperCase()}" successfully updated your reservation status at ` +
           new Date().toLocaleString(),
-        url: '/home/reservation-history'
+        url: "/home/reservation-history",
       });
 
-      setModalView(false);
+      setModalEdit(false);
       fetchData();
     } catch (err) {
       console.error(err);
@@ -113,18 +116,18 @@ function BookingRequests() {
     }
   };
 
-  const [fieldsView, setFieldsView] = useState([]);
-
-  const handleView = useCallback((data) => {
-
-    localStorage.setItem('booking_requests_farmer_id', data.farmer_id);
-    localStorage.setItem('booking_requests_dryer_name', data.dryer_name);
+  const handleEdit = useCallback((data) => {
+    localStorage.setItem("booking_requests_farmer_id", data.farmer_id.id);
+    localStorage.setItem(
+      "booking_requests_dryer_name",
+      data.dryer_id.dryer_name
+    );
 
     const handleStatusChange = (e) => {
       const status = e.target.value;
-      setFieldsView((prev) => {
+      setFieldsEdit((prev) => {
         const fieldsWithoutNotes = prev.filter((f) => f.name !== "notes");
-    
+
         if (status === "denied") {
           fieldsWithoutNotes.push({
             label: "Notes",
@@ -136,12 +139,12 @@ function BookingRequests() {
             colspan: 2,
           });
         }
-    
+
         return fieldsWithoutNotes;
       });
     };
 
-    const isOwner = localStorage.getItem("role") === "owner";  
+    const isOwner = localStorage.getItem("role") === "owner";
     const baseFields = [
       {
         type: "hidden",
@@ -152,7 +155,7 @@ function BookingRequests() {
         label: "Crop Type",
         type: "text",
         name: "crop_type",
-        defaultValue: data.crop_type,
+        defaultValue: data.crop_type_id.crop_type_name,
         disabled: true,
         colspan: 2,
       },
@@ -160,7 +163,7 @@ function BookingRequests() {
         label: "Quantity",
         type: "number",
         name: "quantity",
-        defaultValue: data.quantity,
+        defaultValue: data.crop_type_id.quantity,
         disabled: true,
         colspan: 2,
       },
@@ -168,7 +171,7 @@ function BookingRequests() {
         label: "Payment",
         type: "text",
         name: "payment",
-        defaultValue: data.payment,
+        defaultValue: data.crop_type_id.payment,
         disabled: true,
         colspan: 2,
       },
@@ -182,28 +185,38 @@ function BookingRequests() {
           { value: "approved", phrase: "Approved" },
           { value: "denied", phrase: "Denied" },
         ],
-        disabled: true,
         colspan: 2,
         onChange: isOwner ? handleStatusChange : undefined,
       },
     ];
-  
+
     if (data.status === "denied") {
       baseFields.push({
         label: "Notes",
         type: "textarea",
         name: "notes",
-        defaultValue: data.notes || "",
+        defaultValue: data.crop_type_id.notes || "",
         placeholder: "Reason for denial",
-        disabled: true, 
         colspan: 2,
       });
     }
-  
-    setFieldsView(baseFields);
+
+    setFieldsEdit(baseFields);
+    setModalEdit(true);
+  }, []);
+
+  const handleView = useCallback((data) => {
+    setDatasView(() => data);
     setModalView(true);
   }, []);
-  
+
+  const handleSubmitView = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setLoading(false);
+    setModalView(false);
+  };
+
   const fetchData = useCallback(async () => {
     const local = localStorage.getItem("booking_requests_data");
     const data = JSON.parse(local);
@@ -211,10 +224,10 @@ function BookingRequests() {
       Array.isArray(data)
         ? data?.map((res) => ({
             id: res.id,
-            farmer_name: res.farmer_name || "N/A",
-            location: res.dryer_location || "N/A",
-            crop_type: res.crop_type || "N/A",
-            quantity: res.quantity || "N/A",
+            farmer_name: res.farmer_id.first_name || "N/A",
+            location: res.dryer_id.location || "N/A",
+            crop_type: res.crop_type_id.crop_type_name || "N/A",
+            quantity: res.crop_type_id.quantity || "N/A",
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",
@@ -223,14 +236,22 @@ function BookingRequests() {
                 })
               : "N/A",
             status: res.status || "pending",
-            notes: res.notes || "",  
+            notes: res.crop_type_id.notes || "",
             action: (
-              <Button
-                onClick={() => handleView(res)}
-                className="bg-blue-400 hover:bg-blue-500 text-white"
-              >
-                View
-              </Button>
+              <div className="flex justify-center gap-2">
+                <Button
+                  onClick={() => handleEdit(res)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  Edit
+                </Button>
+                <Button
+                  onClick={() => handleView(res)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  View
+                </Button>
+              </div>
             ),
           }))
         : []
@@ -254,10 +275,10 @@ function BookingRequests() {
         setData(
           result.data?.map((res) => ({
             id: res.id,
-            farmer_name: res.farmer_name || "N/A",
-            location: res.dryer_location || "N/A",
-            crop_type: res.crop_type || "N/A",
-            quantity: res.quantity || "N/A",
+            farmer_name: res.farmer_id.first_name || "N/A",
+            location: res.dryer_id.location || "N/A",
+            crop_type: res.crop_type_id.crop_type_name || "N/A",
+            quantity: res.crop_type_id.quantity || "N/A",
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",
@@ -266,18 +287,29 @@ function BookingRequests() {
                 })
               : "N/A",
             status: res.status || "pending",
-            notes: res.notes || "",
+            notes: res.crop_type_id.notes || "",
             action: (
-              <Button
-                onClick={() => handleView(res)}
-                className="bg-blue-400 hover:bg-blue-500 text-white"
-              >
-                View
-              </Button>
+              <div className="flex justify-center gap-2">
+                <Button
+                  onClick={() => handleEdit(res)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  Edit
+                </Button>
+                <Button
+                  onClick={() => handleView(res)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  View
+                </Button>
+              </div>
             ),
           }))
         );
-        localStorage.setItem("booking_requests_data", JSON.stringify(result.data));
+        localStorage.setItem(
+          "booking_requests_data",
+          JSON.stringify(result.data)
+        );
       }
     } catch (error) {
       console.error(error);
@@ -285,7 +317,7 @@ function BookingRequests() {
     } finally {
       setIsLoading(false);
     }
-  }, [handleView]);
+  }, [handleEdit, handleView]);
 
   useEffect(() => {
     fetchData();
@@ -331,13 +363,32 @@ function BookingRequests() {
           button_name={"Apply Status"}
         />
       )}
+      {modalEdit && (
+        <Modal
+          setModal={setModalEdit}
+          handleSubmit={
+            localStorage.getItem("role") === "owner"
+              ? handleSubmitEdit
+              : undefined
+          }
+          fields={fieldsEdit}
+          title={"Booking Details"}
+          button_name={
+            localStorage.getItem("role") === "owner" ? "Update" : "Close"
+          }
+        />
+      )}
       {modalView && (
         <Modal
           setModal={setModalView}
-          handleSubmit={localStorage.getItem("role") === "owner" ? handleSubmitView : undefined}
-          fields={fieldsView}
-          title={"Booking Details"}
-          button_name={localStorage.getItem("role") === "owner" ? "Update" : "Close"}
+          handleSubmit={handleSubmitView}
+          datas={datasView}
+          title={
+            role === "farmer"
+              ? "Mga Detalye ng Reserbasyon"
+              : "Reservation Details"
+          }
+          button_name={role === "farmer" ? "Tapos" : "Done"}
         />
       )}
       <div
