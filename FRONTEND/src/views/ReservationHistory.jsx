@@ -126,9 +126,9 @@ function ReservationHistory() {
 
     setLoading(true);
     const newEntry = {
-      to: fields.sender,
+      from: fields.sender,
       amount: fields.amount,
-      refNo: fields.reference,
+      reference_no: fields.reference,
       date: fields.date,
     };
 
