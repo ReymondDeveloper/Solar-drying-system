@@ -46,7 +46,13 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                         ? "text-center"
                         : "text-center"
                     }
-                    ${dataCell === "email" ? "lowercase" : dataCell === "created_at" ? "" : "capitalize"}
+                    ${
+                      dataCell === "email"
+                        ? "lowercase"
+                        : dataCell === "created_at"
+                        ? ""
+                        : "capitalize"
+                    }
                   `}
                 >
                   {dataCell === "status" ? (
@@ -108,7 +114,8 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                       dataCell === "dryer_name" ||
                       dataCell === "location" ||
                       dataCell === "role" ||
-                      dataCell === "farmer_name"
+                      dataCell === "farmer_name" ||
+                      dataCell === "crop_type"
                         ? "capitalize"
                         : ""
                     }
@@ -131,7 +138,8 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                     ) : (
                       el[dataCell]
                     )
-                  ) : dataCell === "available_capacity" || dataCell === "maximum_capacity" ? (
+                  ) : dataCell === "available_capacity" ||
+                    dataCell === "maximum_capacity" ? (
                     <span className="text-center font-medium text-gray-700">
                       {el[dataCell]} kg
                     </span>

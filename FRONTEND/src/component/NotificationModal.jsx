@@ -22,9 +22,7 @@ function Notification({ index, item, setNotificationModal }) {
       {item.seen === false && (
         <div className="absolute ms-5 left-0 top-1/2 -translate-y-1/2 bg-red-600 rounded-full w-2 h-2"></div>
       )}
-      <div className="italic ms-5 text-sm">
-        {item.context || "The system found no notifications."}
-      </div>
+      <div className="italic ms-5 text-sm">{item.context}</div>
     </div>
   );
 }
@@ -80,9 +78,21 @@ function NotificationModal({ setNotificationModal }) {
           className="w-[320px] max-h-[calc(100dvh-56px)] bg-[rgba(0,0,0,0.1)] backdrop-blur-[6px] rounded-b-md rounded-tl-md p-5 overflow-y-auto"
         >
           <div className="bg-gray-300 p-5 rounded-md flex flex-col gap-2 justify-between items-start">
-            {data.map((item, index) => (
-              <Notification key={index} item={item} setNotificationModal={setNotificationModal} />
-            ))}
+            {data.length > 0 ? (
+              data.map((item, index) => (
+                <Notification
+                  key={index}
+                  item={item}
+                  setNotificationModal={setNotificationModal}
+                />
+              ))
+            ) : (
+              <div className="bg-gray-200 rounded-md p-5 w-full relative hover:opacity-[75%] cursor-pointer">
+                <div className="italic ms-5 text-sm">
+                  The system found no notifications.
+                </div>
+              </div>
+            )}
             <Button
               className={"w-full bg-green-600 hover:bg-green-700 text-white"}
               onClick={() => handleClick()}

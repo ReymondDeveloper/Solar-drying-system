@@ -6,7 +6,7 @@ export const getNotifications = async (req, res) => {
     const data = await Notification.findAll(user);
 
     if (data.length > 5) {
-      const filtered = data.filter(notification => !notification.seen);
+      const filtered = data.filter((notification) => !notification.seen);
       res.status(200).json(filtered);
     } else {
       res.status(200).json(data);
