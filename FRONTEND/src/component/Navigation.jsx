@@ -1,10 +1,10 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import Links from "../utils/Links";
 import { FaCog } from "react-icons/fa";
-import { FaArrowCircleLeft} from "react-icons/fa";
+import { FaArrowCircleLeft } from "react-icons/fa";
 
 function Navigation({ button, setButton }) {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   return (
     <>
@@ -25,8 +25,10 @@ function Navigation({ button, setButton }) {
         </div>
 
         {!button && (
-          <div className="bg-[rgba(255,255,255,0.2)] w-full flex !ps-5 !py-3 transition-all duration-300 hover:bg-[rgba(255,255,255,0.3)]"
-            onClick={() => navigate(-1)}>
+          <div
+            className="bg-[rgba(255,255,255,0.2)] w-full flex !ps-5 !py-3 transition-all duration-300 hover:bg-[rgba(255,255,255,0.3)]"
+            onClick={() => navigate(-1)}
+          >
             <div
               className={`w-5 me-5 text-white flex items-center justify-center ${
                 !button && "h-[30px]"
@@ -64,10 +66,10 @@ function Navigation({ button, setButton }) {
         <NavLink
           onClick={() => setButton(false)}
           to={"/home/settings"}
-          className="bg-[rgba(255,255,255,0.2)] w-full flex !ps-5 !py-3 transition-all duration-300 hover:bg-[rgba(255,255,255,0.3)] mt-auto"
+          className="bg-[rgba(255,255,255,0.2)] w-full flex !ps-5 !py-3 transition-all duration-300 hover:bg-[rgba(255,255,255,0.3)] md:mt-auto"
         >
           <div className={`w-5 me-5 text-white ${!button && "h-[30px]"}`}>
-            <FaCog />  
+            <FaCog />
           </div>
           <h1
             className={`bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent transition-all duration-300 capitalize ${
@@ -77,7 +79,6 @@ function Navigation({ button, setButton }) {
             Settings
           </h1>
         </NavLink>
-
       </div>
     </>
   );

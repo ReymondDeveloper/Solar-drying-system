@@ -2,18 +2,16 @@ import Transactions from "../models/Transactions.js";
 
 export const uploadTransaction = async (req, res) => {
   try {
-    const { id: farmer_id } = req.user;  
-    const { amount, date, from, reference_no, reservation_id } = req.body;   
-
-    const transaction_date = new Date(date);
+    const { id: farmer_id } = req.user;
+    const { amount, date, from, reference_no, reservation_id } = req.body;
 
     const transaction = await Transactions.create({
       farmer_id,
       amount,
-      transaction_date,
+      transaction_date: date,
       sender_number: from,
       reference_no,
-      reservation_id, 
+      reservation_id,
     });
 
     res.status(201).json({
@@ -28,11 +26,10 @@ export const uploadTransaction = async (req, res) => {
   }
 };
 
-
 export const getFarmerTransactions = async (req, res) => {
   try {
-    const { id: farmer_id } = req.user;
-    const transactions = await Transactions.findByFarmer(farmer_id);
+    const { reservation_id } = req.params;
+    const transactions = await Transactions.findByFarmer(reservation_id);
     res.json(transactions);
   } catch (err) {
     res.status(500).json({

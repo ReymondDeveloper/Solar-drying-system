@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Button from "./Button";
 import { RiCloseLargeLine, RiQrCodeLine } from "react-icons/ri";
 import { FaLocationArrow } from "react-icons/fa";
 import { ImFolderUpload } from "react-icons/im";
+import api from "../api/api.js";
 
 function Modal({
   setModal,
@@ -18,6 +19,7 @@ function Modal({
   const [mainImage, setMainImage] = useState("");
   const userRole = localStorage.getItem("role");
   const [qrModal, setQrmodal] = useState(false);
+  const [transactions, setTransactions] = useState([]);
 
   const handleLocation = () => {
     navigator.geolocation.getCurrentPosition(
@@ -51,6 +53,59 @@ function Modal({
     const cleaned = (val || "0").toString().replace(/[^0-9.-]+/g, "");
     return isNaN(cleaned) ? 0 : Number(cleaned);
   };
+
+  const fetchData = useCallback(async () => {
+    const local = localStorage.getItem("modal_reservation_data");
+    const data = JSON.parse(local);
+    setTransactions(
+      Array.isArray(data)
+        ? data?.map((res) => ({
+            reference_no: res.reference_no,
+            amount: res.amount,
+            sender: res.sender_number,
+            date: res.transaction_date,
+          }))
+        : []
+    );
+
+    try {
+      const result = await api.get(
+        `${import.meta.env.VITE_API}/transactions/${datas.id}`
+      );
+
+      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      const isDifferent =
+        JSON.stringify(data) !==
+        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+      if (isDifferent) {
+        setTransactions(
+          result.data?.map((res) => ({
+            reference_no: res.reference_no,
+            amount: res.amount,
+            sender: res.sender_number,
+            date: res.transaction_date,
+          }))
+        );
+        localStorage.setItem(
+          "modal_reservation_data",
+          JSON.stringify(result.data)
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      setTransactions([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+
+    const interval = setInterval(() => {
+      fetchData();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   return (
     <div
@@ -411,7 +466,8 @@ function Modal({
                       safeNumber(datas.crop_type_id.quantity)}
                   </span>
                 </p>
-                <div className="mt-4 flex flex-col">
+
+                <div className="my-4 flex flex-col">
                   <div className="rounded-t-md bg-green-400 px-5 py-2 text-white">
                     {userRole === "farmer"
                       ? "Makipag-usap sa Dryer Owner"
@@ -439,7 +495,6 @@ function Modal({
                           onClick={() => {
                             setGcashModal(true);
                             setModal(false);
-                            localStorage.setItem("reservation_id", datas.id);
                           }}
                           className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer"
                         >
@@ -456,6 +511,43 @@ function Modal({
                       <FaLocationArrow className="rotate-45" />
                     </span>
                   </div>
+                </div>
+
+                <div className="w-full overflow-x-auto">
+                  <table className="min-w-[700px] w-full">
+                    <thead>
+                      <tr className="bg-gray-200">
+                        <th className="text-left p-2">#</th>
+                        <th className="text-left p-2">Reference No.</th>
+                        <th className="text-left p-2">Amount</th>
+                        <th className="text-left p-2">Date</th>
+                        <th className="text-left p-2">Sender</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transactions.length > 0 ? (
+                        transactions.map((item, index) => (
+                          <tr key={item.id}>
+                            <td className="border-b p-2">{index + 1}</td>
+                            <td className="border-b p-2">
+                              {item.reference_no}
+                            </td>
+                            <td className="border-b p-2">
+                              P {item.amount.toFixed(2)}
+                            </td>
+                            <td className="border-b p-2">{item.date}</td>
+                            <td className="border-b p-2">{item.sender}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td className="border-b p-2 text-center" colSpan={5}>
+                            No transactions found.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
