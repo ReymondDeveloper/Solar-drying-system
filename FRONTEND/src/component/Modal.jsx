@@ -432,20 +432,23 @@ function Modal({
                   </div>
                   <div className="bg-green-400 p-1 h-[46px] text-white flex gap-2">
                     <textarea className="bg-[rgba(255,255,255,0.9)] flex-grow p-2 text-black resize-none"></textarea>
-                    {userRole === "farmer" && (
-                      <span
-                        onClick={() => {
-                          setGcashModal(true);
-                          setModal(false);
-                        }}
-                        className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer"
-                      >
-                        <span className="max-[768px]:hidden">
-                          {userRole === "farmer" ? "I-upload" : "Upload"}
+                    {userRole === "farmer" &&
+                      datas.status !== "denied" &&
+                      datas.status !== "pending" && (
+                        <span
+                          onClick={() => {
+                            setGcashModal(true);
+                            setModal(false);
+                            localStorage.setItem("reservation_id", datas.id);
+                          }}
+                          className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer"
+                        >
+                          <span className="max-[768px]:hidden">
+                            {userRole === "farmer" ? "I-upload" : "Upload"}
+                          </span>
+                          <ImFolderUpload />
                         </span>
-                        <ImFolderUpload />
-                      </span>
-                    )}
+                      )}
                     <span className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer">
                       <span className="max-[768px]:hidden">
                         {userRole === "farmer" ? "Ipadala" : "Send"}

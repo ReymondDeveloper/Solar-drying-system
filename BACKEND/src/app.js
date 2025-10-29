@@ -8,6 +8,7 @@ import dryerRoutes from "../src/api/routes/dryersRoutes.js";
 import reservationRoutes from "../src/api/routes/reservationsRoutes.js";
 import uploadRoutes from "../src/api/routes/uploadRoutes.js";
 import cropTypesRoutes from "../src/api/routes/cropTypesRoutes.js";
+import transactionsRoutes from "../src/api/routes/transactionsRoutes.js";
 
 import { errorHandler } from "../src/api/middleware/errorHandler.js";
 import { protect } from "../src/api/middleware/authMiddleware.js";
@@ -32,6 +33,7 @@ app.use("/api/upload", protect, uploadRoutes);
 app.use("/api/crop-types", protect, cropTypesRoutes);
 app.use("/api/addresses", protect, addressRoutes);
 app.use("/api/notification", notificationRoutes);
+app.use("/api/transactions", protect, transactionsRoutes);
 
 app.use(errorHandler);
 
