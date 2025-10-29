@@ -228,6 +228,41 @@ export const updateReservation = async (req, res) => {
       if (cropError) throw cropError;
     }
 
+    if (status.toLowerCase() === "denied") {
+      const { data: cropType, error: cropError } = await supabase
+        .from("crop_types")
+        .select("quantity")
+        .eq("crop_type_id", reservation.crop_type_id)
+        .single();
+      if (cropError) throw cropError;
+
+      const { data: dryer, error: dryerError } = await supabase
+        .from("dryers")
+        .select("available_capacity, maximum_capacity")
+        .eq("id", reservation.dryer_id)
+        .single();
+      if (dryerError) throw dryerError;
+
+      const newAvailable =
+        Number(dryer.available_capacity) + Number(cropType.quantity);
+
+      const safeAvailable =
+        newAvailable > dryer.maximum_capacity
+          ? dryer.maximum_capacity
+          : newAvailable;
+
+      const { error: updateDryerError } = await supabase
+        .from("dryers")
+        .update({ available_capacity: safeAvailable })
+        .eq("id", reservation.dryer_id);
+
+      if (updateDryerError) throw updateDryerError;
+
+      console.log(
+        `Rolled back ${cropType.quantity} cavans to dryer ${reservation.dryer_id}`
+      );
+    }
+ 
     res.json({
       message: "Reservation updated successfully.",
       reservation,
