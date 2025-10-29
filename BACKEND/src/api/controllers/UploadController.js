@@ -21,7 +21,7 @@ export const uploadFile = (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    const fileUrl = `${process.env.BASE_URL || "http://localhost:3000"}/uploads/${req.file.filename}`;
+    const fileUrl = `${process.env.BASE_URL || "https://solar-drying-system-backend.onrender.com"}/uploads/${req.file.filename}`;
     res.json({ url: fileUrl }); 
   } catch (err) {
     console.error(err);
