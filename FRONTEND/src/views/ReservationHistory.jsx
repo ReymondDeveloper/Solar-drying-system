@@ -123,33 +123,26 @@ function ReservationHistory() {
     e.preventDefault();
     const formData = new FormData(e.target);
     const fields = Object.fromEntries(formData.entries());
-  
+
     setLoading(true);
     const newEntry = {
       from: fields.sender,
       amount: fields.amount,
       reference_no: fields.reference,
       date: fields.date,
-      reservation_id: datasView.id, 
+      reservation_id: datasView.id,
     };
-  
+
     try {
-      await api.post(`${import.meta.env.VITE_API}/transactions`, newEntry, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-  
-      alert("Transaction uploaded successfully!");
+      await api.post(`${import.meta.env.VITE_API}/transactions`, newEntry);
     } catch (error) {
       console.error(error);
-      alert("Failed to upload transaction!");
     } finally {
+      setModalView(true);
       setGcashModal(false);
       setLoading(false);
     }
   };
-  
 
   const handleSubmitView = (e) => {
     e.preventDefault();
