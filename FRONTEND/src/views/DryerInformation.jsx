@@ -121,6 +121,7 @@ function DryerInformation() {
         image_url: dryerData.image_url,
         created_by_id: createdById,
       });
+      
 
       toast.success(res.data.message);
 

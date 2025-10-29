@@ -97,16 +97,18 @@ function Modal({
     }
   }, []);
 
-  useEffect(() => {
-    fetchData();
-
-    const interval = setInterval(() => {
+  if (datas) {
+    useEffect(() => {
       fetchData();
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [fetchData]);
-
+  
+      const interval = setInterval(() => {
+        fetchData();
+      }, 3000);
+  
+      return () => clearInterval(interval);
+    }, [fetchData]);
+  }
+   
   return (
     <div
       onClick={() => setModal(false)}
