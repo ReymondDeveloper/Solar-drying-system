@@ -92,11 +92,7 @@ function Reservations() {
     if (!Array.isArray(data)) setIsLoading(true);
 
     try {
-      const result = await api.get(`${import.meta.env.VITE_API}/reservations`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const result = await api.get(`${import.meta.env.VITE_API}/reservations`);
 
       if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
       const isDifferent =
