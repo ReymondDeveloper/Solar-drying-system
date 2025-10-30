@@ -5,6 +5,7 @@ import Loading from "../component/Loading";
 import { GiBookmarklet } from "react-icons/gi";
 import { HiClipboardDocumentList } from "react-icons/hi2";
 import { MdOutlinePendingActions } from "react-icons/md";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 function Home() {
   const navigate = useNavigate();
@@ -40,7 +41,8 @@ function Home() {
       ...prev,
       reservation: data.reservation ?? 0,
       pending: data.pending ?? 0,
-      dryers: data.dryers ?? 0
+      dryers: data.dryers ?? 0,
+      monthly_reservation: data.monthly_reservation ?? 0,
     })) : setLoading(true)
 
     try {
@@ -105,6 +107,63 @@ function Home() {
         cache.completed = result.data.filter(
           (item) => item.status === "completed"
         ).length;
+      } else {
+        function calculate(data, key) {
+          const result = data?.data || [];
+          const now = new Date();
+          const targetYear = now.getFullYear();
+          const targetMonth = now.getMonth();
+          const counts = {};
+
+          result.forEach(item => {
+            const date = new Date(item.created_at);
+            const itemYear = date.getFullYear();
+            const itemMonth = date.getMonth();
+
+            if (itemYear === targetYear && itemMonth === targetMonth) {
+              const dateKey = date.toISOString().split('T')[0];
+              counts[dateKey] = (counts[dateKey] || 0) + 1;
+            }
+          });
+
+          return Object.entries(counts)
+            .sort(([a], [b]) => new Date(a) - new Date(b))
+            .map(([date, count]) => ({ date, [key]: count }));
+        }
+
+        const [reservationsResult, accountsResult, dryersResult] = await Promise.all([
+          api.get('/reservations'),
+          api.get('/users'),
+          api.get('/dryers'),
+        ]);
+
+        const mergeByDate = (data1, data2, data3) => {
+          const allDates = new Set([
+            ...data1.map(item => item.date),
+            ...data2.map(item => item.date),
+            ...data3.map(item => item.date),
+          ]);
+
+          return Array.from(allDates).sort().map(date => {
+            const item1 = data1.find(item => item.date === date);
+            const item2 = data2.find(item => item.date === date);
+            const item3 = data3.find(item => item.date === date);
+            
+            return {
+              date,
+              reservations: item1?.reservations || 0,
+              accounts: item2?.accounts || 0,
+              dryers: item3?.dryers || 0,
+            };
+          });
+        };
+
+        setCards((prev) =>  ({
+          ...prev,
+          monthly_reservation: mergeByDate(calculate(reservationsResult, 'reservations'), calculate(accountsResult, 'accounts'), calculate(dryersResult, 'dryers'))
+        }))
+
+        cache.monthly_reservation = mergeByDate(calculate(reservationsResult, 'reservations'), calculate(accountsResult, 'accounts'), calculate(dryersResult, 'dryers'));
       }
 
       if (!cache) return;
@@ -136,7 +195,7 @@ function Home() {
   return (
     <>
       {loading && <Loading />}
-      <div className="w-full h-[calc(100dvh-160px)] p-4">
+      <div className="w-full h-[calc(100dvh-160px)] rounded-lg lg:p-5 lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] overflow-hidden">
         {localStorage.getItem("role") === 'owner' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             <div
@@ -207,57 +266,52 @@ function Home() {
               <div className="mt-5 text-5xl font-bold text-center">{cards.completed ?? '...'}</div>
             </div>
           </div>
-        ) : null}
-
-        {/* <div className="flex flex-col md:flex-row md:flex-wrap gap-4">
-          {Links.map(
-            (data) =>
-              data.role === localStorage.getItem("role") &&
-              data.list.map(
-                (route, index) =>
-                  index > 0 && (
-                    <NavLink
-                      to={route.to}
-                      key={index}
-                      className={`
-                        flex gap-3 items-center p-3
-                        rounded-md bg-[rgba(138,183,45,1)]
-                        md:flex-col md:w-[48%] md:p-6 lg:w-[23%]
-                        text-white shadow-md transition-all duration-300
-                        hover:bg-[rgba(120,160,40,1)] hover:shadow-xl hover:scale-[1.02]
-                      `}
-                    >
-                      <div
-                        className="
-                          flex items-center justify-center
-                          bg-[rgba(110,146,36,1)] 
-                          w-16 h-16 md:w-20 md:h-20 rounded-md
-                          text-white text-3xl
-                          transition-transform duration-300
-                          group-hover:rotate-3
-                        "
-                      >
-                        {route.icon}
-                      </div>
-
-                      <div
-                        className="
-                          flex-grow flex flex-col justify-center md:flex-grow-0 md:text-center
-                        "
-                      >
-                        <span className="font-bold text-lg uppercase tracking-wide">
-                          {route.title}
-                        </span>
-                        <span className="text-xs opacity-90">
-                          {route.description}
-                        </span>
-                      </div>
-                    </NavLink>
-                  )
-              )
-          )}
-        </div> */}
-
+        ) : (
+          <div className="w-full text-center bg-white rounded-md lg:p-5 my-5">
+            <h3 className="text-lg font-bold mb-4 text-start">Monthly Report</h3>
+            { cards.monthly_reservation && cards.monthly_reservation.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={cards.monthly_reservation}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#b1c890ff" />
+                  <XAxis dataKey="date" stroke="#000000ff" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#000000ff" tick={{ fontSize: 11 }} />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: '#f9fafbd8',
+                      borderRadius: '0.5rem',
+                      color: '#374151',
+                    }}
+                  />
+                  <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="reservations" 
+                    stroke="#3bf64eff" 
+                    strokeWidth={2}
+                    activeDot={{ r: 6, stroke: '#00000075', strokeWidth: 2 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="dryers" 
+                    stroke="#3e3bf6ff" 
+                    strokeWidth={2}
+                    activeDot={{ r: 6, stroke: '#00000075', strokeWidth: 2 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="accounts" 
+                    stroke="#f65a3bff" 
+                    strokeWidth={2}
+                    activeDot={{ r: 6, stroke: '#00000075', strokeWidth: 2 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <span>No reservations were found.</span>
+            )}
+            
+          </div>
+        )}
       </div>
     </>
   );

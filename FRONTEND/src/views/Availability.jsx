@@ -12,7 +12,6 @@ function Availability() {
   const [limit, setLimit] = useState(5);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [modal, setModal] = useState(false);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -77,11 +76,7 @@ function Availability() {
     if (!Array.isArray(data)) setIsLoading(true);
 
     try {
-      const result = await api.get(`${import.meta.env.VITE_API}/dryers`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const result = await api.get(`${import.meta.env.VITE_API}/dryers`);
 
       if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
       const isDifferent =
@@ -142,13 +137,6 @@ function Availability() {
   const totalPages = Math.max(1, Math.ceil(FilteredData.length / limit));
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
-
-  if (isError)
-    return (
-      <div className="absolute top-0 left-0 w-full h-[calc(100dvh-56px)] text-5xl flex justify-center items-center font-bold py-5">
-        Error while fetching the data
-      </div>
-    );
 
   return (
     <>
