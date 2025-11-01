@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Button from "./Button";
 import { RiCloseLargeLine, RiQrCodeLine } from "react-icons/ri";
 import { FaLocationArrow } from "react-icons/fa";
@@ -20,6 +20,10 @@ function Modal({
   const userRole = localStorage.getItem("role");
   const [qrModal, setQrmodal] = useState(false);
   const [transactions, setTransactions] = useState([]);
+  const [chats, setChats] = useState([]);
+  const chatRef = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const [chatTextArea, setChatTextArea] = useState("");
 
   const handleLocation = () => {
     navigator.geolocation.getCurrentPosition(
@@ -55,8 +59,8 @@ function Modal({
   };
 
   const fetchData = useCallback(async () => {
-    const local = localStorage.getItem("modal_reservation_data");
-    const data = JSON.parse(local);
+    let local = localStorage.getItem("modal_reservation_data");
+    let data = JSON.parse(local);
     setTransactions(
       Array.isArray(data)
         ? data?.map((res) => ({
@@ -69,9 +73,7 @@ function Modal({
     );
 
     try {
-      const result = await api.get(
-        `${import.meta.env.VITE_API}/transactions/${datas.id}`
-      );
+      const result = await api.get(`/transactions/${datas.id}`);
 
       if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
       const isDifferent =
@@ -95,20 +97,87 @@ function Modal({
       console.error(error);
       setTransactions([]);
     }
+
+    local = localStorage.getItem("modal_chat_data");
+    data = JSON.parse(local);
+    setChats(
+      Array.isArray(data)
+        ? data?.map((res) => ({
+            message: res.message,
+            sender: res.sender,
+            created_at: res.created_at,
+          }))
+        : []
+    );
+
+    try {
+      const result = await api.get(`/chats?id=${datas.id}`);
+
+      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      const isDifferent =
+        JSON.stringify(data) !==
+        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+      if (isDifferent) {
+        setChats(
+          result.data?.map((res) => ({
+            message: res.message,
+            sender: res.sender,
+            created_at: res.created_at,
+          }))
+        );
+        localStorage.setItem("modal_chat_data", JSON.stringify(result.data));
+      }
+    } catch (error) {
+      console.error(error);
+      setChats([]);
+    }
   }, []);
 
   if (datas) {
     useEffect(() => {
       fetchData();
-  
+
       const interval = setInterval(() => {
         fetchData();
       }, 3000);
-  
+
       return () => clearInterval(interval);
     }, [fetchData]);
   }
-   
+
+  useEffect(() => {
+    if (!isHovered && chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [chats]);
+
+  function handleChat() {
+    if (chatTextArea.trim() === "") return;
+    try {
+      api.post("/chats", {
+        message: chatTextArea,
+        sender: localStorage.getItem("id"),
+        reservation_id: datas.id,
+      });
+
+      const newChat = {
+        message: chatTextArea,
+        sender: localStorage.getItem("id"),
+        created_at: new Date().toLocaleDateString(),
+        reservation_id: datas.id,
+      };
+
+      setChats((prev) => [...prev, newChat]);
+      localStorage.setItem(
+        "modal_chat_data",
+        JSON.stringify([...chats, newChat])
+      );
+      setChatTextArea("");
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <div
       onClick={() => setModal(false)}
@@ -475,21 +544,49 @@ function Modal({
                       ? "Makipag-usap sa Dryer Owner"
                       : "Chat with Farmer"}
                   </div>
-                  <div className="px-1 py-5 border-x-4 border-green-400 flex flex-col gap-1">
-                    <div className="flex">
-                      <div className="bg-green-200 text-sm font-normal rounded px-5 py-2 max-w-3/4">
-                        <span className="italic">Sample</span>
+                  <div
+                    ref={chatRef}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                    className="p-1 border-x-4 border-green-400 flex flex-col gap-6 h-[150px] overflow-y-auto"
+                  >
+                    {chats.length > 0 ? (
+                      chats.map((chat, index) => (
+                        <div
+                          className={`flex mt-auto relative ${
+                            chat.sender === localStorage.getItem("id")
+                              ? "justify-end"
+                              : "justify-start"
+                          }`}
+                          key={index}
+                        >
+                          <div className="bg-green-200 text-sm font-normal rounded px-5 py-2 max-w-3/4">
+                            <span
+                              className="italic"
+                              style={{ whiteSpace: "pre-line" }}
+                            >
+                              {chat.message}
+                            </span>
+                          </div>
+                          <span className="absolute bottom-[calc(0%-18px)] text-[10px] text-gray-500 italic px-1">
+                            {new Date(chat.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center my-auto italic">
+                        {userRole === "farmer"
+                          ? "Walang pang mensahe na makikita."
+                          : "Theres no messages to show."}
                       </div>
-                    </div>
-
-                    <div className="flex justify-end">
-                      <div className="bg-green-200 text-sm font-normal rounded px-5 py-2 max-w-3/4">
-                        <span className="italic">Sample</span>
-                      </div>
-                    </div>
+                    )}
                   </div>
                   <div className="bg-green-400 p-1 h-[46px] text-white flex gap-2">
-                    <textarea className="bg-[rgba(255,255,255,0.9)] flex-grow p-2 text-black resize-none"></textarea>
+                    <textarea
+                      value={chatTextArea}
+                      onChange={(e) => setChatTextArea(e.target.value)}
+                      className="bg-[rgba(255,255,255,0.9)] flex-grow p-2 text-black resize-none"
+                    ></textarea>
                     {userRole === "farmer" &&
                       datas.status !== "denied" &&
                       datas.status !== "pending" && (
@@ -506,7 +603,10 @@ function Modal({
                           <ImFolderUpload />
                         </span>
                       )}
-                    <span className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer">
+                    <span
+                      onClick={() => handleChat()}
+                      className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer"
+                    >
                       <span className="max-[768px]:hidden">
                         {userRole === "farmer" ? "Ipadala" : "Send"}
                       </span>
@@ -515,42 +615,47 @@ function Modal({
                   </div>
                 </div>
 
-                <div className="w-full overflow-x-auto">
-                  <table className="min-w-[700px] w-full">
-                    <thead>
-                      <tr className="bg-gray-200">
-                        <th className="text-left p-2">#</th>
-                        <th className="text-left p-2">Reference No.</th>
-                        <th className="text-left p-2">Amount</th>
-                        <th className="text-left p-2">Date</th>
-                        <th className="text-left p-2">Sender</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {transactions.length > 0 ? (
-                        transactions.map((item, index) => (
-                          <tr key={item.id}>
-                            <td className="border-b p-2">{index + 1}</td>
-                            <td className="border-b p-2">
-                              {item.reference_no}
-                            </td>
-                            <td className="border-b p-2">
-                              P {item.amount.toFixed(2)}
-                            </td>
-                            <td className="border-b p-2">{item.date}</td>
-                            <td className="border-b p-2">{item.sender}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td className="border-b p-2 text-center" colSpan={5}>
-                            No transactions found.
-                          </td>
+                {datas.status !== "denied" && datas.status !== "pending" && (
+                  <div className="w-full overflow-x-auto">
+                    <table className="min-w-[700px] w-full">
+                      <thead>
+                        <tr className="bg-gray-200">
+                          <th className="text-left p-2">#</th>
+                          <th className="text-left p-2">Reference No.</th>
+                          <th className="text-left p-2">Amount</th>
+                          <th className="text-left p-2">Date</th>
+                          <th className="text-left p-2">Sender</th>
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {transactions.length > 0 ? (
+                          transactions.map((item, index) => (
+                            <tr key={item.id}>
+                              <td className="border-b p-2">{index + 1}</td>
+                              <td className="border-b p-2">
+                                {item.reference_no}
+                              </td>
+                              <td className="border-b p-2">
+                                P {item.amount.toFixed(2)}
+                              </td>
+                              <td className="border-b p-2">{item.date}</td>
+                              <td className="border-b p-2">{item.sender}</td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td
+                              className="border-b p-2 text-center"
+                              colSpan={5}
+                            >
+                              No transactions found.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           ) : null}
