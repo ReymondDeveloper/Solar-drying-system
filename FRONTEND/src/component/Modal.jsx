@@ -131,10 +131,10 @@ function Modal({
       console.error(error);
       setChats([]);
     }
-  }, []);
+  }, [datas]);
 
-  if (datas) {
-    useEffect(() => {
+  useEffect(() => {
+    if (datas) {
       fetchData();
 
       const interval = setInterval(() => {
@@ -142,14 +142,14 @@ function Modal({
       }, 3000);
 
       return () => clearInterval(interval);
-    }, [fetchData]);
-  }
+    }
+  }, [fetchData, datas]);
 
   useEffect(() => {
     if (!isHovered && chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
-  }, [chats]);
+  }, [chats, isHovered]);
 
   function handleChat() {
     if (chatTextArea.trim() === "") return;
@@ -282,14 +282,14 @@ function Modal({
                     })()}
                   </select>
                 </>
-              ) : field.name === "image_url" ? (
+              ) : field.type === "file" ? (
                 <>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
                     {field.label}
                   </label>
                   <div className="flex flex-col gap-3">
                     <input
-                      type="file"
+                      type={field.type}
                       name={field.name}
                       accept="image/*"
                       className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
@@ -297,11 +297,14 @@ function Modal({
                         const file = e.target.files[0];
                         if (!file) return;
                         const localPreview = URL.createObjectURL(file);
-                        setPreviewUrls((prev) => ({
-                          ...prev,
-                          [field.name]: localPreview,
-                        }));
-                        setMainImage(localPreview);
+
+                        setPreviewUrls((prev) => {
+                          const updatedUrls = {
+                            ...prev,
+                            [field.name]: localPreview,
+                          };
+                          setMainImage(updatedUrls[field.name]);
+                        });
 
                         const formData = new FormData();
                         formData.append("file", file);
