@@ -34,13 +34,35 @@ function ReportChart({ data, title }) {
               }}
             />
             <Legend wrapperStyle={{ paddingTop: "20px" }} />
-            <Line
-              type="monotone"
-              dataKey="reservations"
-              stroke="#3bf64eff"
-              strokeWidth={2}
-              activeDot={{ r: 6, stroke: "#00000075", strokeWidth: 2 }}
-            />
+            {data[0]?.reservations !== undefined && (
+                <Line
+                type="monotone"
+                dataKey="reservations"
+                stroke="#3bf64eff"
+                strokeWidth={2}
+                activeDot={{ r: 6, stroke: "#00000075", strokeWidth: 2 }}
+              />
+            )}
+
+            {data[0]?.accounts !== undefined && (
+                <Line
+                type="monotone"
+                dataKey="accounts"
+                stroke="#f63b3bff"
+                strokeWidth={2}
+                activeDot={{ r: 6, stroke: "#00000075", strokeWidth: 2 }}
+              />
+            )}
+
+            {data[0]?.dryers !== undefined && (
+                <Line
+                type="monotone"
+                dataKey="dryers"
+                stroke="#4e3bf6ff"
+                strokeWidth={2}
+                activeDot={{ r: 6, stroke: "#00000075", strokeWidth: 2 }}
+              />
+            )}
           </LineChart>
         </ResponsiveContainer>
       ) : (
