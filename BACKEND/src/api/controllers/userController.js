@@ -57,7 +57,7 @@ export const verifyUser = async (req, res, next) => {
     const params = new URLSearchParams();
     params.append("data", JSON.stringify(email_data));
     await axios.post(
-      "https://script.google.com/macros/s/AKfycbwvrxuE-j5MiInMkka9fyu3ExFTXY_2MiLTneC0gAyYXrX1D2hPKaGbHbMCB0eSivem/exec",
+      "https://script.google.com/macros/s/AKfycbxvKYzaJaf7xFMNEENQPyBIGrTex6hquymsFF6dRztAUZqVnMcBxMK-wDPLhGvlSaUKtw/exec",
       params,
       {
         headers: {
@@ -126,7 +126,7 @@ export const registerUser = async (req, res, next) => {
     const params = new URLSearchParams();
     params.append("data", JSON.stringify(email_data));
     await axios.post(
-      "https://script.google.com/macros/s/AKfycbwvrxuE-j5MiInMkka9fyu3ExFTXY_2MiLTneC0gAyYXrX1D2hPKaGbHbMCB0eSivem/exec",
+      "https://script.google.com/macros/s/AKfycbxvKYzaJaf7xFMNEENQPyBIGrTex6hquymsFF6dRztAUZqVnMcBxMK-wDPLhGvlSaUKtw/exec",
       params,
       {
         headers: {
@@ -171,7 +171,7 @@ export const loginUser = async (req, res) => {
       const params = new URLSearchParams();
       params.append("data", JSON.stringify(email_data));
       await axios.post(
-        "https://script.google.com/macros/s/AKfycbwvrxuE-j5MiInMkka9fyu3ExFTXY_2MiLTneC0gAyYXrX1D2hPKaGbHbMCB0eSivem/exec",
+        "https://script.google.com/macros/s/AKfycbxvKYzaJaf7xFMNEENQPyBIGrTex6hquymsFF6dRztAUZqVnMcBxMK-wDPLhGvlSaUKtw/exec",
         params,
         {
           headers: {

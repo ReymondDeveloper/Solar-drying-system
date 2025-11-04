@@ -7,12 +7,15 @@ import { HiClipboardDocumentList } from "react-icons/hi2";
 import { MdOutlinePendingActions } from "react-icons/md";
 import {
   LineChart,
+  PieChart,
+  Pie,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
+  Cell,
   ResponsiveContainer,
 } from "recharts";
 
@@ -72,6 +75,37 @@ function ReportChart({ data, title }) {
   );
 }
 
+function ReportPie() {
+  const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'];
+  const data = [
+    { name: 'Mais', value: 5 },  // From your drying transactions
+    { name: 'Rice', value: 1 },
+    { name: 'Pending', value: 2 },  // Status breakdown
+    { name: 'Approved', value: 2 },
+  ];
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <PieChart>
+        <Pie
+          data={data}
+          dataKey="value"  // Size based on 'value' property
+          nameKey="name"   // Label based on 'name' property
+          cx="50%"         // Center X (50% of container)
+          cy="50%"         // Center Y (50% of container)
+          outerRadius={100}  // Radius in pixels
+          fill="#8884d8"    // Default fill color
+          label           // Enable labels on slices
+        >
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          ))}
+        </Pie>
+        <Tooltip />
+      </PieChart>
+    </ResponsiveContainer>
+  )
+}
+
 function Home() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -108,6 +142,9 @@ function Home() {
           reservation: data.reservation ?? 0,
           pending: data.pending ?? 0,
           dryers: data.dryers ?? 0,
+          completed: data.completed ?? 0,
+          corn: data.corn ?? 0,
+          rice: data.rice ?? 0,
           monthly_reservation: data.monthly_reservation ?? 0,
           yearly_reservation: data.yearly_reservation ?? 0,
         }))
@@ -235,6 +272,26 @@ function Home() {
         }));
         cache.completed = result.data.filter(
           (item) => item.status === "completed"
+        ).length;
+
+        setCards((prev) => ({
+          ...prev,
+          corn: result.data.filter(
+            (item) => item.crop_type_id.crop_type_name.toLowerCase() === "mais" || item.crop_type_id.crop_type_name.toLowerCase() === "corn"
+          ).length,
+        }));
+        cache.corn = result.data.filter(
+          (item) => item.crop_type_id.crop_type_name.toLowerCase() === "mais" || item.crop_type_id.crop_type_name.toLowerCase() === "corn"
+        ).length;
+
+        setCards((prev) => ({
+          ...prev,
+          rice: result.data.filter(
+            (item) => item.crop_type_id.crop_type_name.toLowerCase() === "rice" || item.crop_type_id.crop_type_name.toLowerCase() === "palay"
+          ).length,
+        }));
+        cache.rice = result.data.filter(
+          (item) => item.crop_type_id.crop_type_name.toLowerCase() === "rice" || item.crop_type_id.crop_type_name.toLowerCase() === "palay"
         ).length;
 
         setCards((prev) => ({
@@ -428,6 +485,8 @@ function Home() {
               data={cards.yearly_reservation}
               title="Yearly Report"
             />
+
+            <ReportPie />
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

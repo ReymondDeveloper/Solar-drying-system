@@ -174,16 +174,10 @@ function SignIn() {
       const { password, confirm_password } = data;
 
       if (password === confirm_password) {
-        const token = localStorage.getItem("token");
 
         const res = await axios.put(
           `${import.meta.env.VITE_API}/users/update`,
-          { password, email: localStorage.getItem("email") },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { password, email: localStorage.getItem("email") }
         );
 
         toast.success(res.data.message);

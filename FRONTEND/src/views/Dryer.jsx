@@ -4,7 +4,6 @@ import Loading from "../component/Loading";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AiFillStar } from "react-icons/ai";
-import { CgArrowUp, CgArrowDown } from "react-icons/cg";
 import Button from "../component/Button";
 import Modal from "../component/Modal";
 import api from "../api/api.js";
@@ -51,14 +50,45 @@ export default function Dryer() {
     if (!data) setLoading(true);
 
     try {
-      const result = await api.get(`${import.meta.env.VITE_API}/dryers/${id}`);
+      const result = await api.get(`/dryers/${id}`);
+      const dryerData = result.data;
+      if (!dryerData) throw new Error("Invalid data from API");
 
-      if (!result.data) throw new Error("Invalid data from API");
+      const ratings = await api.get(`/ratings/${id}`);
+
+      function uniqueRatings(ratings, currentUser) {
+        if (!ratings?.data?.length) return [];
+
+        const userRatings = ratings.data
+          .filter(rating => rating.farmer_id?.id === currentUser)
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        const currentUserRating = userRatings[0] || null;
+
+        const otherRatings = ratings.data.filter(
+          rating => rating.farmer_id?.id !== currentUser
+        );
+
+        const seen = new Set();
+        const uniqueOtherRatings = otherRatings.filter(rating => {
+          const farmerId = rating.farmer_id?.id;
+          if (farmerId && seen.has(farmerId)) return false;
+          if (farmerId) seen.add(farmerId);
+          return true;
+        });
+
+        return currentUserRating 
+          ? [currentUserRating, ...uniqueOtherRatings] 
+          : uniqueOtherRatings;
+      }
+
+      dryerData.ratings = uniqueRatings(ratings, localStorage.getItem("id"));
+
       const isDifferent =
-        JSON.stringify(data) !== JSON.stringify(result.data ? result.data : []);
+        JSON.stringify(data) !== JSON.stringify(dryerData ? dryerData : []);
+
       if (isDifferent) {
-        setData(result.data);
-        localStorage.setItem("dryer_data", JSON.stringify(result.data));
+        setData(dryerData);
+        localStorage.setItem("dryer_data", JSON.stringify(dryerData));
       }
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
@@ -79,20 +109,6 @@ export default function Dryer() {
 
     return () => clearInterval(interval);
   }, [fetchData]);
-
-  const ratings = [
-    {
-      user: "User0001",
-      rating: 5,
-      comment:
-        "As someone who values quality, I wholeheartedly recommend this.",
-    },
-    {
-      user: "User0002",
-      rating: 4,
-      comment: "Using their tools, we streamlined our operations.",
-    },
-  ];
 
   const fieldsAdd = [
     {
@@ -408,14 +424,14 @@ export default function Dryer() {
             </form>
           )}
           <div className="space-y-4">
-            {ratings.length > 0 ? (
-              ratings.map((rating, index) => (
+            {data.ratings ? (
+              data.ratings.map((rating, index) => (
                 <div key={index} className="flex gap-3 border-b pb-3 mb-3">
                   <div className="flex flex-col">
-                    <b className="text-lg">{rating.user}</b>
-                    <p className="text-gray-500">{rating.comment}</p>
+                    <b className="text-lg">{rating.farmer_id.first_name}<span className="ms-5 text-xs font-normal text-gray-500">ON {new Date(rating.created_at).toLocaleString()}</span></b>
+                    <p className="ms-5 text-green-500">{rating.comment}</p>
                   </div>
-                  <div className="flex items-end mb-1 gap-1">
+                  <div className="flex items-center gap-1">
                     {[...Array(rating.rating)].map((_, i) => (
                       <AiFillStar key={i} className="text-yellow-500" />
                     ))}

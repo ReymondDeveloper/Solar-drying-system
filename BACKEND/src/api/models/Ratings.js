@@ -1,5 +1,4 @@
 import supabase from "../../database/supabase.db.js";
-import { v4 as uuidv4 } from "uuid";
 
 const Ratings = {
   create: async (dryer_id, rating, comment, farmer_id) => {
@@ -18,10 +17,10 @@ const Ratings = {
   findByDryer: async (dryer_id) => {
     const { data, error } = await supabase
       .from("ratings")
-      .select("*")
       .select(
         `
         farmer_id:farmer_id (
+          id,
           first_name
         ),
         dryer_id,
