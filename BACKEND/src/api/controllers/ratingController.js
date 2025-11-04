@@ -2,14 +2,14 @@ import Ratings from "../models/Ratings.js";
 
 export const postRatings = async (req, res) => {
   try {
-    const { dryer_id, rating, comment, farmer_id } = req.params;
-
-    await Ratings.create({
+    const { dryer_id, rating, comment, farmer_id } = req.body;
+    
+    await Ratings.create(
       dryer_id,
       rating,
       comment,
       farmer_id,
-    });
+    );
 
     res.status(201).json({
       message: "Rating submitted successfully",

@@ -1,7 +1,8 @@
 import supabase from "../../database/supabase.db.js";
+import { v4 as uuidv4 } from "uuid";
 
 const Ratings = {
-   create: async (dryer_id, rating, comment, farmer_id) => {
+  create: async (dryer_id, rating, comment, farmer_id) => {
     const { error } = await supabase.from("ratings").insert([
       {
         dryer_id,

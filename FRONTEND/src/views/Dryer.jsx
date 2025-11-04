@@ -178,7 +178,6 @@ export default function Dryer() {
     const newFilledStars = [...filledStars];
     const isCurrentlyFilled = newFilledStars[index];
 
-    // If clicking an already filled star, unfill all after it (partial reset); otherwise, fill up to clicked index
     if (isCurrentlyFilled) {
       for (let i = index; i < 5; i++) {
         newFilledStars[i] = false;
@@ -196,13 +195,18 @@ export default function Dryer() {
     const formData = Object.fromEntries(new FormData(e.target).entries());
     const { rating_textarea } = formData;
 
+    if (filledStars.filter(Boolean).length <= 0) {
+      toast.info("This rating is invalid.");
+      return;
+    }
+
     try {
       setLoading(true);
       const res = await api.post("/ratings", {
         dryer_id: id,
         rating: filledStars.filter(Boolean).length,
         comment: rating_textarea,
-        farmer_id: localStorage.getItem("id"),
+        farmer_id: farmerId,
       });
       toast.success(res.data.message);
 
@@ -215,7 +219,8 @@ export default function Dryer() {
         url: "/home/booking-requests",
       });
 
-      console.log(res.data);
+      setFilledStars(new Array(5).fill(false));
+      e.target.reset();
     } catch (error) {
       toast.error(error.response?.data?.message);
     } finally {
