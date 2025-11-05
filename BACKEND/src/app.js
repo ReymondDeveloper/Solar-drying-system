@@ -16,6 +16,7 @@ import { fileURLToPath } from "url";
 import addressRoutes from "../src/api/routes/addressRoutes.js";
 import notificationRoutes from "../src/api/routes/notificationRoutes.js";
 import chatRoutes from "../src/api/routes/chatRoutes.js";
+import ratingRoutes from "../src/api/routes/ratingRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -36,6 +37,7 @@ app.use("/api/addresses", protect, addressRoutes);
 app.use("/api/notification", notificationRoutes);
 app.use("/api/transactions", protect, transactionsRoutes);
 app.use("/api/chats", protect, chatRoutes);
+app.use("/api/ratings", protect, ratingRoutes);
 
 app.use(errorHandler);
 

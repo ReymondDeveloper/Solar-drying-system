@@ -4,13 +4,12 @@ import Loading from "../component/Loading";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AiFillStar } from "react-icons/ai";
-import { CgArrowUp, CgArrowDown } from "react-icons/cg";
 import Button from "../component/Button";
 import Modal from "../component/Modal";
 import api from "../api/api.js";
 import axios from "axios";
 
-export function DynamicMap({ location }) {
+function DynamicMap({ location }) {
   let Location =
     String(location).includes("Sablayan") ||
     String(location).includes("Occidental Mindoro")
@@ -41,6 +40,7 @@ export default function Dryer() {
   const [modalAdd, setModalAdd] = useState(false);
   const navigate = useNavigate();
   const farmerId = localStorage.getItem("id");
+  const [filledStars, setFilledStars] = useState(new Array(5).fill(false));
 
   const fetchData = useCallback(async () => {
     const local = localStorage.getItem("dryer_data");
@@ -50,14 +50,45 @@ export default function Dryer() {
     if (!data) setLoading(true);
 
     try {
-      const result = await api.get(`${import.meta.env.VITE_API}/dryers/${id}`);
+      const result = await api.get(`/dryers/${id}`);
+      const dryerData = result.data;
+      if (!dryerData) throw new Error("Invalid data from API");
 
-      if (!result.data) throw new Error("Invalid data from API");
+      const ratings = await api.get(`/ratings/${id}`);
+
+      function uniqueRatings(ratings, currentUser) {
+        if (!ratings?.data?.length) return [];
+
+        const userRatings = ratings.data
+          .filter(rating => rating.farmer_id?.id === currentUser)
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        const currentUserRating = userRatings[0] || null;
+
+        const otherRatings = ratings.data.filter(
+          rating => rating.farmer_id?.id !== currentUser
+        );
+
+        const seen = new Set();
+        const uniqueOtherRatings = otherRatings.filter(rating => {
+          const farmerId = rating.farmer_id?.id;
+          if (farmerId && seen.has(farmerId)) return false;
+          if (farmerId) seen.add(farmerId);
+          return true;
+        });
+
+        return currentUserRating 
+          ? [currentUserRating, ...uniqueOtherRatings] 
+          : uniqueOtherRatings;
+      }
+
+      dryerData.ratings = uniqueRatings(ratings, localStorage.getItem("id"));
+
       const isDifferent =
-        JSON.stringify(data) !== JSON.stringify(result.data ? result.data : []);
+        JSON.stringify(data) !== JSON.stringify(dryerData ? dryerData : []);
+
       if (isDifferent) {
-        setData(result.data);
-        localStorage.setItem("dryer_data", JSON.stringify(result.data));
+        setData(dryerData);
+        localStorage.setItem("dryer_data", JSON.stringify(dryerData));
       }
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
@@ -78,20 +109,6 @@ export default function Dryer() {
 
     return () => clearInterval(interval);
   }, [fetchData]);
-
-  const ratings = [
-    {
-      user: "User0001",
-      rating: 5,
-      comment:
-        "As someone who values quality, I wholeheartedly recommend this.",
-    },
-    {
-      user: "User0002",
-      rating: 4,
-      comment: "Using their tools, we streamlined our operations.",
-    },
-  ];
 
   const fieldsAdd = [
     {
@@ -173,6 +190,60 @@ export default function Dryer() {
       )
     : [];
 
+  const handleStarClick = (index) => {
+    const newFilledStars = [...filledStars];
+    const isCurrentlyFilled = newFilledStars[index];
+
+    if (isCurrentlyFilled) {
+      for (let i = index; i < 5; i++) {
+        newFilledStars[i] = false;
+      }
+    } else {
+      for (let i = 0; i <= index; i++) {
+        newFilledStars[i] = true;
+      }
+    }
+    setFilledStars(newFilledStars);
+  };
+
+  const handleRatingSubmit = async (e) => {
+    e.preventDefault();
+    const formData = Object.fromEntries(new FormData(e.target).entries());
+    const { rating_textarea } = formData;
+
+    if (filledStars.filter(Boolean).length <= 0) {
+      toast.info("This rating is invalid.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await api.post("/ratings", {
+        dryer_id: id,
+        rating: filledStars.filter(Boolean).length,
+        comment: rating_textarea,
+        farmer_id: farmerId,
+      });
+      toast.success(res.data.message);
+
+      axios.post(`${import.meta.env.VITE_API}/notification`, {
+        user: JSON.parse(localStorage.getItem("dryer_data")).created_by_id,
+        context:
+          `A farmer successfully rate your dryer located on "${
+            JSON.parse(localStorage.getItem("dryer_data")).location
+          }" at ` + new Date().toLocaleString(),
+        url: "/home/booking-requests",
+      });
+
+      setFilledStars(new Array(5).fill(false));
+      e.target.reset();
+    } catch (error) {
+      toast.error(error.response?.data?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       {loading && <Loading />}
@@ -240,15 +311,14 @@ export default function Dryer() {
             <span className="text-gray-900">{data.owner}</span>
           </div>
 
-          {data.available_capacity > 0 &&
-            data.owner !== localStorage.getItem("full_name") && (
-              <Button
-                className="w-full bg-blue-500 text-white py-3 rounded-full hover:bg-blue-600 mt-4"
-                onClick={() => setModalAdd(true)}
-              >
-                Reserve
-              </Button>
-            )}
+          {data.available_capacity > 0 && data.owner !== localStorage.getItem("full_name") && (
+            <Button
+              className="w-full bg-green-500 text-white py-3 rounded-full hover:bg-green-600 mt-4"
+              onClick={() => setModalAdd(true)}
+            >
+              Reserve
+            </Button>
+          )}
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
@@ -320,17 +390,46 @@ export default function Dryer() {
           <DynamicMap location={data.location} />
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md space-y-4 ">
+        <div className="bg-white p-6 rounded-lg shadow-md space-y-4 mt-5 md:mt-0">
           <div className="flex items-center text-center border-b pb-2 mb-4">
             <h2 className="text-2xl font-bold text-gray-800">Ratings</h2>
           </div>
+          {data.available_capacity > 0 && data.owner !== localStorage.getItem("full_name") && (
+            <form className="flex flex-col gap-1" onSubmit={handleRatingSubmit}>
+              <div className="w-full flex justify-center items-center gap-1 pb-2">
+                {filledStars.map((isFilled, index) => (
+                  <AiFillStar
+                    key={index}
+                    className={`text-2xl cursor-pointer transition-colors ${
+                      isFilled ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-500'
+                    }`}
+                    onClick={() => handleStarClick(index)}
+                    role="button"
+                  />
+                ))}
+              </div>
+              <div className="flex flex-col md:flex-row gap-1 md:h-12">
+                <textarea
+                  name="rating_textarea"
+                  placeholder="Descrive your experience. (optional)"
+                  className="bg-[rgba(255,255,255,0.9)] border rounded flex-grow p-2 text-black resize-none"
+                ></textarea>
+                <Button
+                  type={"submit"}
+                  className="w-full md:w-1/4 bg-green-500 text-white py-3 rounded-full hover:bg-green-600"
+                >
+                  Submit
+                </Button>
+              </div>
+            </form>
+          )}
           <div className="space-y-4">
-            {ratings.length > 0 ? (
-              ratings.map((rating, index) => (
+            {data.ratings ? (
+              data.ratings.map((rating, index) => (
                 <div key={index} className="flex gap-3 border-b pb-3 mb-3">
                   <div className="flex flex-col">
-                    <b className="text-lg">{rating.user}</b>
-                    <p className="text-gray-500">{rating.comment}</p>
+                    <b className="text-lg">{rating.farmer_id.first_name}<span className="ms-5 text-xs font-normal text-gray-500">ON {new Date(rating.created_at).toLocaleString()}</span></b>
+                    <p className="ms-5 text-green-500">{rating.comment}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     {[...Array(rating.rating)].map((_, i) => (

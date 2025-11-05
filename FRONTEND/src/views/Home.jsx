@@ -7,12 +7,15 @@ import { HiClipboardDocumentList } from "react-icons/hi2";
 import { MdOutlinePendingActions } from "react-icons/md";
 import {
   LineChart,
+  PieChart,
+  Pie,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
+  Cell,
   ResponsiveContainer,
 } from "recharts";
 
@@ -72,6 +75,40 @@ function ReportChart({ data, title }) {
   );
 }
 
+function ReportPie({ data, title }) {
+  const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4bc04fff'];
+  
+  return (
+    <div className="col-span-1 sm:col-span-2 lg:col-span-3 w-full md:w-1/2 text-center text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl p-5">
+      <h3 className="text-lg font-bold mb-4 text-start">{title}</h3>
+      {data && data.length > 0 ? (
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart>
+            <Pie
+              data={data}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={100}
+              fill="#8884d8"
+              label
+            >
+              {data.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
+      ) : (
+        <span>No reservations were found.</span>
+      )}
+    </div>
+    
+  )
+}
+
 function Home() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -108,6 +145,9 @@ function Home() {
           reservation: data.reservation ?? 0,
           pending: data.pending ?? 0,
           dryers: data.dryers ?? 0,
+          completed: data.completed ?? 0,
+          corn: data.corn ?? 0,
+          rice: data.rice ?? 0,
           monthly_reservation: data.monthly_reservation ?? 0,
           yearly_reservation: data.yearly_reservation ?? 0,
         }))
@@ -192,6 +232,45 @@ function Home() {
 
         setCards((prev) => ({
           ...prev,
+          corn: result.data
+            .filter((item) => 
+              item.crop_type_id.crop_type_name.toLowerCase() === "mais" || 
+              item.crop_type_id.crop_type_name.toLowerCase() === "corn"
+            )
+            .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0)
+        }));
+        cache.corn = result.data
+          .filter((item) => 
+            item.crop_type_id.crop_type_name.toLowerCase() === "mais" || 
+            item.crop_type_id.crop_type_name.toLowerCase() === "corn"
+          )
+          .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0);
+
+        setCards((prev) => ({
+          ...prev,
+          rice: result.data
+            .filter((item) => 
+              item.crop_type_id.crop_type_name.toLowerCase() === "rice" || 
+              item.crop_type_id.crop_type_name.toLowerCase() === "palay"
+            )
+            .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0)
+        }));
+        cache.rice = result.data
+          .filter((item) => 
+            item.crop_type_id.crop_type_name.toLowerCase() === "rice" || 
+            item.crop_type_id.crop_type_name.toLowerCase() === "palay"
+          )
+          .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0);
+
+        setCards((prev) => ({
+          ...prev,
+          monthly_reservation: calculate(result, "reservations"),
+          yearly_reservation: calculate(result, "reservations", "yearly"),
+        }));
+
+
+        setCards((prev) => ({
+          ...prev,
           monthly_reservation: calculate(result, "reservations"),
           yearly_reservation: calculate(result, "reservations", "yearly"),
         }));
@@ -239,6 +318,38 @@ function Home() {
 
         setCards((prev) => ({
           ...prev,
+          corn: result.data
+            .filter((item) => 
+              item.crop_type_id.crop_type_name.toLowerCase() === "mais" || 
+              item.crop_type_id.crop_type_name.toLowerCase() === "corn"
+            )
+            .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0)
+        }));
+        cache.corn = result.data
+          .filter((item) => 
+            item.crop_type_id.crop_type_name.toLowerCase() === "mais" || 
+            item.crop_type_id.crop_type_name.toLowerCase() === "corn"
+          )
+          .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0);
+
+        setCards((prev) => ({
+          ...prev,
+          rice: result.data
+            .filter((item) => 
+              item.crop_type_id.crop_type_name.toLowerCase() === "rice" || 
+              item.crop_type_id.crop_type_name.toLowerCase() === "palay"
+            )
+            .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0)
+        }));
+        cache.rice = result.data
+          .filter((item) => 
+            item.crop_type_id.crop_type_name.toLowerCase() === "rice" || 
+            item.crop_type_id.crop_type_name.toLowerCase() === "palay"
+          )
+          .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0);
+
+        setCards((prev) => ({
+          ...prev,
           monthly_reservation: calculate(result, "reservations"),
           yearly_reservation: calculate(result, "reservations", "yearly"),
         }));
@@ -252,6 +363,38 @@ function Home() {
             api.get("/users"),
             api.get("/dryers"),
           ]);
+
+        setCards((prev) => ({
+          ...prev,
+          corn: reservationsResult.data
+            .filter((item) => 
+              item.crop_type.toLowerCase() === "mais" || 
+              item.crop_type.toLowerCase() === "corn"
+            )
+            .reduce((total, item) => total + (item.quantity || 0), 0)
+        }));
+        cache.corn = reservationsResult.data
+          .filter((item) => 
+            item.crop_type.toLowerCase() === "mais" || 
+            item.crop_type.toLowerCase() === "corn"
+          )
+          .reduce((total, item) => total + (item.quantity || 0), 0);
+
+        setCards((prev) => ({
+          ...prev,
+          rice: reservationsResult.data
+            .filter((item) => 
+              item.crop_type.toLowerCase() === "rice" || 
+              item.crop_type.toLowerCase() === "palay"
+            )
+            .reduce((total, item) => total + (item.quantity || 0), 0)
+        }));
+        cache.rice = reservationsResult.data
+          .filter((item) => 
+            item.crop_type.toLowerCase() === "rice" || 
+            item.crop_type.toLowerCase() === "palay"
+          )
+          .reduce((total, item) => total + (item.quantity || 0), 0);
 
         setCards((prev) => ({
           ...prev,
@@ -367,6 +510,11 @@ function Home() {
               data={cards.yearly_reservation}
               title="Yearly Report"
             />
+
+            <ReportPie
+              data={[{name: 'Mais', value: cards.corn}, {name: 'Palay', value: cards.rice}]}
+              title="Reserved Crop Types (Cavans)"
+            />
           </div>
         ) : localStorage.getItem("role") === "farmer" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -378,7 +526,7 @@ function Home() {
                 <span className="text-2xl">
                   <GiBookmarklet className="w-full h-full" />
                 </span>
-                <span className="text-lg font-semibold">Reservations</span>
+                <span className="text-lg font-semibold">Mga Reserbasyon</span>
               </div>
               <div className="mt-5 text-5xl font-bold text-center">
                 {cards.reservation ?? "..."}
@@ -394,7 +542,7 @@ function Home() {
                   <MdOutlinePendingActions className="w-full h-full" />
                 </span>
                 <span className="text-lg font-semibold">
-                  Pending Reservations
+                  Mga Kasalukuyang Reserbasyon
                 </span>
               </div>
               <div className="mt-5 text-5xl font-bold text-center">
@@ -411,7 +559,7 @@ function Home() {
                   <HiClipboardDocumentList className="w-full h-full" />
                 </span>
                 <span className="text-lg font-semibold">
-                  Completed Reservations
+                  Mga Natapos na Reserbasyon
                 </span>
               </div>
               <div className="mt-5 text-5xl font-bold text-center">
@@ -421,12 +569,17 @@ function Home() {
 
             <ReportChart
               data={cards.monthly_reservation}
-              title="Monthly Report"
+              title="Buwanang Ulat"
             />
 
             <ReportChart
               data={cards.yearly_reservation}
-              title="Yearly Report"
+              title="Taonang Ulat"
+            />
+
+            <ReportPie
+              data={[{name: 'Mais', value: cards.corn}, {name: 'Palay', value: cards.rice}]}
+              title="Kaban Ng Mga Naka Reserbang Pananim"
             />
           </div>
         ) : (
@@ -439,6 +592,11 @@ function Home() {
             <ReportChart
               data={cards.yearly_reservation}
               title="Yearly Report"
+            />
+
+            <ReportPie
+              data={[{name: 'Mais', value: cards.corn}, {name: 'Palay', value: cards.rice}]}
+              title="Reserved Crop Types (Cavans)"
             />
           </div>
         )}

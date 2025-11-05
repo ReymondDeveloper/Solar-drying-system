@@ -16,7 +16,7 @@ function Notification({ index, item, setNotificationModal }) {
   return (
     <div
       key={index}
-      className="bg-gray-200 rounded-md p-5 w-full relative hover:opacity-[75%] cursor-pointer"
+      className="bg-gray-200 rounded-md p-5 w-full relative hover:opacity-[75%] cursor-pointer overflow-hidden"
       onClick={() => handleClick()}
     >
       {item.seen === false && (

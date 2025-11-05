@@ -21,7 +21,7 @@ router.post("/verify-otp", verifyOtp);
 
 // Protected routes
 router.get("/", protect, getUsers);
-router.put("/update", protect, updatePassword);
+router.put("/update", updatePassword);
 router.put("/update-profile", protect, upload, updateProfile);  
 
 export default router;
