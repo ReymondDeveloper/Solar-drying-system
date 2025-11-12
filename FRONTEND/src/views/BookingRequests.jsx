@@ -15,6 +15,7 @@ function BookingRequests() {
   const role = localStorage.getItem("role");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
+  const [totalPages, setTotalPages] = useState(5);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
@@ -260,20 +261,25 @@ function BookingRequests() {
     if (!Array.isArray(data)) setIsLoading(true);
 
     try {
-      const result = await api.get(
-        `${import.meta.env.VITE_API}/reservations/owner`,
-        {
-          params: { ownerId: localStorage.getItem("id") },
-        }
-      );
+      const result = await api.get("/reservations/owner", {
+        params: {
+          ownerId: localStorage.getItem("id"),
+          limit: limit,
+          offset: currentPage * limit - limit,
+        },
+      });
 
-      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      result.data.totalCount &&
+        setTotalPages(Math.ceil(result.data.totalCount / limit));
+
+      if (!Array.isArray(result.data.data))
+        throw new Error("Invalid data from API");
       const isDifferent =
         JSON.stringify(data) !==
-        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+        JSON.stringify(Array.isArray(result.data.data) ? result.data.data : []);
       if (isDifferent) {
         setData(
-          result.data?.map((res) => ({
+          result.data.data?.map((res) => ({
             id: res.id,
             farmer_name: res.farmer_id.first_name || "N/A",
             location: res.dryer_id.location || "N/A",
@@ -308,7 +314,7 @@ function BookingRequests() {
         );
         localStorage.setItem(
           "booking_requests_data",
-          JSON.stringify(result.data)
+          JSON.stringify(result.data.data)
         );
       }
     } catch (error) {
@@ -317,7 +323,7 @@ function BookingRequests() {
     } finally {
       setIsLoading(false);
     }
-  }, [handleEdit, handleView]);
+  }, [handleEdit, handleView, limit, currentPage]);
 
   useEffect(() => {
     fetchData();
@@ -346,7 +352,6 @@ function BookingRequests() {
     return filterByStatus && filterBySearch;
   });
 
-  const totalPages = Math.max(1, Math.ceil(FilteredData.length / limit));
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
 
@@ -404,7 +409,7 @@ function BookingRequests() {
             ) : (
               <>
                 <Table
-                  data={FilteredData.slice(startIndex, startIndex + limit)}
+                  data={FilteredData}
                   startIndex={startIndex}
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}

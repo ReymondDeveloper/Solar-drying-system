@@ -10,6 +10,7 @@ import api from "../api/api";
 function Availability() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
+  const [totalPages, setTotalPages] = useState(5);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState(false);
@@ -76,15 +77,24 @@ function Availability() {
     if (!Array.isArray(data)) setIsLoading(true);
 
     try {
-      const result = await api.get(`${import.meta.env.VITE_API}/dryers`);
+      const result = await api.get("/dryers", {
+        params: {
+          limit: limit,
+          offset: currentPage * limit - limit,
+        },
+      });
 
-      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      result.data.totalCount &&
+        setTotalPages(Math.ceil(result.data.totalCount / limit));
+
+      if (!Array.isArray(result.data.data))
+        throw new Error("Invalid data from API");
       const isDifferent =
         JSON.stringify(data) !==
-        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+        JSON.stringify(Array.isArray(result.data.data) ? result.data.data : []);
       if (isDifferent) {
         setData(
-          result.data?.map((res) => ({
+          result.data.data?.map((res) => ({
             dryer_name: res.dryer_name,
             location: res.location,
             status: res.available_capacity > 0 ? "available" : "occupied",
@@ -97,7 +107,10 @@ function Availability() {
               : "N/A",
           }))
         );
-        localStorage.setItem("availability_data", JSON.stringify(result.data));
+        localStorage.setItem(
+          "availability_data",
+          JSON.stringify(result.data.data)
+        );
       }
     } catch (error) {
       console.error(error);
@@ -105,7 +118,7 @@ function Availability() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [limit, currentPage]);
 
   useEffect(() => {
     fetchData();
@@ -134,7 +147,6 @@ function Availability() {
     return filterByFilters && filterBySearch;
   });
 
-  const totalPages = Math.max(1, Math.ceil(FilteredData.length / limit));
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
 
@@ -163,7 +175,7 @@ function Availability() {
             ) : (
               <>
                 <Table
-                  data={FilteredData.slice(startIndex, startIndex + limit)}
+                  data={FilteredData}
                   startIndex={startIndex}
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}

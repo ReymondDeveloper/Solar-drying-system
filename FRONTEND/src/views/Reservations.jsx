@@ -10,6 +10,7 @@ import api from "../api/api";
 function Reservations() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
+  const [totalPages, setTotalPages] = useState(5);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState(false);
@@ -92,15 +93,24 @@ function Reservations() {
     if (!Array.isArray(data)) setIsLoading(true);
 
     try {
-      const result = await api.get(`${import.meta.env.VITE_API}/reservations`);
+      const result = await api.get("/reservations", {
+        params: {
+          limit: limit,
+          offset: currentPage * limit - limit,
+        },
+      });
 
-      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      result.data.totalCount &&
+        setTotalPages(Math.ceil(result.data.totalCount / limit));
+
+      if (!Array.isArray(result.data.data))
+        throw new Error("Invalid data from API");
       const isDifferent =
         JSON.stringify(data) !==
-        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+        JSON.stringify(Array.isArray(result.data.data) ? result.data.data : []);
       if (isDifferent) {
         setData(
-          result.data?.map((res) => ({
+          result.data.data?.map((res) => ({
             farmer_name: res.farmer_name,
             dryer_name: res.dryer_name,
             location: res.dryer_location,
@@ -113,7 +123,10 @@ function Reservations() {
               : "N/A",
           }))
         );
-        localStorage.setItem("reservation_data", JSON.stringify(result.data));
+        localStorage.setItem(
+          "reservation_data",
+          JSON.stringify(result.data.data)
+        );
       }
     } catch (error) {
       console.error(error);
@@ -121,7 +134,7 @@ function Reservations() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [limit, currentPage]);
 
   useEffect(() => {
     fetchData();
@@ -149,7 +162,6 @@ function Reservations() {
     return filterByStatus && filterBySearch;
   });
 
-  const totalPages = Math.max(1, Math.ceil(FilteredData.length / limit));
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
 
@@ -178,7 +190,7 @@ function Reservations() {
             ) : (
               <>
                 <Table
-                  data={FilteredData.slice(startIndex, startIndex + limit)}
+                  data={FilteredData}
                   startIndex={startIndex}
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}

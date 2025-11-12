@@ -12,21 +12,26 @@ const generateToken = (id) => {
 
 export const getUsers = async (req, res, next) => {
   try {
-    const role = req.query.role;
-    const sort = req.query.sort || "desc";
+    const { role, limit, offset } = req.query;
+    let query = supabase
+      .from("users")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false });
 
-    let query = supabase.from("users").select("*");
+    if (typeof limit !== "undefined" && typeof offset !== "undefined") {
+      const start = Number(offset);
+      const end = start + Number(limit) - 1;
+      query = query.range(start, end);
+    }
 
     if (role && role !== "all") {
       query = query.eq("role", role.toLowerCase());
     }
 
-    query = query.order("created_at", { ascending: sort !== "desc" });
-
-    const { data: users, error } = await query;
+    const { data, count, error } = await query;
     if (error) throw error;
 
-    res.json(users);
+    res.json({ data, totalCount: count });
   } catch (err) {
     next(err);
   }

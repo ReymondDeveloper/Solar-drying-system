@@ -38,7 +38,7 @@ function ReportChart({ data, title }) {
             />
             <Legend wrapperStyle={{ paddingTop: "20px" }} />
             {data[0]?.reservations !== undefined && (
-                <Line
+              <Line
                 type="monotone"
                 dataKey="reservations"
                 stroke="#3bf64eff"
@@ -48,7 +48,7 @@ function ReportChart({ data, title }) {
             )}
 
             {data[0]?.accounts !== undefined && (
-                <Line
+              <Line
                 type="monotone"
                 dataKey="accounts"
                 stroke="#f63b3bff"
@@ -58,7 +58,7 @@ function ReportChart({ data, title }) {
             )}
 
             {data[0]?.dryers !== undefined && (
-                <Line
+              <Line
                 type="monotone"
                 dataKey="dryers"
                 stroke="#4e3bf6ff"
@@ -69,15 +69,19 @@ function ReportChart({ data, title }) {
           </LineChart>
         </ResponsiveContainer>
       ) : (
-        <span>No reservations were found.</span>
+        <span>
+          {localStorage.getItem("role") === "farmer"
+            ? "Walang reserbasyon na natagpuan."
+            : "No reservations were found."}
+        </span>
       )}
     </div>
   );
 }
 
 function ReportPie({ data, title }) {
-  const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4bc04fff'];
-  
+  const COLORS = ["#FF6384", "#36A2EB", "#FFCE56", "#4bc04fff"];
+
   return (
   <div className="col-span-1 sm:col-span-2 lg:col-span-3 w-full text-center text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl p-5">
     <h3 className="text-lg font-bold mb-4 text-start">{title}</h3>
@@ -95,18 +99,24 @@ function ReportPie({ data, title }) {
               label
             >
               {data.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                />
               ))}
             </Pie>
             <Tooltip />
           </PieChart>
         </ResponsiveContainer>
       ) : (
-        <span>No reservations were found.</span>
+        <span>
+          {localStorage.getItem("role") === "farmer"
+            ? "Walang reserbasyon na natagpuan."
+            : "No reservations were found."}
+        </span>
       )}
     </div>
-    
-  )
+  );
 }
 
 function Home() {
@@ -211,9 +221,11 @@ function Home() {
       let cache = {};
 
       if (localStorage.getItem("role") === "owner") {
-        result = await api.get(`/reservations/owner`, {
-          params: { ownerId: localStorage.getItem("id") },
-        });
+        result = (
+          await api.get(`/reservations/owner`, {
+            params: { ownerId: localStorage.getItem("id") },
+          })
+        ).data;
 
         setCards((prev) => ({
           ...prev,
@@ -233,41 +245,56 @@ function Home() {
         setCards((prev) => ({
           ...prev,
           corn: result.data
-            .filter((item) => 
-              item.crop_type_id.crop_type_name.toLowerCase() === "mais" || 
-              item.crop_type_id.crop_type_name.toLowerCase() === "corn"
+            .filter(
+              (item) =>
+                item.crop_type_id.crop_type_name.toLowerCase() === "mais" ||
+                item.crop_type_id.crop_type_name.toLowerCase() === "corn"
             )
-            .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0)
+            .reduce(
+              (total, item) => total + (item.crop_type_id?.quantity || 0),
+              0
+            ),
         }));
         cache.corn = result.data
-          .filter((item) => 
-            item.crop_type_id.crop_type_name.toLowerCase() === "mais" || 
-            item.crop_type_id.crop_type_name.toLowerCase() === "corn"
+          .filter(
+            (item) =>
+              item.crop_type_id.crop_type_name.toLowerCase() === "mais" ||
+              item.crop_type_id.crop_type_name.toLowerCase() === "corn"
           )
-          .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0);
+          .reduce(
+            (total, item) => total + (item.crop_type_id?.quantity || 0),
+            0
+          );
 
         setCards((prev) => ({
           ...prev,
           rice: result.data
-            .filter((item) => 
-              item.crop_type_id.crop_type_name.toLowerCase() === "rice" || 
-              item.crop_type_id.crop_type_name.toLowerCase() === "palay"
+            .filter(
+              (item) =>
+                item.crop_type_id.crop_type_name.toLowerCase() === "rice" ||
+                item.crop_type_id.crop_type_name.toLowerCase() === "palay"
             )
-            .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0)
+            .reduce(
+              (total, item) => total + (item.crop_type_id?.quantity || 0),
+              0
+            ),
         }));
         cache.rice = result.data
-          .filter((item) => 
-            item.crop_type_id.crop_type_name.toLowerCase() === "rice" || 
-            item.crop_type_id.crop_type_name.toLowerCase() === "palay"
+          .filter(
+            (item) =>
+              item.crop_type_id.crop_type_name.toLowerCase() === "rice" ||
+              item.crop_type_id.crop_type_name.toLowerCase() === "palay"
           )
-          .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0);
+          .reduce(
+            (total, item) => total + (item.crop_type_id?.quantity || 0),
+            0
+          );
 
         setCards((prev) => ({
           ...prev,
           monthly_reservation: calculate(result, "reservations"),
           yearly_reservation: calculate(result, "reservations", "yearly"),
         }));
-
 
         setCards((prev) => ({
           ...prev,
@@ -279,7 +306,7 @@ function Home() {
         cache.yearly_reservation = calculate(result, "reservations", "yearly");
 
         result = await api.get("/dryers/owned", {
-          user: { id: localStorage.getItem("id") },
+          params: { id: localStorage.getItem("id") },
         });
 
         setCards((prev) => ({
@@ -288,9 +315,11 @@ function Home() {
         }));
         cache.dryers = result.data.length;
       } else if (localStorage.getItem("role") === "farmer") {
-        result = await api.get(
-          `/reservations/home?farmer_id=${localStorage.getItem("id")}`
-        );
+        result = (
+          await api.get(
+            `/reservations/home?farmer_id=${localStorage.getItem("id")}`
+          )
+        ).data;
 
         setCards((prev) => ({
           ...prev,
@@ -319,34 +348,50 @@ function Home() {
         setCards((prev) => ({
           ...prev,
           corn: result.data
-            .filter((item) => 
-              item.crop_type_id.crop_type_name.toLowerCase() === "mais" || 
-              item.crop_type_id.crop_type_name.toLowerCase() === "corn"
+            .filter(
+              (item) =>
+                item.crop_type_id.crop_type_name.toLowerCase() === "mais" ||
+                item.crop_type_id.crop_type_name.toLowerCase() === "corn"
             )
-            .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0)
+            .reduce(
+              (total, item) => total + (item.crop_type_id?.quantity || 0),
+              0
+            ),
         }));
         cache.corn = result.data
-          .filter((item) => 
-            item.crop_type_id.crop_type_name.toLowerCase() === "mais" || 
-            item.crop_type_id.crop_type_name.toLowerCase() === "corn"
+          .filter(
+            (item) =>
+              item.crop_type_id.crop_type_name.toLowerCase() === "mais" ||
+              item.crop_type_id.crop_type_name.toLowerCase() === "corn"
           )
-          .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0);
+          .reduce(
+            (total, item) => total + (item.crop_type_id?.quantity || 0),
+            0
+          );
 
         setCards((prev) => ({
           ...prev,
           rice: result.data
-            .filter((item) => 
-              item.crop_type_id.crop_type_name.toLowerCase() === "rice" || 
-              item.crop_type_id.crop_type_name.toLowerCase() === "palay"
+            .filter(
+              (item) =>
+                item.crop_type_id.crop_type_name.toLowerCase() === "rice" ||
+                item.crop_type_id.crop_type_name.toLowerCase() === "palay"
             )
-            .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0)
+            .reduce(
+              (total, item) => total + (item.crop_type_id?.quantity || 0),
+              0
+            ),
         }));
         cache.rice = result.data
-          .filter((item) => 
-            item.crop_type_id.crop_type_name.toLowerCase() === "rice" || 
-            item.crop_type_id.crop_type_name.toLowerCase() === "palay"
+          .filter(
+            (item) =>
+              item.crop_type_id.crop_type_name.toLowerCase() === "rice" ||
+              item.crop_type_id.crop_type_name.toLowerCase() === "palay"
           )
-          .reduce((total, item) => total + (item.crop_type_id?.quantity || 0), 0);
+          .reduce(
+            (total, item) => total + (item.crop_type_id?.quantity || 0),
+            0
+          );
 
         setCards((prev) => ({
           ...prev,
@@ -366,60 +411,64 @@ function Home() {
 
         setCards((prev) => ({
           ...prev,
-          corn: reservationsResult.data
-            .filter((item) => 
-              item.crop_type.toLowerCase() === "mais" || 
-              item.crop_type.toLowerCase() === "corn"
+          corn: reservationsResult.data.data
+            .filter(
+              (item) =>
+                item.crop_type.toLowerCase() === "mais" ||
+                item.crop_type.toLowerCase() === "corn"
             )
-            .reduce((total, item) => total + (item.quantity || 0), 0)
+            .reduce((total, item) => total + (item.quantity || 0), 0),
         }));
-        cache.corn = reservationsResult.data
-          .filter((item) => 
-            item.crop_type.toLowerCase() === "mais" || 
-            item.crop_type.toLowerCase() === "corn"
+        cache.corn = reservationsResult.data.data
+          .filter(
+            (item) =>
+              item.crop_type.toLowerCase() === "mais" ||
+              item.crop_type.toLowerCase() === "corn"
           )
           .reduce((total, item) => total + (item.quantity || 0), 0);
 
         setCards((prev) => ({
           ...prev,
-          rice: reservationsResult.data
-            .filter((item) => 
-              item.crop_type.toLowerCase() === "rice" || 
-              item.crop_type.toLowerCase() === "palay"
+          rice: reservationsResult.data.data
+            .filter(
+              (item) =>
+                item.crop_type.toLowerCase() === "rice" ||
+                item.crop_type.toLowerCase() === "palay"
             )
-            .reduce((total, item) => total + (item.quantity || 0), 0)
+            .reduce((total, item) => total + (item.quantity || 0), 0),
         }));
-        cache.rice = reservationsResult.data
-          .filter((item) => 
-            item.crop_type.toLowerCase() === "rice" || 
-            item.crop_type.toLowerCase() === "palay"
+        cache.rice = reservationsResult.data.data
+          .filter(
+            (item) =>
+              item.crop_type.toLowerCase() === "rice" ||
+              item.crop_type.toLowerCase() === "palay"
           )
           .reduce((total, item) => total + (item.quantity || 0), 0);
 
         setCards((prev) => ({
           ...prev,
           monthly_reservation: mergeByDate(
-            calculate(reservationsResult, "reservations"),
-            calculate(accountsResult, "accounts"),
-            calculate(dryersResult, "dryers")
+            calculate(reservationsResult.data, "reservations"),
+            calculate(accountsResult.data, "accounts"),
+            calculate(dryersResult.data, "dryers")
           ),
           yearly_reservation: mergeByDate(
-            calculate(reservationsResult, "reservations", "yearly"),
-            calculate(accountsResult, "accounts", "yearly"),
-            calculate(dryersResult, "dryers", "yearly")
+            calculate(reservationsResult.data, "reservations", "yearly"),
+            calculate(accountsResult.data, "accounts", "yearly"),
+            calculate(dryersResult.data, "dryers", "yearly")
           ),
         }));
 
         cache.monthly_reservation = mergeByDate(
-          calculate(reservationsResult, "reservations"),
-          calculate(accountsResult, "accounts"),
-          calculate(dryersResult, "dryers")
+          calculate(reservationsResult.data, "reservations"),
+          calculate(accountsResult.data, "accounts"),
+          calculate(dryersResult.data, "dryers")
         );
 
         cache.yearly_reservation = mergeByDate(
-          calculate(reservationsResult, "reservations", "yearly"),
-          calculate(accountsResult, "accounts", "yearly"),
-          calculate(dryersResult, "dryers", "yearly")
+          calculate(reservationsResult.data, "reservations", "yearly"),
+          calculate(accountsResult.data, "accounts", "yearly"),
+          calculate(dryersResult.data, "dryers", "yearly")
         );
       }
 
@@ -512,7 +561,14 @@ function Home() {
             />
 
             <ReportPie
-              data={cards.corn !== 0 && cards.rice !== 0  ? [{name: 'Mais', value: cards.corn}, {name: 'Palay', value: cards.rice}] : []}
+              data={
+                cards.corn !== 0 && cards.rice !== 0
+                  ? [
+                      { name: "Mais", value: cards.corn },
+                      { name: "Palay", value: cards.rice },
+                    ]
+                  : []
+              }
               title="Reserved Crop Types (Cavans)"
             />
           </div>
@@ -572,13 +628,17 @@ function Home() {
               title="Buwanang Ulat"
             />
 
-            <ReportChart
-              data={cards.yearly_reservation}
-              title="Taonang Ulat"
-            />
+            <ReportChart data={cards.yearly_reservation} title="Taonang Ulat" />
 
             <ReportPie
-              data={cards.corn !== 0 && cards.rice !== 0  ? [{name: 'Mais', value: cards.corn}, {name: 'Palay', value: cards.rice}] : []}
+              data={
+                cards.corn !== 0 && cards.rice !== 0
+                  ? [
+                      { name: "Mais", value: cards.corn },
+                      { name: "Palay", value: cards.rice },
+                    ]
+                  : []
+              }
               title="Kaban Ng Mga Naka Reserbang Pananim"
             />
           </div>
@@ -595,7 +655,14 @@ function Home() {
             />
 
             <ReportPie
-              data={cards.corn !== 0 && cards.rice !== 0  ? [{name: 'Mais', value: cards.corn}, {name: 'Palay', value: cards.rice}] : []}
+              data={
+                cards.corn !== 0 && cards.rice !== 0
+                  ? [
+                      { name: "Mais", value: cards.corn },
+                      { name: "Palay", value: cards.rice },
+                    ]
+                  : []
+              }
               title="Reserved Crop Types (Cavans)"
             />
           </div>
