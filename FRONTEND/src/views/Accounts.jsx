@@ -187,7 +187,6 @@ function Accounts() {
             address: res.address,
             email: res.email,
             role: res.role,
-            user_profile: res.user_profile,
           }))
         : []
     );
@@ -211,7 +210,6 @@ function Accounts() {
             address: res.address,
             email: res.email,
             role: res.role,
-            user_profile: res.user_profile,
           }))
         );
         localStorage.setItem("accounts_data", JSON.stringify(result.data));
