@@ -17,8 +17,20 @@ function Reservations() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-  const tableHeadings = ["Farmer", "Dryers", "Location", "Date Created"];
-  const tableDataCell = ["farmer_name", "dryer_name", "location", "created_at"];
+  const tableHeadings = [
+    "Farmer",
+    "Dryers",
+    "Location",
+    "Date Created",
+    "Duration",
+  ];
+  const tableDataCell = [
+    "farmer_name",
+    "dryer_name",
+    "location",
+    "created_at",
+    "duration",
+  ];
   const { addresses } = useAddresses();
 
   function useAddresses() {
@@ -86,6 +98,7 @@ function Reservations() {
                   day: "numeric",
                 })
               : "N/A",
+            duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
           }))
         : []
     );
@@ -121,6 +134,7 @@ function Reservations() {
                   day: "numeric",
                 })
               : "N/A",
+            duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
           }))
         );
         localStorage.setItem(

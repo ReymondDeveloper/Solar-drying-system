@@ -411,6 +411,8 @@ function Modal({
                     maxLength={field.maxLength}
                     defaultValue={field.defaultValue || ""}
                     step={field.step}
+                    min={field.min}
+                    onChange={field.onchange}
                   />
                 </>
               )}

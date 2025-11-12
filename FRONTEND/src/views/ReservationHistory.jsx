@@ -34,6 +34,7 @@ function ReservationHistory() {
           "Dami (Canvans)",
           "Paraan ng Pagbabayad",
           "Petsa",
+          "Durasyon",
           "Katayuan",
           "Aksyon",
         ]
@@ -45,6 +46,7 @@ function ReservationHistory() {
           "Quantity",
           "Payment",
           "Date",
+          "Duration",
           "Status",
           "Action",
         ];
@@ -57,6 +59,7 @@ function ReservationHistory() {
     "quantity",
     "payment",
     "date",
+    "duration",
     "status",
     "action",
   ];
@@ -177,6 +180,7 @@ function ReservationHistory() {
                   day: "numeric",
                 })
               : "N/A",
+            duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
             status: res.status || "pending",
             action: (
               <Button
@@ -227,6 +231,7 @@ function ReservationHistory() {
                   day: "numeric",
                 })
               : "N/A",
+            duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
             status: res.status || "pending",
             action: (
               <Button

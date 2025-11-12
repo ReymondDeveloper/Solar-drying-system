@@ -60,24 +60,24 @@ export default function Dryer() {
         if (!ratings?.data?.length) return [];
 
         const userRatings = ratings.data
-          .filter(rating => rating.farmer_id?.id === currentUser)
+          .filter((rating) => rating.farmer_id?.id === currentUser)
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         const currentUserRating = userRatings[0] || null;
 
         const otherRatings = ratings.data.filter(
-          rating => rating.farmer_id?.id !== currentUser
+          (rating) => rating.farmer_id?.id !== currentUser
         );
 
         const seen = new Set();
-        const uniqueOtherRatings = otherRatings.filter(rating => {
+        const uniqueOtherRatings = otherRatings.filter((rating) => {
           const farmerId = rating.farmer_id?.id;
           if (farmerId && seen.has(farmerId)) return false;
           if (farmerId) seen.add(farmerId);
           return true;
         });
 
-        return currentUserRating 
-          ? [currentUserRating, ...uniqueOtherRatings] 
+        return currentUserRating
+          ? [currentUserRating, ...uniqueOtherRatings]
           : uniqueOtherRatings;
       }
 
@@ -112,6 +112,27 @@ export default function Dryer() {
 
   const fieldsAdd = [
     {
+      label: "Date From",
+      type: "date",
+      required: true,
+      name: "date_from",
+      min: new Date().toISOString().split("T")[0],
+      colspan: 1,
+      onchange: (e) => {
+        if (document.querySelector('input[name="date_to"]')) {
+          document.querySelector('input[name="date_to"]').min = e.target.value;
+        }
+      },
+    },
+    {
+      label: "Date To",
+      type: "date",
+      required: true,
+      name: "date_to",
+      min: new Date().toISOString().split("T")[0],
+      colspan: 1,
+    },
+    {
       label: "Crop Type",
       type: "text",
       placeholder: "ex. Rice",
@@ -140,16 +161,18 @@ export default function Dryer() {
   const handleAddFormSubmit = async (e) => {
     e.preventDefault();
     const formData = Object.fromEntries(new FormData(e.target).entries());
-    const { crop_type, quantity, payment } = formData;
+    const { crop_type, quantity, payment, date_from, date_to } = formData;
 
     try {
       setLoading(true);
-      const res = await api.post(`${import.meta.env.VITE_API}/reservations`, {
+      const res = await api.post("/reservations", {
         farmer_id: farmerId,
         dryer_id: id,
-        crop_type: crop_type,
-        quantity: quantity,
-        payment: payment,
+        crop_type,
+        quantity,
+        payment,
+        date_from,
+        date_to,
         owner_id: JSON.parse(localStorage.getItem("dryer_data")).created_by_id,
       });
       toast.success(res.data.message);
@@ -311,14 +334,15 @@ export default function Dryer() {
             <span className="text-gray-900">{data.owner}</span>
           </div>
 
-          {data.available_capacity > 0 && data.owner !== localStorage.getItem("full_name") && (
-            <Button
-              className="w-full bg-green-500 text-white py-3 rounded-full hover:bg-green-600 mt-4"
-              onClick={() => setModalAdd(true)}
-            >
-              Reserve
-            </Button>
-          )}
+          {data.available_capacity > 0 &&
+            data.owner !== localStorage.getItem("full_name") && (
+              <Button
+                className="w-full bg-green-500 text-white py-3 rounded-full hover:bg-green-600 mt-4"
+                onClick={() => setModalAdd(true)}
+              >
+                Reserve
+              </Button>
+            )}
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
@@ -394,41 +418,52 @@ export default function Dryer() {
           <div className="flex items-center text-center border-b pb-2 mb-4">
             <h2 className="text-2xl font-bold text-gray-800">Ratings</h2>
           </div>
-          {data.available_capacity > 0 && data.owner !== localStorage.getItem("full_name") && (
-            <form className="flex flex-col gap-1" onSubmit={handleRatingSubmit}>
-              <div className="w-full flex justify-center items-center gap-1 pb-2">
-                {filledStars.map((isFilled, index) => (
-                  <AiFillStar
-                    key={index}
-                    className={`text-2xl cursor-pointer transition-colors ${
-                      isFilled ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-500'
-                    }`}
-                    onClick={() => handleStarClick(index)}
-                    role="button"
-                  />
-                ))}
-              </div>
-              <div className="flex flex-col md:flex-row gap-1 md:h-12">
-                <textarea
-                  name="rating_textarea"
-                  placeholder="Descrive your experience. (optional)"
-                  className="bg-[rgba(255,255,255,0.9)] border rounded flex-grow p-2 text-black resize-none"
-                ></textarea>
-                <Button
-                  type={"submit"}
-                  className="w-full md:w-1/4 bg-green-500 text-white py-3 rounded-full hover:bg-green-600"
-                >
-                  Submit
-                </Button>
-              </div>
-            </form>
-          )}
+          {data.available_capacity > 0 &&
+            data.owner !== localStorage.getItem("full_name") && (
+              <form
+                className="flex flex-col gap-1"
+                onSubmit={handleRatingSubmit}
+              >
+                <div className="w-full flex justify-center items-center gap-1 pb-2">
+                  {filledStars.map((isFilled, index) => (
+                    <AiFillStar
+                      key={index}
+                      className={`text-2xl cursor-pointer transition-colors ${
+                        isFilled
+                          ? "text-yellow-500"
+                          : "text-gray-300 hover:text-yellow-500"
+                      }`}
+                      onClick={() => handleStarClick(index)}
+                      role="button"
+                    />
+                  ))}
+                </div>
+                <div className="flex flex-col md:flex-row gap-1 md:h-12">
+                  <textarea
+                    name="rating_textarea"
+                    placeholder="Descrive your experience. (optional)"
+                    className="bg-[rgba(255,255,255,0.9)] border rounded flex-grow p-2 text-black resize-none"
+                  ></textarea>
+                  <Button
+                    type={"submit"}
+                    className="w-full md:w-1/4 bg-green-500 text-white py-3 rounded-full hover:bg-green-600"
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </form>
+            )}
           <div className="space-y-4">
             {data.ratings ? (
               data.ratings.map((rating, index) => (
                 <div key={index} className="flex gap-3 border-b pb-3 mb-3">
                   <div className="flex flex-col">
-                    <b className="text-lg">{rating.farmer_id.first_name}<span className="ms-5 text-xs font-normal text-gray-500">ON {new Date(rating.created_at).toLocaleString()}</span></b>
+                    <b className="text-lg">
+                      {rating.farmer_id.first_name}
+                      <span className="ms-5 text-xs font-normal text-gray-500">
+                        ON {new Date(rating.created_at).toLocaleString()}
+                      </span>
+                    </b>
                     <p className="ms-5 text-green-500">{rating.comment}</p>
                   </div>
                   <div className="flex items-center gap-1">
