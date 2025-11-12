@@ -110,8 +110,8 @@ export const getReservationById = async (req, res) => {
 export const getArchivedReservations = async (req, res) => {
   try {
     const oneMonthAgo = subMonths(new Date(), 1);
-
-    const { data, error } = await supabase
+    const { limit, offset } = req.query;
+    let query = supabase
       .from("reservations")
       .select(
         `
@@ -121,10 +121,19 @@ export const getArchivedReservations = async (req, res) => {
         crop_type_id:crop_type_id(crop_type_name, quantity, payment, notes),
         status,
         created_at
-      `
+      `,
+        { count: "exact" }
       )
       .lt("created_at", oneMonthAgo.toISOString())
       .order("created_at", { ascending: false });
+
+    if (typeof limit !== "undefined" && typeof offset !== "undefined") {
+      const start = Number(offset);
+      const end = start + Number(limit) - 1;
+      query = query.range(start, end);
+    }
+
+    const { data, count, error } = await query;
 
     if (error) throw error;
 
@@ -146,7 +155,7 @@ export const getArchivedReservations = async (req, res) => {
       };
     });
     console.log("Archived reservations fetched:", formattedData);
-    res.status(200).json(formattedData);
+    res.status(200).json({ data: formattedData, totalCount: count });
   } catch (error) {
     console.error("Error fetching archived reservations:", error);
     res.status(500).json({
