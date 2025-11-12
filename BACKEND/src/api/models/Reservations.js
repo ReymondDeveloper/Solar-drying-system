@@ -14,7 +14,9 @@ const Reservations = {
         dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity),
         crop_type_id:crop_type_id (crop_type_id, crop_type_name, quantity, payment, notes),
         status,
-        created_at
+        created_at,
+        date_from,
+        date_to
       `,
         { count: "exact" }
       )
@@ -61,7 +63,14 @@ const Reservations = {
     return data;
   },
 
-  create: async ({ farmer_id, dryer_id, crop_type_id, owner_id }) => {
+  create: async ({
+    farmer_id,
+    dryer_id,
+    crop_type_id,
+    owner_id,
+    date_from,
+    date_to,
+  }) => {
     const { data, error } = await supabase
       .from("reservations")
       .insert([
@@ -72,6 +81,8 @@ const Reservations = {
           crop_type_id,
           status: "pending",
           owner_id,
+          date_from,
+          date_to,
         },
       ])
       .select()

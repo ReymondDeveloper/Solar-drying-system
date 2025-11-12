@@ -33,6 +33,7 @@ function BookingRequests() {
     "Crop Type",
     "Quantity (Cavans)",
     "Date Created",
+    "Duration",
     "Status",
     "Action",
   ];
@@ -43,6 +44,7 @@ function BookingRequests() {
     "crop_type",
     "quantity",
     "created_at",
+    "duration",
     "status",
     "action",
   ];
@@ -236,6 +238,7 @@ function BookingRequests() {
                   day: "numeric",
                 })
               : "N/A",
+            duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
             status: res.status || "pending",
             notes: res.crop_type_id.notes || "",
             action: (
@@ -292,6 +295,7 @@ function BookingRequests() {
                   day: "numeric",
                 })
               : "N/A",
+            duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
             status: res.status || "pending",
             notes: res.crop_type_id.notes || "",
             action: (

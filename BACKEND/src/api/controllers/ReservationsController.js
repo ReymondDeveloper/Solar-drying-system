@@ -72,6 +72,8 @@ export const getReservations = async (req, res) => {
           rate: dryer?.rate || 0,
           status: r.status || "pending",
           created_at: r.created_at,
+          date_from: r.date_from,
+          date_to: r.date_to,
         };
 
         return mapped;
@@ -167,8 +169,16 @@ export const getArchivedReservations = async (req, res) => {
 
 export const createReservation = async (req, res) => {
   try {
-    const { farmer_id, dryer_id, crop_type, quantity, payment, owner_id } =
-      req.body;
+    const {
+      farmer_id,
+      dryer_id,
+      crop_type,
+      quantity,
+      payment,
+      owner_id,
+      date_from,
+      date_to,
+    } = req.body;
 
     if (
       !farmer_id ||
@@ -176,7 +186,9 @@ export const createReservation = async (req, res) => {
       !crop_type ||
       !quantity ||
       !payment ||
-      !owner_id
+      !owner_id ||
+      !date_from ||
+      !date_to
     ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
@@ -202,6 +214,8 @@ export const createReservation = async (req, res) => {
       crop_type_id: cropType.crop_type_id,
       status: "pending",
       owner_id,
+      date_from,
+      date_to,
     });
 
     await Dryers.update(dryer_id, {
@@ -340,7 +354,9 @@ export const getReservationsByOwner = async (req, res) => {
         dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity),
         crop_type_id:crop_type_id (crop_type_id, crop_type_name, quantity, payment, notes),
         status,
-        created_at
+        created_at,
+        date_from,
+        date_to
       `,
         { count: "exact" }
       )
