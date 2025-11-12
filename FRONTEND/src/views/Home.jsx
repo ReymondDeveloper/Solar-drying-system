@@ -79,10 +79,10 @@ function ReportPie({ data, title }) {
   const COLORS = ['#FF6384', '#36A2EB', '#FFCE56', '#4bc04fff'];
   
   return (
-    <div className="col-span-1 sm:col-span-2 lg:col-span-3 w-full md:w-1/2 text-center text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl p-5">
-      <h3 className="text-lg font-bold mb-4 text-start">{title}</h3>
+  <div className="col-span-1 sm:col-span-2 lg:col-span-3 w-full text-center text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl p-5">
+    <h3 className="text-lg font-bold mb-4 text-start">{title}</h3>
       {data && data.length > 0 ? (
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={400}>
           <PieChart>
             <Pie
               data={data}
@@ -90,7 +90,7 @@ function ReportPie({ data, title }) {
               nameKey="name"
               cx="50%"
               cy="50%"
-              outerRadius={100}
+              outerRadius="80%" 
               fill="#8884d8"
               label
             >
