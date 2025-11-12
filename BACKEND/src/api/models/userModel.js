@@ -7,7 +7,7 @@ const User = {
     const { data, error } = await supabase
       .from("users") // your table name in Supabase
       .select(
-        `id, first_name, middle_name, last_name, email, address, role, user_profile`
+        `id, first_name, middle_name, last_name, email, address, role`
       );
     if (error) throw error;
     return data;
@@ -20,7 +20,7 @@ const User = {
       .select(
         `
         id, created_at, first_name, middle_name, last_name, email,
-        is_admin, is_farmer, is_owner, created_by_id, deleted_at, deleted_by_id, user_profile
+        role, created_by_id, deleted_at, deleted_by_id
       `
       )
       .eq("id", id)
@@ -37,47 +37,6 @@ const User = {
       .eq("email", email)
       .single();
     if (error && error.code !== "PGRST116") throw error; // ignore not found
-    return data;
-  },
-
-  // Create new user
-  create: async ({
-    first_name,
-    middle_name,
-    last_name,
-    email,
-    password,
-    is_admin = false,
-    is_farmer = false,
-    is_owner = false,
-    created_by_id = null,
-    user_profile = null,
-  }) => {
-    const { data, error } = await supabase
-      .from("users")
-      .insert([
-        {
-          id: uuidv4(),
-          first_name,
-          middle_name,
-          last_name,
-          email,
-          password,
-          is_admin,
-          is_farmer,
-          is_owner,
-          created_by_id,
-          user_profile,
-        },
-      ])
-      .select(
-        `
-        id, first_name, middle_name, last_name, email,
-        is_admin, is_farmer, is_owner, created_by_id, user_profile
-      `
-      )
-      .single();
-    if (error) throw error;
     return data;
   },
 

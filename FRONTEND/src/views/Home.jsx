@@ -512,7 +512,7 @@ function Home() {
             />
 
             <ReportPie
-              data={[{name: 'Mais', value: cards.corn}, {name: 'Palay', value: cards.rice}]}
+              data={cards.corn !== 0 && cards.rice !== 0  ? [{name: 'Mais', value: cards.corn}, {name: 'Palay', value: cards.rice}] : []}
               title="Reserved Crop Types (Cavans)"
             />
           </div>
@@ -578,7 +578,7 @@ function Home() {
             />
 
             <ReportPie
-              data={[{name: 'Mais', value: cards.corn}, {name: 'Palay', value: cards.rice}]}
+              data={cards.corn !== 0 && cards.rice !== 0  ? [{name: 'Mais', value: cards.corn}, {name: 'Palay', value: cards.rice}] : []}
               title="Kaban Ng Mga Naka Reserbang Pananim"
             />
           </div>
@@ -595,7 +595,7 @@ function Home() {
             />
 
             <ReportPie
-              data={[{name: 'Mais', value: cards.corn}, {name: 'Palay', value: cards.rice}]}
+              data={cards.corn !== 0 && cards.rice !== 0  ? [{name: 'Mais', value: cards.corn}, {name: 'Palay', value: cards.rice}] : []}
               title="Reserved Crop Types (Cavans)"
             />
           </div>

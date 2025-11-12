@@ -105,7 +105,6 @@ export const registerUser = async (req, res, next) => {
           email: email.toLowerCase(),
           password: hashedPassword,
           role,
-          is_verified: false,
           otp_code: otp,
           otp_expires_at: expiresAt,
           address,

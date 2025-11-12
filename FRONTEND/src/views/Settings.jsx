@@ -15,14 +15,13 @@ function Settings() {
     last_name: localStorage.getItem("last_name") || "",
     mobile_number: localStorage.getItem("mobile_number") || "",
     email: localStorage.getItem("email") || "",
-    password: localStorage.getItem("password") || "********",
   });
 
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
   const handleLogout = (e) => {
     e.preventDefault();
-    localStorage.clear();  
-    navigate("/"); 
+    localStorage.clear();
+    navigate("/");
     toast.success("Successfully logged out!");
   };
 
@@ -57,8 +56,8 @@ function Settings() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    setIsEditing(false);
 
     const mobileRegex = /^\+63\d{10}$/;
     if (!mobileRegex.test(formData.mobile_number)) {
@@ -102,7 +101,6 @@ function Settings() {
       }
 
       toast.success("Profile updated successfully!");
-      setIsEditing(false);
     } catch (err) {
       console.error("Update failed:", err.response?.data || err.message);
       toast.error(
@@ -189,19 +187,18 @@ function Settings() {
 
         <div className="flex-2 w-full bg-white p-6 rounded-lg shadow-lg overflow-auto">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="font-semibold text-2xl border-b pb-2">Profile Settings</h2>
+            <h2 className="font-semibold text-2xl border-b pb-2">
+              Profile Settings
+            </h2>
             <Button
-              onClick={handleLogout}  // Add this onClick to trigger logout
+              onClick={handleLogout}
               className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md text-lg"
             >
               Logout
             </Button>
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-2 gap-4 w-full"
-          >
+          <form className="grid grid-cols-2 gap-4 w-full">
             {formFields.map((field, index) => (
               <div
                 key={index}
@@ -211,7 +208,9 @@ function Settings() {
                     : "col-span-2 lg:col-span-1"
                 }`}
               >
-                <label className="text-gray-700 mb-1 w-full">{field.label}</label>
+                <label className="text-gray-700 mb-1 w-full">
+                  {field.label}
+                </label>
                 <input
                   type={field.type}
                   name={field.name}
@@ -229,8 +228,14 @@ function Settings() {
             ))}
 
             <Button
-              type={isEditing ? "submit" : "button"}
-              onClick={() => !isEditing && setIsEditing(true)}
+              type={"button"}
+              onClick={() => {
+                if (!isEditing) {
+                  setIsEditing(true);
+                } else {
+                  handleSubmit();
+                }
+              }}
               className="mt-6 w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg text-lg font-semibold transition duration-200 col-span-2"
             >
               {isEditing ? "Save Profile" : "Edit Profile"}
