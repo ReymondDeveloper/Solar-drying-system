@@ -37,7 +37,8 @@ function Reports() {
       return created >= start && created <= end;
     });
 
-    if (filtered.length === 0) toast.error("No users found within the selected date range.");
+    if (filtered.length === 0)
+      toast.error("No users found within the selected date range.");
     return filtered;
   };
 
@@ -60,7 +61,6 @@ function Reports() {
       [`Date Range: ${startDate} to ${endDate}`],
       [""],
       ["#", "Name", "Email", "Mobile", "Address", "Role"],
-      
     ];
 
     const data = dataToExport.map((u, i) => [
@@ -68,7 +68,9 @@ function Reports() {
       `${u.first_name || ""} ${u.last_name || ""}`,
       u.email || "N/A",
       u.mobile_number || "N/A",
-      u.address?.length > 50 ? u.address.substring(0, 50) + "..." : u.address || "N/A",
+      u.address?.length > 50
+        ? u.address.substring(0, 50) + "..."
+        : u.address || "N/A",
       u.role || "N/A",
     ]);
 
@@ -96,18 +98,29 @@ function Reports() {
       doc.internal.pageSize.width / 2 - doc.getTextWidth(text) / 2;
 
     doc.setFontSize(6);
-    doc.text("Solar Dryer Monitoring System", getCenteredPage("Solar Dryer Monitoring System"), 10);
-    doc.text("Department of Agriculture, Philippines", getCenteredPage("Department of Agriculture, Philippines"), 13);
-    doc.text(`Date Range: ${startDate} to ${endDate}`, getCenteredPage(`Date Range: ${startDate} to ${endDate}`), 16);
+    doc.text(
+      "Solar Dryer Monitoring System",
+      getCenteredPage("Solar Dryer Monitoring System"),
+      10
+    );
+    doc.text(
+      "Department of Agriculture, Philippines",
+      getCenteredPage("Department of Agriculture, Philippines"),
+      13
+    );
+    doc.text(
+      `Date Range: ${startDate} to ${endDate}`,
+      getCenteredPage(`Date Range: ${startDate} to ${endDate}`),
+      16
+    );
 
-      
     const pageWidth = doc.internal.pageSize.getWidth();
     const tableWidth = pageWidth - 6;
     let y = 30;
 
     const boxHeight = 7;
-    const boxY = 22; 
-     // doc.setFillColor(230, 230, 230); // light gray background
+    const boxY = 22;
+    // doc.setFillColor(230, 230, 230); // light gray background
     // doc.setFont("helvetica", "bold");
     // doc.setFontSize(9);
     // doc.rect(5, boxY, tableWidth, boxHeight, "F"); // F = fill
@@ -115,13 +128,13 @@ function Reports() {
 
     const columns = [
       { label: "#", ratio: 0.05 },
-      { label: "Name", ratio: 0.20 },
+      { label: "Name", ratio: 0.2 },
       { label: "Email", ratio: 0.22 },
       { label: "Mobile", ratio: 0.15 },
       { label: "Address", ratio: 0.23 },
       { label: "Role", ratio: 0.15 },
     ];
- 
+
     let x = 3;
     columns.forEach((c) => {
       c.x = x;
@@ -145,7 +158,10 @@ function Reports() {
         Name: `${u.first_name || ""} ${u.last_name || ""}`,
         Email: u.email || "N/A",
         Mobile: u.mobile_number || "N/A",
-        Address: u.address?.length > 50 ? u.address.substring(0, 50) + "..." : u.address || "N/A",
+        Address:
+          u.address?.length > 50
+            ? u.address.substring(0, 50) + "..."
+            : u.address || "N/A",
         Role: u.role || "N/A",
       };
 
@@ -173,12 +189,12 @@ function Reports() {
         const headers = { Authorization: `Bearer ${token}` };
 
         const usersRes = await axios.get(`${base}/users`, { headers });
-        const allUsers = usersRes.data || [];
+        const allUsers = usersRes.data.data || [];
         setUsers(allUsers);
         setFarmers(allUsers.filter((u) => u.role === "farmer"));
 
         const dryersRes = await axios.get(`${base}/dryers`, { headers });
-        setDryers(dryersRes.data || []);
+        setDryers(dryersRes.data.data || []);
       } catch (err) {
         console.error("Error fetching reports:", err);
       } finally {
@@ -189,16 +205,33 @@ function Reports() {
   }, []);
 
   const cards = [
-    { label: "Registered Users", value: users.length, icon: "👤", bg: "from-green-400 to-green-500" },
-    { label: "Verified Solar Dryer Owners", value: dryers.length, icon: "☀️", bg: "from-blue-400 to-blue-500" },
-    { label: "Registered Farmers", value: farmers.length, icon: "🌾", bg: "from-red-400 to-red-500" },
+    {
+      label: "Registered Users",
+      value: users.length,
+      icon: "👤",
+      bg: "from-green-400 to-green-500",
+    },
+    {
+      label: "Verified Solar Dryer Owners",
+      value: dryers.length,
+      icon: "☀️",
+      bg: "from-blue-400 to-blue-500",
+    },
+    {
+      label: "Registered Farmers",
+      value: farmers.length,
+      icon: "🌾",
+      bg: "from-red-400 to-red-500",
+    },
   ];
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 md:p-8 flex flex-col">
       <div className="w-full bg-white p-8 rounded-2xl shadow-xl">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-800 tracking-tight">Reports Dashboard</h2>
+          <h2 className="text-3xl font-bold text-gray-800 tracking-tight">
+            Reports Dashboard
+          </h2>
           <div className="flex gap-3">
             <button
               onClick={() => {
@@ -231,14 +264,18 @@ function Reports() {
                 <span className="text-2xl">{card.icon}</span>
                 <span className="text-lg font-semibold">{card.label}</span>
               </div>
-              <div className="mt-5 text-5xl font-bold text-center">{loading ? "..." : card.value}</div>
+              <div className="mt-5 text-5xl font-bold text-center">
+                {loading ? "..." : card.value}
+              </div>
             </div>
           ))}
         </div>
 
         <div className="bg-gray-50 p-6 rounded-xl shadow-md w-full">
           <div className="flex justify-between items-center mb-5">
-            <h3 className="text-xl font-semibold text-gray-700">User Registrations</h3>
+            <h3 className="text-xl font-semibold text-gray-700">
+              User Registrations
+            </h3>
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
@@ -256,7 +293,10 @@ function Reports() {
               <thead className="bg-[rgb(138,183,45)] text-white">
                 <tr>
                   {tableHeadings.map((heading, idx) => (
-                    <th key={idx} className="py-3 px-4 text-left font-semibold uppercase tracking-wide">
+                    <th
+                      key={idx}
+                      className="py-3 px-4 text-left font-semibold uppercase tracking-wide"
+                    >
                       {heading}
                     </th>
                   ))}
@@ -265,15 +305,23 @@ function Reports() {
               <tbody className="bg-white">
                 {loading ? (
                   <tr>
-                    <td colSpan={tableHeadings.length} className="py-6 text-center text-gray-500">
+                    <td
+                      colSpan={tableHeadings.length}
+                      className="py-6 text-center text-gray-500"
+                    >
                       Loading data...
                     </td>
                   </tr>
                 ) : filteredUsers.length > 0 ? (
                   filteredUsers.map((user, i) => (
-                    <tr key={user.id} className="border-b hover:bg-gray-100 transition">
+                    <tr
+                      key={user.id}
+                      className="border-b hover:bg-gray-100 transition"
+                    >
                       <td className="py-3 px-4">{i + 1}</td>
-                      <td className="py-3 px-4">{user.first_name || user.name}</td>
+                      <td className="py-3 px-4">
+                        {user.first_name || user.name}
+                      </td>
                       <td className="py-3 px-4">{user.email}</td>
                       <td className="py-3 px-4">{user.mobile_number}</td>
                       <td className="py-3 px-4">
@@ -294,7 +342,10 @@ function Reports() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={tableHeadings.length} className="py-6 text-center text-gray-500">
+                    <td
+                      colSpan={tableHeadings.length}
+                      className="py-6 text-center text-gray-500"
+                    >
                       No users found.
                     </td>
                   </tr>
@@ -308,7 +359,9 @@ function Reports() {
       {showDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-2xl p-6 w-[90%] sm:w-[400px]">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Select Date Range</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Select Date Range
+            </h3>
 
             <div className="flex flex-col gap-3">
               <div>

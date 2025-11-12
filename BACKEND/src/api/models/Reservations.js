@@ -1,31 +1,38 @@
 import supabase from "../../database/supabase.db.js";
 import { v4 as uuidv4 } from "uuid";
-import { subMonths } from 'date-fns';  
+import { subMonths } from "date-fns";
 const Reservations = {
-  findAll: async ({ farmer_id } = {}) => {
-    const oneMonthAgo = subMonths(new Date(), 1).toISOString();  
+  findAll: async ({ farmer_id, limit, offset } = {}) => {
+    const oneMonthAgo = subMonths(new Date(), 1).toISOString();
     let query = supabase
       .from("reservations")
       .select(
         `
-      id,
-      farmer_id:farmer_id (id, first_name, last_name, email, mobile_number),
-      owner_id:owner_id (id, first_name, last_name, email, mobile_number),
-      dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity),
-      crop_type_id:crop_type_id (crop_type_id, crop_type_name, quantity, payment, notes),
-      status,
-      created_at
-    `
+        id,
+        farmer_id:farmer_id (id, first_name, last_name, email, mobile_number),
+        owner_id:owner_id (id, first_name, last_name, email, mobile_number),
+        dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity),
+        crop_type_id:crop_type_id (crop_type_id, crop_type_name, quantity, payment, notes),
+        status,
+        created_at
+      `,
+        { count: "exact" }
       )
       .order("created_at", { ascending: false });
 
-    if (farmer_id) query = query.eq("farmer_id", farmer_id);  // Filter by farmer_id
-    query = query.gte("created_at", oneMonthAgo);  // Filter to get only reservations from the last month
+    if (typeof limit !== "undefined" && typeof offset !== "undefined") {
+      const start = Number(offset);
+      const end = start + Number(limit) - 1;
+      query = query.range(start, end);
+    }
 
-    const { data, error } = await query;
+    if (farmer_id) query = query.eq("farmer_id", farmer_id); // Filter by farmer_id
+    query = query.gte("created_at", oneMonthAgo); // Filter to get only reservations from the last month
+
+    const { data, count, error } = await query;
     if (error) throw error;
 
-    return data;
+    return { data, totalCount: count };
   },
 
   findById: async (id) => {

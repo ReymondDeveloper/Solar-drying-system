@@ -96,6 +96,11 @@ function Settings() {
       localStorage.setItem("last_name", formData.last_name);
       localStorage.setItem("mobile_number", formData.mobile_number);
       localStorage.setItem("email", formData.email);
+      localStorage.setItem(
+        "full_name",
+        `${formData.last_name}, ${formData.first_name} ${formData.middle_name}`
+      );
+
       if (res.data.profile_image) {
         localStorage.setItem("profile_image", res.data.profile_image);
       }

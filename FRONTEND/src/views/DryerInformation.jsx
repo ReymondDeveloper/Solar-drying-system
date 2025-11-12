@@ -14,6 +14,7 @@ import api from "../api/api";
 function DryerInformation() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
+  const [totalPages, setTotalPages] = useState(5);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -111,7 +112,7 @@ function DryerInformation() {
 
         dryerData.image_url = uploadRes.data.url;
       }
-      dryerData.isverified = dryerData.isverified === "true";  
+      dryerData.isverified = dryerData.isverified === "true";
 
       const res = await api.post("/dryers", {
         dryer_name: dryerData.dryer_name,
@@ -121,7 +122,6 @@ function DryerInformation() {
         image_url: dryerData.image_url,
         created_by_id: createdById,
       });
-      
 
       toast.success(res.data.message);
 
@@ -181,7 +181,7 @@ function DryerInformation() {
       } else {
         updatedData.image_url = selectedDryer.image_url;
       }
-      updatedData.isverified = updatedData.isverified === "true"; 
+      updatedData.isverified = updatedData.isverified === "true";
 
       const res = await api.put(`/dryers/${selectedDryer.id}`, updatedData);
 
@@ -210,8 +210,8 @@ function DryerInformation() {
                   day: "numeric",
                 })
               : "N/A",
-              isverified: res.isverified ? "Verified" : "Not Verified",   
-              action: (
+            isverified: res.isverified ? "Verified" : "Not Verified",
+            action: (
               <div className="flex justify-center gap-2">
                 <Button
                   onClick={() => handleEdit(res)}
@@ -234,22 +234,25 @@ function DryerInformation() {
     if (!Array.isArray(data)) setIsLoading(true);
 
     try {
-      const result = await api.get(
-        "/dryers/owned",
-        {
-          user: {
-            id: localStorage.getItem("id"),
-          },
-        }
-      );
+      const result = await api.get("/dryers/owned", {
+        params: {
+          id: localStorage.getItem("id"),
+          limit: limit,
+          offset: currentPage * limit - limit,
+        },
+      });
 
-      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      result.data.totalCount &&
+        setTotalPages(Math.ceil(result.data.totalCount / limit));
+
+      if (!Array.isArray(result.data.data))
+        throw new Error("Invalid data from API");
       const isDifferent =
         JSON.stringify(data) !==
-        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+        JSON.stringify(Array.isArray(result.data.data) ? result.data.data : []);
       if (isDifferent) {
         setData(
-          result.data?.map((res) => ({
+          result.data.data?.map((res) => ({
             ...res,
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
@@ -278,7 +281,7 @@ function DryerInformation() {
         );
         localStorage.setItem(
           "dryer_information_data",
-          JSON.stringify(result.data)
+          JSON.stringify(result.data.data)
         );
       }
     } catch (err) {
@@ -287,7 +290,7 @@ function DryerInformation() {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate]);
+  }, [navigate, limit, currentPage]);
 
   useEffect(() => {
     fetchData();
@@ -354,7 +357,6 @@ function DryerInformation() {
     return filterByFilters && filterBySearch;
   });
 
-  const totalPages = Math.max(1, Math.ceil(FilteredData.length / limit));
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
 
@@ -417,7 +419,7 @@ function DryerInformation() {
             ) : (
               <>
                 <Table
-                  data={FilteredData.slice(startIndex, startIndex + limit)}
+                  data={FilteredData}
                   startIndex={startIndex}
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}

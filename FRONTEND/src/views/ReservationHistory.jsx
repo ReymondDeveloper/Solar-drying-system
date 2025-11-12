@@ -12,6 +12,7 @@ import GcashModal from "../component/GcashModal.jsx";
 function ReservationHistory() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
+  const [totalPages, setTotalPages] = useState(5);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
@@ -192,25 +193,26 @@ function ReservationHistory() {
     if (!Array.isArray(data)) setIsLoading(true);
 
     try {
-      const result = await api.get(
-        `${
-          import.meta.env.VITE_API
-        }/reservations/home?farmer_id=${localStorage.getItem("id")}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const result = await api.get("/reservations/home", {
+        params: {
+          farmer_id: localStorage.getItem("id"),
+          limit: limit,
+          offset: currentPage * limit - limit,
+        },
+      });
 
-      if (!Array.isArray(result.data)) throw new Error("Invalid data from API");
+      result.data.totalCount &&
+        setTotalPages(Math.ceil(result.data.totalCount / limit));
+
+      if (!Array.isArray(result.data.data))
+        throw new Error("Invalid data from API");
       const isDifferent =
         JSON.stringify(data) !==
-        JSON.stringify(Array.isArray(result.data) ? result.data : []);
+        JSON.stringify(Array.isArray(result.data.data) ? result.data.data : []);
 
       if (isDifferent) {
         setData(
-          result.data?.map((res) => ({
+          result.data.data?.map((res) => ({
             farmer_name: res.farmer_id.first_name || "N/A",
             dryer_name: res.dryer_id.dryer_name || "N/A",
             location: res.dryer_id.location || "N/A",
@@ -238,7 +240,7 @@ function ReservationHistory() {
         );
         localStorage.setItem(
           "reservation_history_data",
-          JSON.stringify(result.data)
+          JSON.stringify(result.data.data)
         );
       }
     } catch (error) {
@@ -247,7 +249,7 @@ function ReservationHistory() {
     } finally {
       setIsLoading(false);
     }
-  }, [handleView]);
+  }, [handleView, limit, currentPage]);
 
   useEffect(() => {
     fetchData();
@@ -275,7 +277,6 @@ function ReservationHistory() {
     return filterByFilters && filterBySearch;
   });
 
-  const totalPages = Math.max(1, Math.ceil(FilteredData.length / limit));
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
 
@@ -327,7 +328,7 @@ function ReservationHistory() {
             ) : (
               <>
                 <Table
-                  data={FilteredData.slice(startIndex, startIndex + limit)}
+                  data={FilteredData}
                   startIndex={startIndex}
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}

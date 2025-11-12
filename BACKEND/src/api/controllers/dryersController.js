@@ -1,18 +1,27 @@
 import supabase from "../../database/supabase.db.js";
 
 export const getOwned = async (req, res) => {
-  console.log("Getting Owned Dryers: BEGIN:", req.user);
-  const { id } = req.user;
+  console.log("Getting Owned Dryers: BEGIN:", req.query);
+  const { id, limit, offset } = req.query;
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from("dryers")
-      .select("*")
-      .eq("created_by_id", id)
+      .select("*", { count: "exact" })
       .order("created_at", { ascending: false });
+
+    if (typeof limit !== "undefined" && typeof offset !== "undefined") {
+      const start = Number(offset);
+      const end = start + Number(limit) - 1;
+      query = query.range(start, end);
+    }
+
+    query = query.eq("created_by_id", id);
+
+    const { data, count, error } = await query;
 
     if (error && error.code !== "PGRST116") throw error;
 
-    res.json(data);
+    res.json({ data, totalCount: count });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Something went wrong..." });
@@ -22,17 +31,28 @@ export const getOwned = async (req, res) => {
 };
 
 export const getDryers = async (req, res) => {
+  const { limit, offset } = req.query;
+
   try {
-    const { data: dryers, error } = await supabase
+    let query = supabase
       .from("dryers")
       .select(
-        "id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id, created_at"
+        "id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id, created_at",
+        { count: "exact" }
       )
       .order("created_at", { ascending: false });
 
+    if (typeof limit !== "undefined" && typeof offset !== "undefined") {
+      const start = Number(offset);
+      const end = start + Number(limit) - 1;
+      query = query.range(start, end);
+    }
+
+    const { data, count, error } = await query;
+
     if (error) throw error;
 
-    res.json(dryers);
+    res.json({ data, totalCount: count });
   } catch (err) {
     console.error(err);
     res
@@ -61,14 +81,16 @@ export const getDryerById = async (req, res) => {
 
     const { data: reservations, error: reservationsError } = await supabase
       .from("reservations")
-      .select(`
+      .select(
+        `
         id,
         farmer_id,
         status,
         created_at,
         crop_type_id,
         crop_types(crop_type_name, quantity)
-      `)
+      `
+      )
       .eq("dryer_id", id);
     if (reservationsError) throw reservationsError;
 
@@ -87,7 +109,7 @@ export const getDryerById = async (req, res) => {
           crop_type: reservation.crop_types.crop_type_name,
           quantity: reservation.crop_types.quantity,
           status: reservation.status,
-          reservation_date: reservation.created_at
+          reservation_date: reservation.created_at,
         };
       })
     );
@@ -96,14 +118,15 @@ export const getDryerById = async (req, res) => {
 
     res.json({
       ...dryer,
-      owner: `${owner.last_name}, ${owner.first_name} ${owner.middle_name || ""}`,
+      owner: `${owner.last_name}, ${owner.first_name} ${
+        owner.middle_name || ""
+      }`,
       farmers: validFarmers,
     });
   } catch (err) {
     res.status(404).json({ message: "Dryer not found.", error: err.message });
   }
 };
-
 
 export const createDryer = async (req, res) => {
   try {
@@ -114,7 +137,7 @@ export const createDryer = async (req, res) => {
       rate,
       image_url,
       created_by_id,
-      isverified
+      isverified,
     } = req.body;
 
     const { data, error } = await supabase
@@ -128,7 +151,7 @@ export const createDryer = async (req, res) => {
           rate,
           image_url,
           created_by_id,
-          isverified
+          isverified,
         },
       ])
       .select()
@@ -158,7 +181,7 @@ export const updateDryer = async (req, res) => {
       image_url,
       isverified,
     } = req.body;
-    const updatedIsVerified = isverified === "true"; 
+    const updatedIsVerified = isverified === "true";
     const { data, error } = await supabase
       .from("dryers")
       .update({
@@ -168,7 +191,7 @@ export const updateDryer = async (req, res) => {
         rate,
         available_capacity,
         image_url,
-        isverified: updatedIsVerified, 
+        isverified: updatedIsVerified,
       })
       .eq("id", id)
       .select()

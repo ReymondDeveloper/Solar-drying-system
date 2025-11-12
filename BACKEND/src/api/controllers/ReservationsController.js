@@ -2,15 +2,24 @@ import Reservations from "../models/Reservations.js";
 import Dryers from "../models/dryersModel.js";
 import CropTypes from "../models/CropTypes.js";
 import supabase from "../../database/supabase.db.js";
-import { subMonths } from 'date-fns';  
+import { subMonths } from "date-fns";
 
 export const getReservations = async (req, res) => {
   try {
-    const { dryer_id } = req.query;
-    const { data: reservations, error: resError } = await supabase
+    const { dryer_id, limit, offset } = req.query;
+    let query = supabase
       .from("reservations")
-      .select("*")
+      .select("*", { count: "exact" })
       .order("created_at", { ascending: false });
+
+    if (typeof limit !== "undefined" && typeof offset !== "undefined") {
+      const start = Number(offset);
+      const end = start + Number(limit) - 1;
+      query = query.range(start, end);
+    }
+
+    const { data: reservations, count, error: resError } = await query;
+
     if (resError) throw resError;
 
     const formatted = await Promise.all(
@@ -70,7 +79,7 @@ export const getReservations = async (req, res) => {
     );
 
     const filtered = formatted.filter((f) => f !== null);
-    res.json(filtered);
+    res.json({ data: filtered, totalCount: count });
   } catch (err) {
     res
       .status(500)
@@ -80,14 +89,15 @@ export const getReservations = async (req, res) => {
 
 export const getReservationById = async (req, res) => {
   try {
-    const { farmer_id } = req.query;
+    const { farmer_id, limit, offset } = req.query;
     if (!farmer_id)
       return res.status(400).json({ message: "farmer_id is required" });
 
-    const reservations = await Reservations.findAll({ farmer_id });
-    // if (!reservations || reservations.length === 0) {
-    //   return res.status(404).json({ message: "No reservations found for this farmer." });
-    // }
+    const reservations = await Reservations.findAll({
+      farmer_id,
+      limit,
+      offset,
+    });
 
     res.json(reservations);
   } catch (err) {
@@ -99,22 +109,24 @@ export const getReservationById = async (req, res) => {
 
 export const getArchivedReservations = async (req, res) => {
   try {
-    const oneMonthAgo = subMonths(new Date(), 1); 
+    const oneMonthAgo = subMonths(new Date(), 1);
 
     const { data, error } = await supabase
       .from("reservations")
-      .select(`
+      .select(
+        `
         id,
         farmer_id:farmer_id(id, first_name, last_name, email, mobile_number),
         dryer_id:dryer_id(id, dryer_name, location, rate, available_capacity, created_by_id),
         crop_type_id:crop_type_id(crop_type_name, quantity, payment, notes),
         status,
         created_at
-      `)
-      .lt('created_at', oneMonthAgo.toISOString())   
-      .order('created_at', { ascending: false }); 
+      `
+      )
+      .lt("created_at", oneMonthAgo.toISOString())
+      .order("created_at", { ascending: false });
 
-    if (error) throw error;   
+    if (error) throw error;
 
     const formattedData = data.map((r) => {
       return {
@@ -135,10 +147,12 @@ export const getArchivedReservations = async (req, res) => {
     });
     console.log("Archived reservations fetched:", formattedData);
     res.status(200).json(formattedData);
-
   } catch (error) {
     console.error("Error fetching archived reservations:", error);
-    res.status(500).json({ message: "Failed to fetch archived reservations", error: error.message });
+    res.status(500).json({
+      message: "Failed to fetch archived reservations",
+      error: error.message,
+    });
   }
 };
 
@@ -262,7 +276,7 @@ export const updateReservation = async (req, res) => {
         `Rolled back ${cropType.quantity} cavans to dryer ${reservation.dryer_id}`
       );
     }
- 
+
     res.json({
       message: "Reservation updated successfully.",
       reservation,
@@ -302,7 +316,7 @@ export const checkReservation = async (req, res) => {
 
 export const getReservationsByOwner = async (req, res) => {
   try {
-    const { ownerId } = req.query;
+    const { ownerId, limit, offset } = req.query;
     if (!ownerId) {
       return res.status(400).json({ message: "Missing ID." });
     }
@@ -311,22 +325,27 @@ export const getReservationsByOwner = async (req, res) => {
       .from("reservations")
       .select(
         `
-      id,
-      farmer_id:farmer_id (id, first_name, last_name, email, mobile_number),
-      owner_id:owner_id (id, first_name, last_name, email, mobile_number),
-      dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity),
-      crop_type_id:crop_type_id (crop_type_id, crop_type_name, quantity, payment, notes),
-      status,
-      created_at
-    `
+        id,
+        farmer_id:farmer_id (id, first_name, last_name, email, mobile_number),
+        owner_id:owner_id (id, first_name, last_name, email, mobile_number),
+        dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity),
+        crop_type_id:crop_type_id (crop_type_id, crop_type_name, quantity, payment, notes),
+        status,
+        created_at
+      `,
+        { count: "exact" }
       )
       .order("created_at", { ascending: false });
 
-    if (ownerId) query = query.eq("owner_id", ownerId);
-    const { data, error } = await query;
-    if (error) throw error;
+    if (typeof limit !== "undefined" && typeof offset !== "undefined") {
+      const start = Number(offset);
+      const end = start + Number(limit) - 1;
+      query = query.range(start, end);
+    }
 
-    res.json(data);
+    const { data, count, error } = await query.eq("owner_id", ownerId);
+    if (error) throw error;
+    res.json({ data, totalCount: count });
   } catch (err) {
     console.error("Error in getReservationsByOwner:", err);
     res.status(500).json({
