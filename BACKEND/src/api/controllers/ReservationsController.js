@@ -265,7 +265,7 @@ export const updateReservation = async (req, res) => {
       if (cropError) throw cropError;
     }
 
-    if (status.toLowerCase() === "denied") {
+    if (status.toLowerCase() === "denied" || status.toLowerCase() === "completed") {
       const { data: cropType, error: cropError } = await supabase
         .from("crop_types")
         .select("quantity")
