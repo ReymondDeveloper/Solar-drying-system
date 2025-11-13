@@ -305,9 +305,11 @@ function Home() {
         cache.monthly_reservation = calculate(result, "reservations");
         cache.yearly_reservation = calculate(result, "reservations", "yearly");
 
-        result = await api.get("/dryers/owned", {
-          params: { id: localStorage.getItem("id") },
-        });
+        result = (
+          await api.get("/dryers/owned", {
+            params: { id: localStorage.getItem("id") },
+          })
+        ).data;
 
         setCards((prev) => ({
           ...prev,
