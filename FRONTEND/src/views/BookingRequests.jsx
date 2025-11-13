@@ -59,6 +59,7 @@ function BookingRequests() {
         { value: "pending", phrase: "Pending" },
         { value: "approved", phrase: "Approved" },
         { value: "denied", phrase: "Denied" },
+        { value: "completed", phrase: "Completed" },
       ],
       colspan: 2,
     },
@@ -84,16 +85,10 @@ function BookingRequests() {
     const data = Object.fromEntries(formData.entries());
     try {
       setLoading(true);
-      await api.put(
-        `${import.meta.env.VITE_API}/reservations/${data.id}`,
+      await api.put(`/reservations/${data.id}`,
         {
           status: data.status,
           notes: data.notes || null,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
         }
       );
 
@@ -187,6 +182,7 @@ function BookingRequests() {
           { value: "pending", phrase: "Pending" },
           { value: "approved", phrase: "Approved" },
           { value: "denied", phrase: "Denied" },
+          { value: "completed", phrase: "Completed" },
         ],
         colspan: 2,
         onChange: isOwner ? handleStatusChange : undefined,
@@ -244,7 +240,7 @@ function BookingRequests() {
             action: (
               <div className="flex justify-center gap-2">
                 <Button
-                  onClick={() => handleEdit(res)}
+                  onClick={() => res.status && res.status !== "completed" && handleEdit(res)}
                   className="bg-blue-400 hover:bg-blue-500 text-white"
                 >
                   Edit
