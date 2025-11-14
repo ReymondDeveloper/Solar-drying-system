@@ -16,12 +16,34 @@ function CreateReservation() {
   const [totalPages, setTotalPages] = useState(5);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState({ status: "all", location: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { addresses } = useAddresses();
+
+  function useAddresses() {
+    const [addresses, setAddresses] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+      const fetchAddresses = async () => {
+        setLoading(true);
+        try {
+          const res = await api.get("/addresses");
+          setAddresses(res.data);
+        } catch (err) {
+          console.error("Failed to fetch addresses:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchAddresses();
+    }, []);
+
+    return { addresses, loading };
+  }
 
   const tableHeadings =
     role === "farmer"
@@ -60,22 +82,38 @@ function CreateReservation() {
       type: "select",
       name: "status",
       options: [
-        { value: "all", phrase: "All" },
-        { value: "available", phrase: "Available" },
-        { value: "occupied", phrase: "Occupied" },
+        { value: "all", phrase: "Lahat" },
+        { value: "available", phrase: "Magagamit" },
+        { value: "occupied", phrase: "Nakareserba" },
       ],
+      defaultValue: filter.status,
+      colspan: 2,
+    },
+    {
+      label: "Location (Sablayan)",
+      type: "select",
+      name: "location",
+      options: [
+        { value: "all", phrase: "Lahat" },
+        ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
+      ],
+      defaultValue: filter.location,
       colspan: 2,
     },
   ];
 
   const handleSubmitFilter = (e) => {
-    setLoading(true);
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    setFilter(data.status);
-    setLoading(false);
-    setModalFilter(false);
+    setLoading(true);
+    try {
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      setFilter((prev) => ({ ...prev, ...data }));
+      setModalFilter(false);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchData = useCallback(async () => {
@@ -164,7 +202,7 @@ function CreateReservation() {
     } finally {
       setIsLoading(false);
     }
-  }, [limit, currentPage]);
+  }, [navigate, limit, currentPage]);
 
   useEffect(() => {
     fetchData();
@@ -177,30 +215,31 @@ function CreateReservation() {
   }, [fetchData]);
 
   const FilteredData = data.filter((info) => {
-    const filterByFilters =
-      filter && filter !== "all"
-        ? info.status.toLowerCase().includes(filter.toLowerCase())
+    const filterByStatus =
+      filter.status && filter.status !== "all"
+        ? info.status.toLowerCase() === filter.status.toLowerCase()
         : true;
+
+    const filterByLocation =
+      filter.location && filter.location !== "all"
+      ? info.location
+        .toLowerCase()
+        .includes(String(filter.location).toLowerCase())
+      : true;
 
     const filterBySearch = search
       ? Object.entries(info)
-          .filter(([key]) => key !== "status" && key !== "action")
+          .filter(([key]) => key !== "status" && key !== "location" && key !== "action")
           .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;
-    return filterByFilters && filterBySearch;
+
+    return filterByStatus && filterBySearch && filterByLocation;
   });
 
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
-
-  if (isError)
-    return (
-      <div className="absolute top-0 left-0 w-full h-[calc(100dvh-56px)] text-5xl flex justify-center items-center font-bold py-5">
-        Error while fetching the data
-      </div>
-    );
 
   return (
     <>

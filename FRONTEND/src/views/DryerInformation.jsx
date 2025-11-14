@@ -21,7 +21,7 @@ function DryerInformation() {
   const [modalFilter, setModalFilter] = useState(false);
   const [modalEdit, setModalEdit] = useState(false);
   const [modalAdd, setModalAdd] = useState(false);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState({ location: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedDryer, setSelectedDryer] = useState(null);
@@ -54,9 +54,10 @@ function DryerInformation() {
       type: "select",
       name: "location",
       options: [
-        { value: "all", phrase: "All" },
+        { value: "all", phrase: "Lahat" },
         ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
       ],
+      defaultValue: filter.location,
       colspan: 2,
     },
   ];
@@ -64,11 +65,15 @@ function DryerInformation() {
   const handleSubmitFilter = (e) => {
     e.preventDefault();
     setLoading(true);
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    setFilter((prev) => ({ ...prev, ...data }));
-    setLoading(false);
-    setModalFilter(false);
+    try {
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      setFilter((prev) => ({ ...prev, ...data }));
+      setModalFilter(false);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fieldsAdd = [
@@ -340,12 +345,12 @@ function DryerInformation() {
   ];
 
   const FilteredData = data.filter((info) => {
-    const filterByFilters =
-      !filter.location ||
-      filter.location === "all" ||
-      info.location
+    const filterByLocation =
+      filter.location && filter.location !== "all"
+      ? info.location
         .toLowerCase()
-        .includes(String(filter.location).toLowerCase());
+        .includes(String(filter.location).toLowerCase())
+      : true;
 
     const filterBySearch = search
       ? Object.entries(info)
@@ -354,7 +359,7 @@ function DryerInformation() {
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;
-    return filterByFilters && filterBySearch;
+    return filterByLocation && filterBySearch;
   });
 
   const currentPageSafe = Math.min(currentPage, totalPages);

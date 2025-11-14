@@ -14,7 +14,7 @@ function Reservations() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState(false);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState({ location: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const tableHeadings = [
@@ -61,9 +61,10 @@ function Reservations() {
       type: "select",
       name: "location",
       options: [
-        { value: "all", phrase: "All" },
+        { value: "all", phrase: "Lahat" },
         ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
       ],
+      defaultValue: filter.location,
       colspan: 2,
     },
   ];
@@ -73,7 +74,7 @@ function Reservations() {
     setLoading(true);
     try {
       const data = Object.fromEntries(new FormData(e.target).entries());
-      setFilter(data.location);
+      setFilter((prev) => ({ ...prev, ...data }));
       setModal(false);
     } catch (error) {
       console.log(error);
@@ -161,10 +162,13 @@ function Reservations() {
   }, [fetchData]);
 
   const FilteredData = data.filter((info) => {
-    const filterByStatus =
-      filter !== "all"
-        ? info.location.toLowerCase() === filter.toLowerCase()
-        : true;
+    const filterByLocation =
+      filter.location && filter.location !== "all"
+      ? info.location
+        .toLowerCase()
+        .includes(String(filter.location).toLowerCase())
+      : true;
+
     const filterBySearch = search
       ? Object.entries(info)
           .filter(([key]) => key !== "location")
@@ -173,7 +177,7 @@ function Reservations() {
           )
       : true;
 
-    return filterByStatus && filterBySearch;
+    return filterByLocation && filterBySearch;
   });
 
   const currentPageSafe = Math.min(currentPage, totalPages);
