@@ -18,11 +18,34 @@ function ReservationHistory() {
   const [modalFilter, setModalFilter] = useState(false);
   const [modalView, setModalView] = useState(false);
   const [gcashModal, setGcashModal] = useState(false);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState({ status: "all", location: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [datasView, setDatasView] = useState([]);
   const role = localStorage.getItem("role");
+  const { addresses } = useAddresses();
+
+  function useAddresses() {
+    const [addresses, setAddresses] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+      const fetchAddresses = async () => {
+        setLoading(true);
+        try {
+          const res = await api.get("/addresses");
+          setAddresses(res.data);
+        } catch (err) {
+          console.error("Failed to fetch addresses:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchAddresses();
+    }, []);
+
+    return { addresses, loading };
+  }
 
   const tableHeadings =
     role === "farmer"
@@ -70,10 +93,24 @@ function ReservationHistory() {
       type: "select",
       name: "status",
       options: [
-        { value: "all", phrase: "All" },
+        { value: "all", phrase: "Lahat" },
+        { value: "pending", phrase: "Pending" },
         { value: "approved", phrase: "Approved" },
         { value: "denied", phrase: "Denied" },
+        { value: "completed", phrase: "Completed" },
       ],
+      defaultValue: filter.status,
+      colspan: 2,
+    },
+    {
+      label: "Location (Sablayan)",
+      type: "select",
+      name: "location",
+      options: [
+        { value: "all", phrase: "Lahat" },
+        ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
+      ],
+      defaultValue: filter.location,
       colspan: 2,
     },
   ];
@@ -116,11 +153,15 @@ function ReservationHistory() {
   const handleSubmitFilter = (e) => {
     e.preventDefault();
     setLoading(true);
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    setFilter(data.status);
-    setLoading(false);
-    setModalFilter(false);
+    try {
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      setFilter((prev) => ({ ...prev, ...data }));
+      setModalFilter(false);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmitGcash = async (e) => {
@@ -267,19 +308,27 @@ function ReservationHistory() {
   }, [fetchData]);
 
   const FilteredData = data.filter((info) => {
-    const filterByFilters =
-      filter && filter !== "all"
-        ? info.status.toLowerCase().includes(filter.toLowerCase())
+    const filterByStatus =
+      filter.status && filter.status !== "all"
+        ? info.status.toLowerCase() === filter.status.toLowerCase()
         : true;
+
+    const filterByLocation =
+      filter.location && filter.location !== "all"
+      ? info.location
+        .toLowerCase()
+        .includes(String(filter.location).toLowerCase())
+      : true;
 
     const filterBySearch = search
       ? Object.entries(info)
-          .filter(([key]) => key !== "action" && key !== "status")
+          .filter(([key]) => key !== "status" && key !== "location" && key !== "action")
           .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;
-    return filterByFilters && filterBySearch;
+
+    return filterByStatus && filterBySearch && filterByLocation;
   });
 
   const currentPageSafe = Math.min(currentPage, totalPages);

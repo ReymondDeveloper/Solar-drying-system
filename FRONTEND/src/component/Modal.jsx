@@ -349,7 +349,7 @@ function Modal({
                         value={option.value}
                         className="capitalize"
                       >
-                        {option.value}
+                        {option.phrase}
                       </option>
                     ))}
                   </select>

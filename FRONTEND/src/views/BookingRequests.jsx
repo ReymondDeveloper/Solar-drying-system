@@ -26,6 +26,29 @@ function BookingRequests() {
   const [filter, setFilter] = useState({ status: "all", location: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const { addresses } = useAddresses();
+
+  function useAddresses() {
+    const [addresses, setAddresses] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+      const fetchAddresses = async () => {
+        setLoading(true);
+        try {
+          const res = await api.get("/addresses");
+          setAddresses(res.data);
+        } catch (err) {
+          console.error("Failed to fetch addresses:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchAddresses();
+    }, []);
+
+    return { addresses, loading };
+  }
 
   const tableHeadings = [
     "Farmer Name",
@@ -61,6 +84,18 @@ function BookingRequests() {
         { value: "denied", phrase: "Denied" },
         { value: "completed", phrase: "Completed" },
       ],
+      defaultValue: filter.status,
+      colspan: 2,
+    },
+    {
+      label: "Location (Sablayan)",
+      type: "select",
+      name: "location",
+      options: [
+        { value: "all", phrase: "All" },
+        ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
+      ],
+      defaultValue: filter.location,
       colspan: 2,
     },
   ];
@@ -341,15 +376,22 @@ function BookingRequests() {
         ? info.status.toLowerCase() === filter.status.toLowerCase()
         : true;
 
+    const filterByLocation =
+      filter.location && filter.location !== "all"
+      ? info.location
+        .toLowerCase()
+        .includes(String(filter.location).toLowerCase())
+      : true;
+
     const filterBySearch = search
       ? Object.entries(info)
-          .filter(([key]) => key !== "status" && key !== "action")
+          .filter(([key]) => key !== "status" && key !== "location" && key !== "action")
           .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;
 
-    return filterByStatus && filterBySearch;
+    return filterByStatus && filterBySearch && filterByLocation;
   });
 
   const currentPageSafe = Math.min(currentPage, totalPages);

@@ -14,10 +14,33 @@ function Availability() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState(false);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState({ status: "all", location: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const { addresses } = useAddresses();
 
+  function useAddresses() {
+    const [addresses, setAddresses] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+      const fetchAddresses = async () => {
+        setLoading(true);
+        try {
+          const res = await api.get("/addresses");
+          setAddresses(res.data);
+        } catch (err) {
+          console.error("Failed to fetch addresses:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchAddresses();
+    }, []);
+
+    return { addresses, loading };
+  }
+  
   const tableHeadings = [
     "Registered Dryer",
     "Location (Sablayan)",
@@ -36,6 +59,18 @@ function Availability() {
         { value: "available", phrase: "Available" },
         { value: "occupied", phrase: "Occupied" },
       ],
+      defaultValue: filter.status,
+      colspan: 2,
+    },
+    {
+      label: "Location (Sablayan)",
+      type: "select",
+      name: "location",
+      options: [
+        { value: "all", phrase: "All" },
+        ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
+      ],
+      defaultValue: filter.location,
       colspan: 2,
     },
   ];
@@ -45,7 +80,7 @@ function Availability() {
     setLoading(true);
     try {
       const data = Object.fromEntries(new FormData(e.target).entries());
-      setFilter(data.status);
+      setFilter((prev) => ({ ...prev, ...data }));
       setModal(false);
     } catch (error) {
       console.log(error);
@@ -131,10 +166,17 @@ function Availability() {
   }, [fetchData]);
 
   const FilteredData = data.filter((info) => {
-    const filterByFilters =
-      filter && filter !== "all"
-        ? info.status.toLowerCase().includes(filter.toLowerCase())
+    const filterByStatus =
+      filter.status && filter.status !== "all"
+        ? info.status.toLowerCase() === filter.status.toLowerCase()
         : true;
+
+    const filterByLocation =
+      filter.location && filter.location !== "all"
+      ? info.location
+        .toLowerCase()
+        .includes(String(filter.location).toLowerCase())
+      : true;
 
     const filterBySearch = search
       ? Object.entries(info)
@@ -144,7 +186,7 @@ function Availability() {
           )
       : true;
 
-    return filterByFilters && filterBySearch;
+    return filterByStatus && filterByLocation && filterBySearch;
   });
 
   const currentPageSafe = Math.min(currentPage, totalPages);
