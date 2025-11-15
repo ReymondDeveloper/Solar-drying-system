@@ -16,7 +16,6 @@ function Modal({
 }) {
   const [address, setAddress] = useState("");
   const [previewUrls, setPreviewUrls] = useState({});
-  const [mainImage, setMainImage] = useState("");
   const userRole = localStorage.getItem("role");
   const [qrModal, setQrmodal] = useState(false);
   const [transactions, setTransactions] = useState([]);
@@ -298,38 +297,70 @@ function Modal({
                         if (!file) return;
                         const localPreview = URL.createObjectURL(file);
 
-                        setPreviewUrls((prev) => {
-                          const updatedUrls = {
-                            ...prev,
-                            [field.name]: localPreview,
-                          };
-                          setMainImage(updatedUrls[field.name]);
-                        });
+                        setPreviewUrls((prev) => ({
+                          ...prev,
+                          [field.name]: localPreview,
+                        }));
 
                         const formData = new FormData();
                         formData.append("file", file);
 
                         try {
-                          const res = await fetch(
-                            `${import.meta.env.VITE_API}/upload`,
-                            {
-                              method: "POST",
-                              body: formData,
-                            }
-                          );
-                          const data = await res.json();
+                          const res = await api.post("/upload", formData, {
+                            headers: {
+                              'Content-Type': 'multipart/form-data',
+                            },
+                          });
+                          
+                          const data = await res.data;
                           if (data.url) {
                             setPreviewUrls((prev) => ({
                               ...prev,
                               [field.name]: data.url,
                             }));
-                            setMainImage(data.url);
+
+                            URL.revokeObjectURL(localPreview);
                           }
+
                         } catch (err) {
                           console.error("Image upload failed:", err);
                         }
                       }}
                     />
+
+                    {previewUrls[field.name] ? (
+                      <>
+                        <input type="hidden" name={`img_${[field.name]}`} value={previewUrls[field.name]} />
+                        <div className="flex justify-center border rounded-lg p-4 bg-gray-50">
+                          <img
+                            src={
+                              previewUrls[field.name].startsWith("http") || 
+                              previewUrls[field.name].startsWith("blob:") 
+                                ? previewUrls[field.name]
+                                : `${import.meta.env.VITE_API.replace("/api", "")}${previewUrls[field.name]}`
+                            }
+                            alt="Preview"
+                            className="max-h-[400px] w-auto object-contain rounded-lg shadow-md"
+                          />
+                        </div>
+                      </>
+                    ) : field.defaultValue ? (
+                      <>
+                        <input type="hidden" name={`img_${[field.name]}`} value={field.defaultValue} />
+                        <div className="flex justify-center border rounded-lg p-4 bg-gray-50">
+                          <img
+                            src={
+                              field.defaultValue.startsWith("http") || 
+                              field.defaultValue.startsWith("blob:") 
+                                ? field.defaultValue
+                                : `${import.meta.env.VITE_API.replace("/api", "")}${field.defaultValue}`
+                            }
+                            alt="Preview"
+                            className="max-h-[400px] w-auto object-contain rounded-lg shadow-md"
+                          />
+                        </div>
+                      </>
+                    ) : null}
                   </div>
                 </>
               ) : field.type === "select" ? (
@@ -433,7 +464,7 @@ function Modal({
                 )}
 
                 {qrModal && (
-                  <div className="mx-auto text-auto border p-1 bg-white max-w-1/2">
+                  <div className="mx-auto my-5 text-auto border p-1 bg-white max-w-1/2">
                     <img
                       src={
                         datas.dryer_id.qr_code !== undefined &&
@@ -666,22 +697,7 @@ function Modal({
           ) : null}
         </div>
 
-        {mainImage && (
-          <div className="flex justify-center border rounded-lg p-4 bg-gray-50">
-            <img
-              src={
-                mainImage.startsWith("http") || mainImage.startsWith("blob:")
-                  ? mainImage
-                  : `${import.meta.env.VITE_API.replace(
-                      "/api",
-                      ""
-                    )}${mainImage}`
-              }
-              alt="Preview"
-              className="max-h-[400px] w-auto object-contain rounded-lg shadow-md"
-            />
-          </div>
-        )}
+        
 
         <div className="flex justify-end gap-3 pt-4 border-t">
           <Button

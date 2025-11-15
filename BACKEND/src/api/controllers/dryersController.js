@@ -137,7 +137,7 @@ export const createDryer = async (req, res) => {
       rate,
       image_url,
       created_by_id,
-      isverified,
+      qr_code,
     } = req.body;
 
     const { data, error } = await supabase
@@ -151,7 +151,7 @@ export const createDryer = async (req, res) => {
           rate,
           image_url,
           created_by_id,
-          isverified,
+          qr_code,
         },
       ])
       .select()
@@ -177,11 +177,22 @@ export const updateDryer = async (req, res) => {
       location,
       maximum_capacity,
       rate,
-      available_capacity,
       image_url,
-      isverified,
+      qr_code,
     } = req.body;
-    const updatedIsVerified = isverified === "true";
+
+    const { data: existingData, error: existingError } = await supabase
+      .from("dryers")
+      .select("available_capacity, maximum_capacity")
+      .eq("id", id)
+      .single();
+
+    if (existingError) throw existingError;
+
+    const existing_maximum_capacity = existingData.maximum_capacity || 0;
+    const existing_available_capacity = existingData.available_capacity || 0;
+    const available_capacity = existing_maximum_capacity < maximum_capacity ? Number(existing_available_capacity) + Number(maximum_capacity - existing_maximum_capacity) : existing_available_capacity;
+
     const { data, error } = await supabase
       .from("dryers")
       .update({
@@ -191,11 +202,12 @@ export const updateDryer = async (req, res) => {
         rate,
         available_capacity,
         image_url,
-        isverified: updatedIsVerified,
+        qr_code,
       })
       .eq("id", id)
       .select()
       .single();
+
     if (error) throw error;
 
     res.json({ message: "Dryer updated successfully.", dryer: data });
