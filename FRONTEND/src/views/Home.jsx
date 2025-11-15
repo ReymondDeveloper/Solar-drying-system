@@ -564,7 +564,7 @@ function Home() {
 
             <ReportPie
               data={
-                cards.corn !== 0 && cards.rice !== 0
+                cards.corn !== undefined && cards.rice !== undefined
                   ? [
                       { name: "Mais", value: cards.corn },
                       { name: "Palay", value: cards.rice },
@@ -634,7 +634,7 @@ function Home() {
 
             <ReportPie
               data={
-                cards.corn !== 0 && cards.rice !== 0
+                cards.corn !== undefined && cards.rice !== undefined
                   ? [
                       { name: "Mais", value: cards.corn },
                       { name: "Palay", value: cards.rice },
@@ -658,7 +658,7 @@ function Home() {
 
             <ReportPie
               data={
-                cards.corn !== 0 && cards.rice !== 0
+                cards.corn !== undefined && cards.rice !== undefined
                   ? [
                       { name: "Mais", value: cards.corn },
                       { name: "Palay", value: cards.rice },
