@@ -54,7 +54,7 @@ function DryerInformation() {
       type: "select",
       name: "location",
       options: [
-        { value: "all", phrase: "Lahat" },
+        { value: "all", phrase: "All" },
         ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
       ],
       defaultValue: filter.location,
@@ -92,7 +92,8 @@ function DryerInformation() {
       required: true,
     },
     { label: "Rate (PHP)", type: "number", name: "rate", required: true },
-    { label: "Dryer Image", type: "file", name: "image_url" },
+    { label: "Dryer Image", type: "file", name: "dryer_image", },
+    { label: "QR Code", type: "file", name: "qr_code" },
   ];
 
   const handleSubmitAdd = async (e) => {
@@ -104,28 +105,14 @@ function DryerInformation() {
       const formData = new FormData(e.target);
       let dryerData = Object.fromEntries(formData.entries());
 
-      const file = formData.get("image_url");
-      if (file && file.size > 0) {
-        const uploadForm = new FormData();
-        uploadForm.append("file", file);
-
-        const uploadRes = await api.post("/upload", uploadForm, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        dryerData.image_url = uploadRes.data.url;
-      }
-      dryerData.isverified = dryerData.isverified === "true";
-
       const res = await api.post("/dryers", {
         dryer_name: dryerData.dryer_name,
         location: dryerData.location,
         maximum_capacity: dryerData.maximum_capacity,
         rate: dryerData.rate,
-        image_url: dryerData.image_url,
+        image_url: dryerData.img_image_url,
         created_by_id: createdById,
+        qr_code: dryerData.img_qr_code,
       });
 
       toast.success(res.data.message);
@@ -165,6 +152,7 @@ function DryerInformation() {
     setSelectedDryer(dryer);
     setModalEdit(true);
   }
+
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -173,22 +161,14 @@ function DryerInformation() {
     let updatedData = Object.fromEntries(formData.entries());
 
     try {
-      const imageFile = formData.get("image_url");
-      if (imageFile && imageFile instanceof File && imageFile.size > 0) {
-        const uploadData = new FormData();
-        uploadData.append("file", imageFile);
-
-        const uploadRes = await api.post("/upload", uploadData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-
-        updatedData.image_url = uploadRes.data.url;
-      } else {
-        updatedData.image_url = selectedDryer.image_url;
-      }
-      updatedData.isverified = updatedData.isverified === "true";
-
-      const res = await api.put(`/dryers/${selectedDryer.id}`, updatedData);
+      const res = await api.put(`/dryers/${selectedDryer.id}`, {
+        dryer_name: updatedData.dryer_name,
+        location: updatedData.location,
+        maximum_capacity: updatedData.maximum_capacity,
+        rate: updatedData.rate,
+        image_url: updatedData.img_image_url,
+        qr_code: updatedData.img_qr_code,
+      });
 
       toast.success(res.data.message);
       fetchData();
@@ -341,6 +321,13 @@ function DryerInformation() {
       label: "Dryer Image",
       type: "file",
       name: "image_url",
+      defaultValue: selectedDryer?.image_url,
+    },
+    {
+      label: "QR Code",
+      type: "file",
+      name: "qr_code",
+      defaultValue: selectedDryer?.qr_code,
     },
   ];
 
