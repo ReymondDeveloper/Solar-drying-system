@@ -4,6 +4,9 @@ import { RiCloseLargeLine, RiQrCodeLine } from "react-icons/ri";
 import { FaLocationArrow } from "react-icons/fa";
 import { ImFolderUpload } from "react-icons/im";
 import api from "../api/api.js";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import "./datepicker.css";
 
 function Modal({
   setModal,
@@ -23,6 +26,8 @@ function Modal({
   const chatRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
   const [chatTextArea, setChatTextArea] = useState("");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const handleLocation = () => {
     navigator.geolocation.getCurrentPosition(
@@ -177,6 +182,21 @@ function Modal({
     }
   }
 
+  function formatDateLocal(date) {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // months are zero-based
+    const day = date.getDate().toString().padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function normalizeDate(date) {
+    if (!(date instanceof Date)) {
+      date = new Date(date);
+    }
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
   return (
     <div
       onClick={() => setModal(false)}
@@ -215,7 +235,7 @@ function Modal({
                   </label>
                   <select
                     name={field.name}
-                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
+                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 outline-0"
                     defaultValue={field.defaultValue || ""}
                     required={field.required}
                     disabled={field.disabled}
@@ -234,7 +254,7 @@ function Modal({
                   <input
                     type="number"
                     name={field.name}
-                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
+                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 outline-0"
                     defaultValue={field.defaultValue || ""}
                     required={field.required}
                     disabled={field.disabled}
@@ -249,7 +269,7 @@ function Modal({
                   </label>
                   <select
                     name={field.name}
-                    className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500"
+                    className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500 outline-0"
                     defaultValue={field.defaultValue || ""}
                     disabled={field.disabled}
                     required={field.required}
@@ -308,10 +328,10 @@ function Modal({
                         try {
                           const res = await api.post("/upload", formData, {
                             headers: {
-                              'Content-Type': 'multipart/form-data',
+                              "Content-Type": "multipart/form-data",
                             },
                           });
-                          
+
                           const data = await res.data;
                           if (data.url) {
                             setPreviewUrls((prev) => ({
@@ -321,7 +341,6 @@ function Modal({
 
                             URL.revokeObjectURL(localPreview);
                           }
-
                         } catch (err) {
                           console.error("Image upload failed:", err);
                         }
@@ -330,14 +349,21 @@ function Modal({
 
                     {previewUrls[field.name] ? (
                       <>
-                        <input type="hidden" name={`img_${[field.name]}`} value={previewUrls[field.name]} />
+                        <input
+                          type="hidden"
+                          name={`img_${[field.name]}`}
+                          value={previewUrls[field.name]}
+                        />
                         <div className="flex justify-center border rounded-lg p-4 bg-gray-50">
                           <img
                             src={
-                              previewUrls[field.name].startsWith("http") || 
-                              previewUrls[field.name].startsWith("blob:") 
+                              previewUrls[field.name].startsWith("http") ||
+                              previewUrls[field.name].startsWith("blob:")
                                 ? previewUrls[field.name]
-                                : `${import.meta.env.VITE_API.replace("/api", "")}${previewUrls[field.name]}`
+                                : `${import.meta.env.VITE_API.replace(
+                                    "/api",
+                                    ""
+                                  )}${previewUrls[field.name]}`
                             }
                             alt="Preview"
                             className="max-h-[400px] w-auto object-contain rounded-lg shadow-md"
@@ -346,14 +372,21 @@ function Modal({
                       </>
                     ) : field.defaultValue ? (
                       <>
-                        <input type="hidden" name={`img_${[field.name]}`} value={field.defaultValue} />
+                        <input
+                          type="hidden"
+                          name={`img_${[field.name]}`}
+                          value={field.defaultValue}
+                        />
                         <div className="flex justify-center border rounded-lg p-4 bg-gray-50">
                           <img
                             src={
-                              field.defaultValue.startsWith("http") || 
-                              field.defaultValue.startsWith("blob:") 
+                              field.defaultValue.startsWith("http") ||
+                              field.defaultValue.startsWith("blob:")
                                 ? field.defaultValue
-                                : `${import.meta.env.VITE_API.replace("/api", "")}${field.defaultValue}`
+                                : `${import.meta.env.VITE_API.replace(
+                                    "/api",
+                                    ""
+                                  )}${field.defaultValue}`
                             }
                             alt="Preview"
                             className="max-h-[400px] w-auto object-contain rounded-lg shadow-md"
@@ -370,7 +403,7 @@ function Modal({
                   </label>
                   <select
                     name={field.name}
-                    className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500"
+                    className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500 outline-0"
                     defaultValue={field.defaultValue || ""}
                     onChange={(e) => field.onChange && field.onChange(e)}
                   >
@@ -428,13 +461,69 @@ function Modal({
                     className="w-full h-32 border border-gray-300 rounded-lg p-2 text-sm resize-none focus:ring-2 focus:ring-green-500"
                   />
                 </>
+              ) : field.type === "date" ? (
+                <>
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                    {userRole === "farmer" ? "Saklaw na petsa" : field.label}
+                  </label>
+                  <br />
+
+                  <DatePicker
+                    selectsRange
+                    startDate={startDate}
+                    endDate={endDate}
+                    onChange={(dates) => {
+                      const [start, end] = dates;
+                      setStartDate(start);
+                      setEndDate(end);
+                    }}
+                    minDate={new Date()}
+                    excludeDates={
+                      JSON.parse(localStorage.getItem("dryer_data"))
+                        ?.farmers.filter(
+                          ({ date_from, date_to, status }) =>
+                            (!date_to && status === "approved") ||
+                            (date_to === "" && status === "approved") ||
+                            (date_from === date_to && status === "approved")
+                        )
+                        .map(({ date_from }) =>
+                          normalizeDate(new Date(date_from))
+                        ) || []
+                    }
+                    excludeDateIntervals={
+                      JSON.parse(localStorage.getItem("dryer_data"))
+                        ?.farmers.filter(({ status }) => status === "approved")
+                        .map(({ date_from, date_to }) => ({
+                          start: normalizeDate(new Date(date_from)),
+                          end: normalizeDate(new Date(date_to)),
+                        })) || []
+                    }
+                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 outline-0"
+                    placeholderText={
+                      userRole === "farmer"
+                        ? "Pumili ng saklaw na petsa"
+                        : "Select a date range"
+                    }
+                  />
+
+                  <input
+                    type="hidden"
+                    name="date_from"
+                    value={formatDateLocal(startDate)}
+                  />
+                  <input
+                    type="hidden"
+                    name="date_to"
+                    value={formatDateLocal(endDate)}
+                  />
+                </>
               ) : (
                 <>
                   <label className="text-[rgba(0,100,0,255)] font-bold text-md">
                     {field.label}
                   </label>
                   <input
-                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
+                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 outline-0"
                     type={field.type}
                     required={field.required}
                     name={field.name}
@@ -696,8 +785,6 @@ function Modal({
             </div>
           ) : null}
         </div>
-
-        
 
         <div className="flex justify-end gap-3 pt-4 border-t">
           <Button
