@@ -82,14 +82,7 @@ export const getDryerById = async (req, res) => {
     const { data: reservations, error: reservationsError } = await supabase
       .from("reservations")
       .select(
-        `
-        id,
-        farmer_id,
-        status,
-        created_at,
-        crop_type_id,
-        crop_types(crop_type_name, quantity)
-      `
+        "id, farmer_id, status, created_at, crop_type_id, crop_types(crop_type_name, quantity), date_from, date_to"
       )
       .eq("dryer_id", id);
     if (reservationsError) throw reservationsError;
@@ -110,6 +103,8 @@ export const getDryerById = async (req, res) => {
           quantity: reservation.crop_types.quantity,
           status: reservation.status,
           reservation_date: reservation.created_at,
+          date_from: reservation.date_from,
+          date_to: reservation.date_to,
         };
       })
     );
@@ -172,14 +167,8 @@ export const createDryer = async (req, res) => {
 export const updateDryer = async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      dryer_name,
-      location,
-      maximum_capacity,
-      rate,
-      image_url,
-      qr_code,
-    } = req.body;
+    const { dryer_name, location, maximum_capacity, rate, image_url, qr_code } =
+      req.body;
 
     const { data: existingData, error: existingError } = await supabase
       .from("dryers")
@@ -191,7 +180,11 @@ export const updateDryer = async (req, res) => {
 
     const existing_maximum_capacity = existingData.maximum_capacity || 0;
     const existing_available_capacity = existingData.available_capacity || 0;
-    const available_capacity = existing_maximum_capacity < maximum_capacity ? Number(existing_available_capacity) + Number(maximum_capacity - existing_maximum_capacity) : existing_available_capacity;
+    const available_capacity =
+      existing_maximum_capacity < maximum_capacity
+        ? Number(existing_available_capacity) +
+          Number(maximum_capacity - existing_maximum_capacity)
+        : existing_available_capacity;
 
     const { data, error } = await supabase
       .from("dryers")

@@ -112,25 +112,16 @@ export default function Dryer() {
 
   const fieldsAdd = [
     {
-      label: "Date From",
+      label: "Date Range",
       type: "date",
       required: true,
-      name: "date_from",
       min: new Date().toISOString().split("T")[0],
-      colspan: 1,
+      colspan: 2,
       onchange: (e) => {
         if (document.querySelector('input[name="date_to"]')) {
           document.querySelector('input[name="date_to"]').min = e.target.value;
         }
       },
-    },
-    {
-      label: "Date To",
-      type: "date",
-      required: true,
-      name: "date_to",
-      min: new Date().toISOString().split("T")[0],
-      colspan: 1,
     },
     {
       label: "Crop Type",
