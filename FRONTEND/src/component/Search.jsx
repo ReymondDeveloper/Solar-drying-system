@@ -44,12 +44,13 @@ function Search({ setSearch, setModal }) {
           }
         }}
       />
-      <div
+      <button
         onClick={() => setModal((prev) => !prev)}
-        className="rounded-full p-3 cursor-pointer hover:bg-[rgba(0,0,0,0.1)] transition-all duration-300"
+        className="flex items-center gap-2 px-4 py-2 bg-gray-200 border border-gray-300 rounded-full hover:bg-gray-300 transition-all duration-200"
       >
         <CiFilter />
-      </div>
+        <span>Filter</span>
+      </button>
     </div>
   );
 }

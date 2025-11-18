@@ -6,7 +6,8 @@ const Dryers = {
     const { data, error } = await supabase
       .from("dryers")
       .select(`
-        id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, isverified,
+        id, dryer_name, location, available_capacity, maximum_capacity, rate, 
+        image_url, isverified, is_operation,operation_reason,
         created_at, updated_at, created_by_id, updated_by_id
       `);
     if (error) throw error;
@@ -17,7 +18,8 @@ const Dryers = {
     const { data, error } = await supabase
       .from("dryers")
       .select(`
-        id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url,isverified,
+           id, dryer_name, location, available_capacity, maximum_capacity, rate, 
+        image_url, isverified, is_operation,operation_reason,
         created_at, updated_at, created_by_id, updated_by_id
       `)
       .eq("id", id)
@@ -26,7 +28,7 @@ const Dryers = {
     return data;
   },
 
-  create: async ({ dryer_name, location, available_capacity, maximum_capacity, rate, image_url = null, created_by_id = null, isverified = false }) => {
+  create: async ({ dryer_name, location, available_capacity, maximum_capacity, rate, image_url = null, created_by_id = null, isverified = false, is_operation = false, operation_reason = null}) => {
     const { data, error } = await supabase
       .from("dryers")
       .insert([
@@ -39,19 +41,21 @@ const Dryers = {
           rate,
           image_url,
           created_by_id,
-          isverified
+          isverified,
+          is_operation,
+          operation_reason
         },
       ])
       .select(`
         id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url,
-        created_at, created_by_id, isverified
+        created_at, created_by_id, isverified, is_operation, operation_reason
       `)
       .single();
     if (error) throw error;
     return data;
   },
 
-  update: async (id, { dryer_name, location, available_capacity, maximum_capacity, rate, image_url, updated_by_id, isverified }) => {
+  update: async (id, { dryer_name, location, available_capacity, maximum_capacity, rate, image_url, updated_by_id, isverified, is_operation, operation_reason =null }) => {
     const { data, error } = await supabase
       .from("dryers")
       .update({
@@ -63,12 +67,14 @@ const Dryers = {
         image_url,
         updated_by_id,
         isverified,
+        is_operation,
+        operation_reason,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
       .select(`
         id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url,
-        updated_at, updated_by_id, isverified
+        updated_at, updated_by_id, isverified, is_operation, operation_reason
       `)
       .single();
     if (error) throw error;

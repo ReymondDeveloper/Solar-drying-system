@@ -11,7 +11,7 @@ const Reservations = {
         id,
         farmer_id:farmer_id (id, first_name, last_name, email, mobile_number),
         owner_id:owner_id (id, first_name, last_name, email, mobile_number),
-        dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity, qr_code),
+        dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity, qr_code, is_operation, operation_reason),
         crop_type_id:crop_type_id (crop_type_id, crop_type_name, quantity, payment, notes),
         status,
         created_at,
@@ -47,7 +47,7 @@ const Reservations = {
           id, first_name, last_name, email, mobile_number
         ),
         dryer_id:dryer_id ( 
-          id, dryer_name, location, rate, available_capacity
+          id, dryer_name, location, rate, available_capacity,is_operation,operation_reason
         ),
         crop_type_id:crop_type_id ( 
           crop_type_id, crop_type_name, quantity, payment, notes

@@ -45,9 +45,10 @@ function Availability() {
     "Registered Dryer",
     "Location (Sablayan)",
     "Date Created",
+    "In Operation",
     "Status",
   ];
-  const tableDataCell = ["dryer_name", "location", "created_at", "status"];
+  const tableDataCell = ["dryer_name", "location", "created_at","is_operation", "status"];
 
   const fields = [
     {
@@ -98,6 +99,7 @@ function Availability() {
             dryer_name: res.dryer_name,
             location: res.location,
             status: res.available_capacity > 0 ? "available" : "occupied",
+            is_operation: res.is_operation ? "Yes" : "No",
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",

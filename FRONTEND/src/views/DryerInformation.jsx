@@ -27,13 +27,14 @@ function DryerInformation() {
   const [selectedDryer, setSelectedDryer] = useState(null);
   const { addresses } = useAddresses();
   const navigate = useNavigate();
-
+  const [isOperational, setIsOperational] = useState(true);
   const tableHeadings = [
     "Dryer Name",
     "Location (Sablayan)",
     "Capacity (Cavans)",
     "Available Capacity (Cavans)",
     "Rate",
+    "Operation Status",
     "Date Created",
     "Action",
   ];
@@ -44,6 +45,7 @@ function DryerInformation() {
     "maximum_capacity",
     "available_capacity",
     "rate",
+    "is_operation",
     "created_at",
     "action",
   ];
@@ -92,9 +94,27 @@ function DryerInformation() {
       required: true,
     },
     { label: "Rate (PHP)", type: "number", name: "rate", required: true },
+    {
+      label: "Operation Status",
+      type: "select",
+      name: "is_operation",
+      required: true,
+      options: [
+        { value: "true", phrase: "Operational" },
+        { value: "false", phrase: "Not Operational" },
+      ],
+      onChange: (e) => setIsOperational(e.target.value === "true"),
+    },
+    !isOperational && {
+      label: "Reason for Not Operational",
+      type: "text",
+      name: "operation_reason",
+      required: true,
+      placeholder: "Provide reason why dryer is not operational",
+    },
     { label: "Dryer Image", type: "file", name: "dryer_image", },
     { label: "QR Code", type: "file", name: "qr_code" },
-  ];
+  ].filter(Boolean);
 
   const handleSubmitAdd = async (e) => {
     e.preventDefault();
@@ -113,6 +133,8 @@ function DryerInformation() {
         image_url: dryerData.img_image_url,
         created_by_id: createdById,
         qr_code: dryerData.img_qr_code,
+        is_operation: dryerData.is_operation === "true",
+        operation_reason: dryerData.is_operation === "false" ? dryerData.operation_reason : null,
       });
 
       toast.success(res.data.message);
@@ -168,6 +190,8 @@ function DryerInformation() {
         rate: updatedData.rate,
         image_url: updatedData.img_image_url,
         qr_code: updatedData.img_qr_code,
+        is_operation: updatedData.is_operation === "true",
+        operation_reason: updatedData.is_operation === "false" ? updatedData.operation_reason : null,
       });
 
       toast.success(res.data.message);
@@ -196,6 +220,7 @@ function DryerInformation() {
                 })
               : "N/A",
             isverified: res.isverified ? "Verified" : "Not Verified",
+            is_operation: res.is_operation ? "Operational" : "Not Operational", 
             action: (
               <div className="flex justify-center gap-2">
                 <Button
@@ -246,6 +271,7 @@ function DryerInformation() {
                   day: "numeric",
                 })
               : "N/A",
+            is_operation: res.is_operation ? "Operational" : "Not Operational", 
             action: (
               <div className="flex justify-center gap-2">
                 <Button
@@ -318,10 +344,24 @@ function DryerInformation() {
       defaultValue: selectedDryer?.rate,
     },
     {
-      label: "Dryer Image",
-      type: "file",
-      name: "image_url",
-      defaultValue: selectedDryer?.image_url,
+      label: "Operation Status",
+      type: "select",
+      name: "is_operation",
+      required: true,
+      defaultValue: selectedDryer?.is_operation ? "true" : "false",
+      options: [
+        { value: "true", phrase: "Operational" },
+        { value: "false", phrase: "Not Operational" },
+      ],
+      onChange: (e) => setIsOperational(e.target.value === "true"),
+    },
+    !isOperational && {
+      label: "Reason for Not Operational",
+      type: "text",
+      name: "operation_reason",
+      required: true,
+      defaultValue: selectedDryer?.operation_reason || "",
+      placeholder: "Provide reason why dryer is not operational",
     },
     {
       label: "QR Code",
@@ -329,7 +369,13 @@ function DryerInformation() {
       name: "qr_code",
       defaultValue: selectedDryer?.qr_code,
     },
-  ];
+    {
+      label: "Dryer Image",
+      type: "file",
+      name: "image_url",
+      defaultValue: selectedDryer?.image_url,
+    },
+  ].filter(Boolean);
 
   const FilteredData = data.filter((info) => {
     const filterByLocation =

@@ -167,7 +167,9 @@ function CreateReservation() {
         JSON.stringify(Array.isArray(result.data.data) ? result.data.data : []);
       if (isDifferent) {
         setData(
-          result.data.data?.map((res) => ({
+          result.data.data
+          ?.filter((res) => res.is_operation)
+          .map((res) => ({
             id: res.id,
             dryer_name: res.dryer_name,
             location: res.location,
