@@ -88,6 +88,7 @@ export const registerUser = async (req, res, next) => {
       password,
       role,
       address,
+      mobile_number,
     } = req.body;
 
     const existingUser = await User.findByEmail(email);
@@ -113,6 +114,7 @@ export const registerUser = async (req, res, next) => {
           otp_code: otp,
           otp_expires_at: expiresAt,
           address,
+          mobile_number,
         },
       ])
       .select()

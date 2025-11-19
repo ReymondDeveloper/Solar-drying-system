@@ -79,26 +79,80 @@ function ReportChart({ data, title }) {
   );
 }
 
-function ReportPie({ data, title }) {
-  const COLORS = ["#FF6384", "#36A2EB", "#FFCE56", "#4bc04fff"];
+function ReportPie({ data = [], title }) {
+  const COLORS = ["#FF6384", "#36A2EB"];
+  const [pieFilter, setPieFilter] = useState("all");
+  const MONTHS = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const safeData = Array.isArray(data) ? data : [];
+
+  const filteredData =
+    pieFilter === "all"
+      ? safeData
+      : [safeData[Number(pieFilter)]].filter(Boolean);
+
+  const MIN_SLICE_VALUE = 0.0001;
+
+  const pieChartData =
+    filteredData.length > 0
+      ? filteredData
+          .map(({ rice, corn }) => [
+            { name: "Rice", value: rice === 0 ? MIN_SLICE_VALUE : rice },
+            { name: "Corn", value: corn === 0 ? MIN_SLICE_VALUE : corn },
+          ])
+          .flat()
+      : [
+          { name: "Rice", value: MIN_SLICE_VALUE },
+          { name: "Corn", value: MIN_SLICE_VALUE },
+        ];
+
   return (
-  <div className="col-span-1 sm:col-span-2 lg:col-span-3 w-full text-center text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl p-5">
-      
-    <h3 className="text-lg font-bold mb-4 text-start">{title}</h3>
-      {data && data.length > 0 ? (
+    <div className="col-span-1 sm:col-span-2 lg:col-span-3 w-full text-center text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl p-5">
+      <h3 className="text-lg font-bold mb-4 text-start">{title}</h3>
+
+      <div className="w-full max-w-xs mb-3">
+        <select
+          value={pieFilter}
+          onChange={(e) => setPieFilter(e.target.value)}
+          className="w-full p-2 border border-green-300 rounded-lg bg-white text-green-700 focus:ring-2 focus:ring-green-400 focus:outline-none"
+        >
+          <option value="all">All Months</option>
+          {MONTHS.map((m, index) => (
+            <option key={index} value={index}>
+              {m}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {pieChartData.length > 0 ? (
         <ResponsiveContainer width="100%" height={400}>
           <PieChart>
             <Pie
-              data={data}
+              data={pieChartData}
               dataKey="value"
               nameKey="name"
               cx="50%"
               cy="50%"
-              outerRadius="80%" 
-              fill="#8884d8"
-              label
+              outerRadius="80%"
+              label={({ name, value }) => {
+                return `${name}: ${value === MIN_SLICE_VALUE ? 0 : value}`;
+              }}
             >
-              {data.map((_, index) => (
+              {pieChartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
@@ -123,11 +177,7 @@ function Home() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [cards, setCards] = useState([]);
-  const [pieFilter, setPieFilter] = useState("all");
-  const MONTHS = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
+
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
@@ -155,27 +205,27 @@ function Home() {
     if (pieFilter === "all") {
       return [
         { name: "Mais", value: cards.corn || 0 },
-        { name: "Palay", value: cards.rice || 0 }
+        { name: "Palay", value: cards.rice || 0 },
       ];
     }
-  
+
     const selectedMonth = parseInt(pieFilter);
     const monthData = cards.monthly_reservation.filter((item) => {
       const date = new Date(item.date);
       return date.getMonth() === selectedMonth;
     });
-  
+
     const monthCorn = monthData.reduce(
       (sum, i) => sum + (i.reservations || 0),
       0
     );
-  
+
     return [
       { name: "Mais", value: monthCorn },
-      { name: "Palay", value: cards.rice || 0 }
+      { name: "Palay", value: cards.rice || 0 },
     ];
   };
-  
+
   const fetchData = useCallback(async () => {
     const data = JSON.parse(localStorage.getItem("home_data"));
 
@@ -245,6 +295,47 @@ function Home() {
           };
         });
     };
+
+    function pieChart(data) {
+      const cropMap = { rice: "rice", mais: "corn" };
+
+      const monthsOrder = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+
+      const monthlyTotals = {};
+      monthsOrder.forEach((month) => {
+        monthlyTotals[month] = { rice: 0, corn: 0 };
+      });
+
+      data.forEach(({ quantity, crop_type, created_at }) => {
+        const date = new Date(created_at);
+        const month = date.toLocaleString("default", { month: "long" });
+        const crop = cropMap[crop_type.toLowerCase()];
+        if (crop && monthlyTotals[month]) {
+          monthlyTotals[month][crop] += quantity;
+        }
+      });
+
+      const result = monthsOrder.map((month) => ({
+        month,
+        rice: monthlyTotals[month].rice,
+        corn: monthlyTotals[month].corn,
+      }));
+
+      return result;
+    }
 
     try {
       let result;
@@ -443,39 +534,9 @@ function Home() {
 
         setCards((prev) => ({
           ...prev,
-          corn: reservationsResult.data.data
-            .filter(
-              (item) =>
-                item.crop_type.toLowerCase() === "mais" ||
-                item.crop_type.toLowerCase() === "corn"
-            )
-            .reduce((total, item) => total + (item.quantity || 0), 0),
+          pie: pieChart(reservationsResult.data.data),
         }));
-        cache.corn = reservationsResult.data.data
-          .filter(
-            (item) =>
-              item.crop_type.toLowerCase() === "mais" ||
-              item.crop_type.toLowerCase() === "corn"
-          )
-          .reduce((total, item) => total + (item.quantity || 0), 0);
-
-        setCards((prev) => ({
-          ...prev,
-          rice: reservationsResult.data.data
-            .filter(
-              (item) =>
-                item.crop_type.toLowerCase() === "rice" ||
-                item.crop_type.toLowerCase() === "palay"
-            )
-            .reduce((total, item) => total + (item.quantity || 0), 0),
-        }));
-        cache.rice = reservationsResult.data.data
-          .filter(
-            (item) =>
-              item.crop_type.toLowerCase() === "rice" ||
-              item.crop_type.toLowerCase() === "palay"
-          )
-          .reduce((total, item) => total + (item.quantity || 0), 0);
+        cache.pie = pieChart(reservationsResult.data.data);
 
         setCards((prev) => ({
           ...prev,
@@ -686,26 +747,7 @@ function Home() {
               title="Yearly Report"
             />
 
-            <div className="w-full max-w-xs mb-3">
-              <select
-                value={pieFilter}
-                onChange={(e) => setPieFilter(e.target.value)}
-                className="w-full p-2 border border-green-300 rounded-lg bg-white text-green-700 focus:ring-2 focus:ring-green-400 focus:outline-none"
-              >
-                <option value="all">All Months</option>
-
-                {MONTHS.map((m, index) => (
-                  <option key={index} value={index}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-            </div>
-              <ReportPie
-                data={getFilteredPieData()}
-                title="Reserved Crop Types (Cavans)"
-              />
-
+            <ReportPie data={cards.pie} title="Reserved Crop Types (Cavans)" />
           </div>
         )}
       </div>

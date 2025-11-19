@@ -327,38 +327,40 @@ export default function Dryer() {
 
           {localStorage.getItem("role") !== "farmer" && (
             <div className="flex flex-col gap-2 bg-white p-4 rounded-lg shadow-sm   hover:bg-gray-100 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-gray-700">Operation Status:</span>
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                  data.is_operation
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {data.is_operation ? "Operational" : "Not Operational"}
-              </span>
-            </div>
-          
-            {!data.is_operation && data.operation_reason && (
-              <div className="mt-2 bg-red-50 border-l-4 border-red-400 p-3 rounded-md">
-                <span className="font-medium text-red-700">Reason:</span>{" "}
-                <span className="text-red-600">{data.operation_reason}</span>
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-gray-700">
+                  Operation Status:
+                </span>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                    data.is_operation
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {data.is_operation ? "Operational" : "Not Operational"}
+                </span>
               </div>
-            )}
-          </div>
-          
+
+              {!data.is_operation && data.operation_reason && (
+                <div className="mt-2 bg-red-50 border-l-4 border-red-400 p-3 rounded-md">
+                  <span className="font-medium text-red-700">Reason:</span>{" "}
+                  <span className="text-red-600">{data.operation_reason}</span>
+                </div>
+              )}
+            </div>
           )}
 
-          {data.available_capacity > 0 &&
-            data.owner !== localStorage.getItem("full_name") && (
+          {(data.available_capacity > 0 &&
+            data.owner !== localStorage.getItem("full_name")) ||
+            (localStorage.getItem("role") !== "admin" && (
               <Button
                 className="w-full bg-green-500 text-white py-3 rounded-full hover:bg-green-600 mt-4"
                 onClick={() => setModalAdd(true)}
               >
                 Reserve
               </Button>
-            )}
+            ))}
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
