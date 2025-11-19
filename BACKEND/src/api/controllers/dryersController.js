@@ -31,7 +31,7 @@ export const getOwned = async (req, res) => {
 };
 
 export const getDryers = async (req, res) => {
-  const { limit, offset } = req.query;
+  const { limit, offset, role } = req.query;
 
   try {
     let query = supabase
@@ -40,13 +40,18 @@ export const getDryers = async (req, res) => {
         "id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id, created_at, is_operation, operation_reason",
         { count: "exact" }
       )
-      // .eq("is_operation", true) 
       .order("created_at", { ascending: false });
 
     if (typeof limit !== "undefined" && typeof offset !== "undefined") {
       const start = Number(offset);
       const end = start + Number(limit) - 1;
       query = query.range(start, end);
+    }
+
+    if (typeof role !== "undefined") {
+      if (role === "farmer") {
+        query = query.eq("is_operation", true) 
+      } 
     }
 
     const { data, count, error } = await query;

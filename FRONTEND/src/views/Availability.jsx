@@ -14,7 +14,7 @@ function Availability() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState(false);
-  const [filter, setFilter] = useState({ status: "all", location: "all" });
+  const [filter, setFilter] = useState({ status: "all", location: "all", is_operation: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const { addresses } = useAddresses();
@@ -45,14 +45,14 @@ function Availability() {
     "Registered Dryer",
     "Location (Sablayan)",
     "Date Created",
-    "In Operation",
-    "Status",
+    "Operation Status",
+    "Reservation Status",
   ];
-  const tableDataCell = ["dryer_name", "location", "created_at","is_operation", "status"];
+  const tableDataCell = ["dryer_name", "location", "created_at", "is_operation", "status"];
 
   const fields = [
     {
-      label: "Status",
+      label: "Reservation Status",
       type: "select",
       name: "status",
       options: [
@@ -72,6 +72,18 @@ function Availability() {
         ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
       ],
       defaultValue: filter.location,
+      colspan: 2,
+    },
+    {
+      label: "Operation Status",
+      type: "select",
+      name: "is_operation",
+      options: [
+        { value: "all", phrase: "All" },
+        { value: "yes", phrase: "Yes" },
+        { value: "no", phrase: "No" },
+      ],
+      defaultValue: filter.is_operation,
       colspan: 2,
     },
   ];
@@ -99,7 +111,7 @@ function Availability() {
             dryer_name: res.dryer_name,
             location: res.location,
             status: res.available_capacity > 0 ? "available" : "occupied",
-            is_operation: res.is_operation ? "Yes" : "No",
+            is_operation: res.is_operation ? "Yes" : `No - ${res.operation_reason ?? "Maintenance"}`,
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",
@@ -135,6 +147,7 @@ function Availability() {
             dryer_name: res.dryer_name,
             location: res.location,
             status: res.available_capacity > 0 ? "available" : "occupied",
+            is_operation: res.is_operation ? "Yes" : `No - ${res.operation_reason ?? "Maintenance"}`,
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",
@@ -180,6 +193,13 @@ function Availability() {
         .includes(String(filter.location).toLowerCase())
       : true;
 
+    const filterByOperation =
+      filter.is_operation && filter.is_operation !== "all"
+      ? info.is_operation
+        .toLowerCase()
+        .includes(String(filter.is_operation).toLowerCase())
+      : true;
+
     const filterBySearch = search
       ? Object.entries(info)
           .filter(([key]) => key !== "status")
@@ -188,7 +208,7 @@ function Availability() {
           )
       : true;
 
-    return filterByStatus && filterByLocation && filterBySearch;
+    return filterByStatus && filterByLocation && filterByOperation && filterBySearch;
   });
 
   const currentPageSafe = Math.min(currentPage, totalPages);

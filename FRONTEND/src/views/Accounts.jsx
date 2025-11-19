@@ -20,7 +20,7 @@ function Accounts() {
   const [isError, setIsError] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
   const [modalAdd, setModalAdd] = useState(false);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState({ role: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -48,11 +48,12 @@ function Accounts() {
       type: "select",
       name: "role",
       options: [
-        { value: "all" },
-        { value: "admin" },
-        { value: "owner" },
-        { value: "farmer" },
+        { value: "all", phrase: "all" },
+        { value: "admin", phrase: "admin" },
+        { value: "owner", phrase: "owner" },
+        { value: "farmer", phrase: "farmer" },
       ],
+      defaultValue: filter.role,
       colspan: 2,
     },
   ];
@@ -62,7 +63,7 @@ function Accounts() {
     setLoading(true);
     try {
       const data = Object.fromEntries(new FormData(e.target).entries());
-      setFilter(data.role);
+      setFilter((prev) => ({ ...prev, ...data }));
       setModalFilter(false);
     } catch (error) {
       console.log(error);
@@ -244,19 +245,20 @@ function Accounts() {
   }, [fetchData]);
 
   const FilteredData = data.filter((info) => {
-    const filterByFilters =
-      filter && filter !== "all"
-        ? info.role.toLowerCase().includes(filter.toLowerCase())
+    const filterByRole =
+      filter.role && filter.role !== "all"
+        ? info.role.toLowerCase() === filter.role.toLowerCase()
         : true;
 
     const filterBySearch = search
       ? Object.entries(info)
-          .filter(([key]) => key !== "role")
+          .filter(([key]) => key !== "status" && key !== "location" && key !== "action")
           .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;
-    return filterByFilters && filterBySearch;
+
+    return filterByRole && filterBySearch;
   });
 
   const currentPageSafe = Math.min(currentPage, totalPages);

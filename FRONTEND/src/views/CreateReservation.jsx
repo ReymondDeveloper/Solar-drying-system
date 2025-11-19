@@ -154,6 +154,7 @@ function CreateReservation() {
         params: {
           limit: limit,
           offset: currentPage * limit - limit,
+          role: localStorage.getItem("role"),
         },
       });
 
