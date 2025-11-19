@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
 import Search from "../component/Search";
 import Modal from "../component/Modal";
 import Loading from "../component/Loading";
+import Button from "../component/Button";
 import api from "../api/api";
 
 function Availability() {
@@ -14,10 +16,15 @@ function Availability() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState(false);
-  const [filter, setFilter] = useState({ status: "all", location: "all", is_operation: "all" });
+  const [filter, setFilter] = useState({
+    status: "all",
+    location: "all",
+    is_operation: "all",
+  });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const { addresses } = useAddresses();
+  const navigate = useNavigate();
 
   function useAddresses() {
     const [addresses, setAddresses] = useState([]);
@@ -40,15 +47,23 @@ function Availability() {
 
     return { addresses, loading };
   }
-  
+
   const tableHeadings = [
     "Registered Dryer",
     "Location (Sablayan)",
     "Date Created",
     "Operation Status",
     "Reservation Status",
+    "Action",
   ];
-  const tableDataCell = ["dryer_name", "location", "created_at", "is_operation", "status"];
+  const tableDataCell = [
+    "dryer_name",
+    "location",
+    "created_at",
+    "is_operation",
+    "status",
+    "action",
+  ];
 
   const fields = [
     {
@@ -111,7 +126,9 @@ function Availability() {
             dryer_name: res.dryer_name,
             location: res.location,
             status: res.available_capacity > 0 ? "available" : "occupied",
-            is_operation: res.is_operation ? "Yes" : `No - ${res.operation_reason ?? "Maintenance"}`,
+            is_operation: res.is_operation
+              ? "Yes"
+              : `No - ${res.operation_reason ?? "Maintenance"}`,
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",
@@ -119,6 +136,14 @@ function Availability() {
                   day: "numeric",
                 })
               : "N/A",
+            action: (
+              <Button
+                onClick={() => navigate("/home/create-reservation/" + res.id)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
+              >
+                View
+              </Button>
+            ),
           }))
         : []
     );
@@ -147,7 +172,9 @@ function Availability() {
             dryer_name: res.dryer_name,
             location: res.location,
             status: res.available_capacity > 0 ? "available" : "occupied",
-            is_operation: res.is_operation ? "Yes" : `No - ${res.operation_reason ?? "Maintenance"}`,
+            is_operation: res.is_operation
+              ? "Yes"
+              : `No - ${res.operation_reason ?? "Maintenance"}`,
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",
@@ -155,6 +182,14 @@ function Availability() {
                   day: "numeric",
                 })
               : "N/A",
+            action: (
+              <Button
+                onClick={() => navigate("/home/create-reservation/" + res.id)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
+              >
+                View
+              </Button>
+            ),
           }))
         );
         localStorage.setItem(
@@ -188,17 +223,17 @@ function Availability() {
 
     const filterByLocation =
       filter.location && filter.location !== "all"
-      ? info.location
-        .toLowerCase()
-        .includes(String(filter.location).toLowerCase())
-      : true;
+        ? info.location
+            .toLowerCase()
+            .includes(String(filter.location).toLowerCase())
+        : true;
 
     const filterByOperation =
       filter.is_operation && filter.is_operation !== "all"
-      ? info.is_operation
-        .toLowerCase()
-        .includes(String(filter.is_operation).toLowerCase())
-      : true;
+        ? info.is_operation
+            .toLowerCase()
+            .includes(String(filter.is_operation).toLowerCase())
+        : true;
 
     const filterBySearch = search
       ? Object.entries(info)
@@ -208,7 +243,9 @@ function Availability() {
           )
       : true;
 
-    return filterByStatus && filterByLocation && filterByOperation && filterBySearch;
+    return (
+      filterByStatus && filterByLocation && filterByOperation && filterBySearch
+    );
   });
 
   const currentPageSafe = Math.min(currentPage, totalPages);

@@ -95,11 +95,34 @@ function Accounts() {
       colspan: 1,
     },
     {
+      label: "Mobile Number",
+      type: "text",
+      name: "mobile_number",
+      required: true,
+      colspan: 1,
+      onchange: (e) => {
+        let newValue = e.target.value.replace(/\D/g, "");
+
+        if (newValue.startsWith("0")) {
+          newValue = "+63" + newValue.slice(1);
+        } else if (newValue.startsWith("63")) {
+          newValue = "+" + newValue;
+        } else if (!newValue.startsWith("+63") && newValue.length > 0) {
+          newValue = "+63" + newValue;
+        }
+
+        if (newValue.length > 13) {
+          newValue = newValue.slice(0, 13);
+        }
+        e.target.value = newValue;
+      },
+    },
+    {
       label: "Email address",
       type: "email",
       name: "email",
       required: true,
-      colspan: 1,
+      colspan: 2,
     },
     {
       label: "Address",
@@ -112,7 +135,11 @@ function Accounts() {
       label: "Role",
       type: "select",
       name: "role",
-      options: [{ value: "owner" }, { value: "farmer" }, { value: "admin" }],
+      options: [
+        { value: "owner", phrase: "Owner" },
+        { value: "farmer", phrase: "Farmer" },
+        { value: "admin", phrase: "Admin" },
+      ],
       colspan: 2,
     },
     {
@@ -138,6 +165,7 @@ function Accounts() {
       email,
       role,
       password,
+      mobile_number,
     } = Object.fromEntries(formData.entries());
     try {
       const res = await api.post(`${import.meta.env.VITE_API}/users/register`, {
@@ -148,6 +176,7 @@ function Accounts() {
         email,
         password,
         role,
+        mobile_number,
       });
       toast.success(res.data.message);
 
@@ -252,7 +281,10 @@ function Accounts() {
 
     const filterBySearch = search
       ? Object.entries(info)
-          .filter(([key]) => key !== "status" && key !== "location" && key !== "action")
+          .filter(
+            ([key]) =>
+              key !== "status" && key !== "location" && key !== "action"
+          )
           .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )

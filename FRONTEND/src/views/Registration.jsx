@@ -41,11 +41,34 @@ function Registration() {
       colspan: 1,
     },
     {
+      label: "Mobile Number",
+      type: "text",
+      name: "mobile_number",
+      required: true,
+      colspan: 1,
+      onchange: (e) => {
+        let newValue = e.target.value.replace(/\D/g, "");
+
+        if (newValue.startsWith("0")) {
+          newValue = "+63" + newValue.slice(1);
+        } else if (newValue.startsWith("63")) {
+          newValue = "+" + newValue;
+        } else if (!newValue.startsWith("+63") && newValue.length > 0) {
+          newValue = "+63" + newValue;
+        }
+
+        if (newValue.length > 13) {
+          newValue = newValue.slice(0, 13);
+        }
+        e.target.value = newValue;
+      },
+    },
+    {
       label: "Email address",
       type: "email",
       name: "email",
       required: true,
-      colspan: 1,
+      colspan: 2,
     },
     {
       label: "Address",
@@ -84,6 +107,7 @@ function Registration() {
       email,
       role,
       password,
+      mobile_number,
     } = Object.fromEntries(formData.entries());
     try {
       const res = await axios.post(
@@ -96,6 +120,7 @@ function Registration() {
           email,
           password,
           role,
+          mobile_number,
         }
       );
       toast.success(res.data.message);
@@ -234,6 +259,7 @@ function Registration() {
                         required={data.required}
                         minLength={data.minLength}
                         maxLength={data.maxLength}
+                        onChange={data.onchange}
                       />
                     )}
                   </div>
