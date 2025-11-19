@@ -103,7 +103,7 @@ function DryerInformation() {
         { value: "true", phrase: "Operational" },
         { value: "false", phrase: "Not Operational" },
       ],
-      onChange: (e) => setIsOperational(e.target.value === "true"),
+      onChange: (e) => setIsOperational(e.target.value),
     },
     !isOperational && {
       label: "Reason for Not Operational",
@@ -114,7 +114,7 @@ function DryerInformation() {
     },
     { label: "Dryer Image", type: "file", name: "dryer_image", },
     { label: "QR Code", type: "file", name: "qr_code" },
-  ].filter(Boolean);
+  ];
 
   const handleSubmitAdd = async (e) => {
     e.preventDefault();
@@ -224,7 +224,7 @@ function DryerInformation() {
             action: (
               <div className="flex justify-center gap-2">
                 <Button
-                  onClick={() => handleEdit(res)}
+                  onClick={() => (handleEdit(res), setIsOperational(res.is_operation))}
                   className="bg-blue-400 hover:bg-blue-500 text-white"
                 >
                   Edit
