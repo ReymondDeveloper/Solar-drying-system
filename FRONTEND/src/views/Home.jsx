@@ -81,9 +81,9 @@ function ReportChart({ data, title }) {
 
 function ReportPie({ data, title }) {
   const COLORS = ["#FF6384", "#36A2EB", "#FFCE56", "#4bc04fff"];
-
   return (
   <div className="col-span-1 sm:col-span-2 lg:col-span-3 w-full text-center text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl p-5">
+      
     <h3 className="text-lg font-bold mb-4 text-start">{title}</h3>
       {data && data.length > 0 ? (
         <ResponsiveContainer width="100%" height={400}>
@@ -123,7 +123,11 @@ function Home() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [cards, setCards] = useState([]);
-
+  const [pieFilter, setPieFilter] = useState("all");
+  const MONTHS = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
@@ -146,6 +150,32 @@ function Home() {
     checkAuth();
   }, [navigate]);
 
+  const getFilteredPieData = () => {
+    if (!cards || !cards.monthly_reservation) return [];
+    if (pieFilter === "all") {
+      return [
+        { name: "Mais", value: cards.corn || 0 },
+        { name: "Palay", value: cards.rice || 0 }
+      ];
+    }
+  
+    const selectedMonth = parseInt(pieFilter);
+    const monthData = cards.monthly_reservation.filter((item) => {
+      const date = new Date(item.date);
+      return date.getMonth() === selectedMonth;
+    });
+  
+    const monthCorn = monthData.reduce(
+      (sum, i) => sum + (i.reservations || 0),
+      0
+    );
+  
+    return [
+      { name: "Mais", value: monthCorn },
+      { name: "Palay", value: cards.rice || 0 }
+    ];
+  };
+  
   const fetchData = useCallback(async () => {
     const data = JSON.parse(localStorage.getItem("home_data"));
 
@@ -656,17 +686,26 @@ function Home() {
               title="Yearly Report"
             />
 
-            <ReportPie
-              data={
-                cards.corn !== undefined && cards.rice !== undefined
-                  ? [
-                      { name: "Mais", value: cards.corn },
-                      { name: "Palay", value: cards.rice },
-                    ]
-                  : []
-              }
-              title="Reserved Crop Types (Cavans)"
-            />
+            <div className="w-full max-w-xs mb-3">
+              <select
+                value={pieFilter}
+                onChange={(e) => setPieFilter(e.target.value)}
+                className="w-full p-2 border border-green-300 rounded-lg bg-white text-green-700 focus:ring-2 focus:ring-green-400 focus:outline-none"
+              >
+                <option value="all">All Months</option>
+
+                {MONTHS.map((m, index) => (
+                  <option key={index} value={index}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+            </div>
+              <ReportPie
+                data={getFilteredPieData()}
+                title="Reserved Crop Types (Cavans)"
+              />
+
           </div>
         )}
       </div>
