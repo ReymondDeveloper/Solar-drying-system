@@ -104,19 +104,17 @@ function ReportPie({ data = [], title }) {
       ? safeData
       : [safeData[Number(pieFilter)]].filter(Boolean);
 
-  const MIN_SLICE_VALUE = 0.0001;
-
   const pieChartData =
     filteredData.length > 0
       ? filteredData
           .map(({ rice, corn }) => [
-            { name: "Rice", value: rice === 0 ? MIN_SLICE_VALUE : rice },
-            { name: "Corn", value: corn === 0 ? MIN_SLICE_VALUE : corn },
+            { name: "Rice", value: rice },
+            { name: "Corn", value: corn },
           ])
           .flat()
       : [
-          { name: "Rice", value: MIN_SLICE_VALUE },
-          { name: "Corn", value: MIN_SLICE_VALUE },
+          { name: "Rice", value: 0 },
+          { name: "Corn", value: 0 },
         ];
 
   return (
@@ -137,8 +135,7 @@ function ReportPie({ data = [], title }) {
           ))}
         </select>
       </div>
-
-      {pieChartData.length > 0 ? (
+      {pieChartData.length > 0 && ((pieChartData[0].value !== 0 && pieChartData[1].value !== 0) || !pieChartData.every(item => item.value === 0)) ? (
         <ResponsiveContainer width="100%" height={400}>
           <PieChart>
             <Pie
@@ -149,10 +146,10 @@ function ReportPie({ data = [], title }) {
               cy="50%"
               outerRadius="80%"
               label={({ name, value }) => {
-                return `${name}: ${value === MIN_SLICE_VALUE ? 0 : value}`;
+                return `${name}: ${value}`;
               }}
             >
-              {pieChartData.map((entry, index) => (
+              {pieChartData.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={COLORS[index % COLORS.length]}
@@ -200,32 +197,6 @@ function Home() {
     checkAuth();
   }, [navigate]);
 
-  const getFilteredPieData = () => {
-    if (!cards || !cards.monthly_reservation) return [];
-    if (pieFilter === "all") {
-      return [
-        { name: "Mais", value: cards.corn || 0 },
-        { name: "Palay", value: cards.rice || 0 },
-      ];
-    }
-
-    const selectedMonth = parseInt(pieFilter);
-    const monthData = cards.monthly_reservation.filter((item) => {
-      const date = new Date(item.date);
-      return date.getMonth() === selectedMonth;
-    });
-
-    const monthCorn = monthData.reduce(
-      (sum, i) => sum + (i.reservations || 0),
-      0
-    );
-
-    return [
-      { name: "Mais", value: monthCorn },
-      { name: "Palay", value: cards.rice || 0 },
-    ];
-  };
-
   const fetchData = useCallback(async () => {
     const data = JSON.parse(localStorage.getItem("home_data"));
 
@@ -236,8 +207,7 @@ function Home() {
           pending: data.pending ?? 0,
           dryers: data.dryers ?? 0,
           completed: data.completed ?? 0,
-          corn: data.corn ?? 0,
-          rice: data.rice ?? 0,
+          pie: data.pie ?? 0,
           monthly_reservation: data.monthly_reservation ?? 0,
           yearly_reservation: data.yearly_reservation ?? 0,
         }))
@@ -297,7 +267,7 @@ function Home() {
     };
 
     function pieChart(data) {
-      const cropMap = { rice: "rice", mais: "corn" };
+      const cropMap = { rice: "rice", corn: "corn", palay: "rice", mais: "corn" };
 
       const monthsOrder = [
         "January",
@@ -319,12 +289,21 @@ function Home() {
         monthlyTotals[month] = { rice: 0, corn: 0 };
       });
 
-      data.forEach(({ quantity, crop_type, created_at }) => {
+      (data.quantity || data[0].quantity) && data.forEach(({ quantity, crop_type, created_at }) => {
         const date = new Date(created_at);
         const month = date.toLocaleString("default", { month: "long" });
         const crop = cropMap[crop_type.toLowerCase()];
         if (crop && monthlyTotals[month]) {
           monthlyTotals[month][crop] += quantity;
+        }
+      });
+      
+      (data.crop_type_id || data[0].crop_type_id) && data.forEach(({ crop_type_id }) => {
+        const date = new Date(crop_type_id.created_at);
+        const month = date.toLocaleString("default", { month: "long" });
+        const crop = cropMap[crop_type_id.crop_type_name.toLowerCase()];
+        if (crop && monthlyTotals[month]) {
+          monthlyTotals[month][crop] += crop_type_id.quantity;
         }
       });
 
@@ -365,51 +344,9 @@ function Home() {
 
         setCards((prev) => ({
           ...prev,
-          corn: result.data
-            .filter(
-              (item) =>
-                item.crop_type_id.crop_type_name.toLowerCase() === "mais" ||
-                item.crop_type_id.crop_type_name.toLowerCase() === "corn"
-            )
-            .reduce(
-              (total, item) => total + (item.crop_type_id?.quantity || 0),
-              0
-            ),
+          pie: pieChart(result.data),
         }));
-        cache.corn = result.data
-          .filter(
-            (item) =>
-              item.crop_type_id.crop_type_name.toLowerCase() === "mais" ||
-              item.crop_type_id.crop_type_name.toLowerCase() === "corn"
-          )
-          .reduce(
-            (total, item) => total + (item.crop_type_id?.quantity || 0),
-            0
-          );
-
-        setCards((prev) => ({
-          ...prev,
-          rice: result.data
-            .filter(
-              (item) =>
-                item.crop_type_id.crop_type_name.toLowerCase() === "rice" ||
-                item.crop_type_id.crop_type_name.toLowerCase() === "palay"
-            )
-            .reduce(
-              (total, item) => total + (item.crop_type_id?.quantity || 0),
-              0
-            ),
-        }));
-        cache.rice = result.data
-          .filter(
-            (item) =>
-              item.crop_type_id.crop_type_name.toLowerCase() === "rice" ||
-              item.crop_type_id.crop_type_name.toLowerCase() === "palay"
-          )
-          .reduce(
-            (total, item) => total + (item.crop_type_id?.quantity || 0),
-            0
-          );
+        cache.pie = pieChart(result.data);
 
         setCards((prev) => ({
           ...prev,
@@ -470,51 +407,9 @@ function Home() {
 
         setCards((prev) => ({
           ...prev,
-          corn: result.data
-            .filter(
-              (item) =>
-                item.crop_type_id.crop_type_name.toLowerCase() === "mais" ||
-                item.crop_type_id.crop_type_name.toLowerCase() === "corn"
-            )
-            .reduce(
-              (total, item) => total + (item.crop_type_id?.quantity || 0),
-              0
-            ),
+          pie: pieChart(result.data),
         }));
-        cache.corn = result.data
-          .filter(
-            (item) =>
-              item.crop_type_id.crop_type_name.toLowerCase() === "mais" ||
-              item.crop_type_id.crop_type_name.toLowerCase() === "corn"
-          )
-          .reduce(
-            (total, item) => total + (item.crop_type_id?.quantity || 0),
-            0
-          );
-
-        setCards((prev) => ({
-          ...prev,
-          rice: result.data
-            .filter(
-              (item) =>
-                item.crop_type_id.crop_type_name.toLowerCase() === "rice" ||
-                item.crop_type_id.crop_type_name.toLowerCase() === "palay"
-            )
-            .reduce(
-              (total, item) => total + (item.crop_type_id?.quantity || 0),
-              0
-            ),
-        }));
-        cache.rice = result.data
-          .filter(
-            (item) =>
-              item.crop_type_id.crop_type_name.toLowerCase() === "rice" ||
-              item.crop_type_id.crop_type_name.toLowerCase() === "palay"
-          )
-          .reduce(
-            (total, item) => total + (item.crop_type_id?.quantity || 0),
-            0
-          );
+        cache.pie = pieChart(result.data);
 
         setCards((prev) => ({
           ...prev,
@@ -653,17 +548,7 @@ function Home() {
               title="Yearly Report"
             />
 
-            <ReportPie
-              data={
-                cards.corn !== undefined && cards.rice !== undefined
-                  ? [
-                      { name: "Mais", value: cards.corn },
-                      { name: "Palay", value: cards.rice },
-                    ]
-                  : []
-              }
-              title="Reserved Crop Types (Cavans)"
-            />
+            <ReportPie data={cards.pie} title="Reserved Crop Types (Cavans)" />
           </div>
         ) : localStorage.getItem("role") === "farmer" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -723,17 +608,7 @@ function Home() {
 
             <ReportChart data={cards.yearly_reservation} title="Taonang Ulat" />
 
-            <ReportPie
-              data={
-                cards.corn !== undefined && cards.rice !== undefined
-                  ? [
-                      { name: "Mais", value: cards.corn },
-                      { name: "Palay", value: cards.rice },
-                    ]
-                  : []
-              }
-              title="Kaban Ng Mga Naka Reserbang Pananim"
-            />
+            <ReportPie data={cards.pie} title="Kaban Ng Mga Naka Reserbang Pananim" />
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
