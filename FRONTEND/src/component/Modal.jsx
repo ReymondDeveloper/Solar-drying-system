@@ -190,12 +190,12 @@ function Modal({
     return `${year}-${month}-${day}`;
   }
 
-  function normalizeDate(date) {
-    if (!(date instanceof Date)) {
-      date = new Date(date);
-    }
-    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  }
+  // function normalizeDate(date) {
+  //   if (!(date instanceof Date)) {
+  //     date = new Date(date);
+  //   }
+  //   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  // }
 
   return (
     <div
@@ -300,6 +300,101 @@ function Modal({
                       }
                     })()}
                   </select>
+                </>
+              ) : field.name === "business_permit" ? (
+                <>
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                    {field.label}
+                  </label>
+                  <div className="flex flex-col gap-3">
+                    <input
+                      type={field.type}
+                      name={field.name}
+                      accept="application/pdf"
+                      className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const localPreview = URL.createObjectURL(file);
+
+                        setPreviewUrls((prev) => ({
+                          ...prev,
+                          [field.name]: localPreview,
+                        }));
+
+                        const formData = new FormData();
+                        formData.append("file", file);
+
+                        try {
+                          const res = await api.post("/upload", formData, {
+                            headers: {
+                              "Content-Type": "multipart/form-data",
+                            },
+                          });
+
+                          const data = await res.data;
+                          if (data.url) {
+                            setPreviewUrls((prev) => ({
+                              ...prev,
+                              [field.name]: data.url,
+                            }));
+
+                            URL.revokeObjectURL(localPreview);
+                          }
+                        } catch (err) {
+                          console.error("Image upload failed:", err);
+                        }
+                      }}
+                    />
+
+                    {previewUrls[field.name] ? (
+                      <>
+                        <input
+                          type="hidden"
+                          name={`pdf_${[field.name]}`}
+                          value={previewUrls[field.name]}
+                        />
+                        <div className="flex justify-center border rounded-lg p-4 bg-gray-50">
+                          <iframe
+                            src={
+                              previewUrls[field.name].startsWith("http") ||
+                              previewUrls[field.name].startsWith("blob:")
+                                ? previewUrls[field.name]
+                                : `${import.meta.env.VITE_API.replace(
+                                    "/api",
+                                    ""
+                                  )}${previewUrls[field.name]}`
+                            }
+                            alt="Preview"
+                            className="max-h-[400px] w-auto object-contain rounded-lg shadow-md"
+                          />
+                        </div>
+                      </>
+                    ) : field.defaultValue ? (
+                      <>
+                        <input
+                          type="hidden"
+                          name={`pdf_${[field.name]}`}
+                          value={field.defaultValue}
+                        />
+                        <div className="flex justify-center border rounded-lg p-4 bg-gray-50">
+                          <iframe
+                            src={
+                              field.defaultValue.startsWith("http") ||
+                              field.defaultValue.startsWith("blob:")
+                                ? field.defaultValue
+                                : `${import.meta.env.VITE_API.replace(
+                                    "/api",
+                                    ""
+                                  )}${field.defaultValue}`
+                            }
+                            alt="Preview"
+                            className="max-h-[400px] w-auto object-contain rounded-lg shadow-md"
+                          />
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
                 </>
               ) : field.type === "file" ? (
                 <>
@@ -478,26 +573,26 @@ function Modal({
                       setEndDate(end);
                     }}
                     minDate={new Date()}
-                    excludeDates={
-                      JSON.parse(localStorage.getItem("dryer_data"))
-                        ?.farmers.filter(
-                          ({ date_from, date_to, status }) =>
-                            (!date_to && status === "approved") ||
-                            (date_to === "" && status === "approved") ||
-                            (date_from === date_to && status === "approved")
-                        )
-                        .map(({ date_from }) =>
-                          normalizeDate(new Date(date_from))
-                        ) || []
-                    }
-                    excludeDateIntervals={
-                      JSON.parse(localStorage.getItem("dryer_data"))
-                        ?.farmers.filter(({ status }) => status === "approved")
-                        .map(({ date_from, date_to }) => ({
-                          start: normalizeDate(new Date(date_from)),
-                          end: normalizeDate(new Date(date_to)),
-                        })) || []
-                    }
+                    // excludeDates={
+                    //   JSON.parse(localStorage.getItem("dryer_data"))
+                    //     ?.farmers.filter(
+                    //       ({ date_from, date_to, status }) =>
+                    //         (!date_to && status === "approved") ||
+                    //         (date_to === "" && status === "approved") ||
+                    //         (date_from === date_to && status === "approved")
+                    //     )
+                    //     .map(({ date_from }) =>
+                    //       normalizeDate(new Date(date_from))
+                    //     ) || []
+                    // }
+                    // excludeDateIntervals={
+                    //   JSON.parse(localStorage.getItem("dryer_data"))
+                    //     ?.farmers.filter(({ status }) => status === "approved")
+                    //     .map(({ date_from, date_to }) => ({
+                    //       start: normalizeDate(new Date(date_from)),
+                    //       end: normalizeDate(new Date(date_to)),
+                    //     })) || []
+                    // }
                     className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 outline-0"
                     placeholderText={
                       userRole === "farmer"

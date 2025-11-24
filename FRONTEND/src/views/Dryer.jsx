@@ -246,7 +246,7 @@ export default function Dryer() {
           `A farmer successfully rate your dryer located on "${
             JSON.parse(localStorage.getItem("dryer_data")).location
           }" at ` + new Date().toLocaleString(),
-        url: "/home/booking-requests",
+        url: `/home/create-reservation/${id}`,
       });
 
       setFilledStars(new Array(5).fill(false));

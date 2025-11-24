@@ -61,7 +61,7 @@ function Reservations() {
       type: "select",
       name: "location",
       options: [
-        { value: "all", phrase: "Lahat" },
+        { value: "all", phrase: "All" },
         ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
       ],
       defaultValue: filter.location,
