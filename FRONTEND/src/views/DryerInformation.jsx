@@ -10,6 +10,7 @@ import Button from "../component/Button";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import api from "../api/api";
+import axios from "axios";
 
 function DryerInformation() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -94,26 +95,9 @@ function DryerInformation() {
       required: true,
     },
     { label: "Rate (PHP)", type: "number", name: "rate", required: true },
-    {
-      label: "Operation Status",
-      type: "select",
-      name: "is_operation",
-      required: true,
-      options: [
-        { value: "true", phrase: "Operational" },
-        { value: "false", phrase: "Not Operational" },
-      ],
-      onChange: (e) => setIsOperational(e.target.value),
-    },
-    !isOperational && {
-      label: "Reason for Not Operational",
-      type: "text",
-      name: "operation_reason",
-      required: true,
-      placeholder: "Provide reason why dryer is not operational",
-    },
-    { label: "Dryer Image", type: "file", name: "dryer_image", },
+    { label: "Dryer Image", type: "file", name: "image_url", },
     { label: "QR Code", type: "file", name: "qr_code" },
+    { label: "Business Permit", type: "file", name: "business_permit" },
   ];
 
   const handleSubmitAdd = async (e) => {
@@ -121,7 +105,6 @@ function DryerInformation() {
     setLoading(true);
 
     try {
-      const createdById = localStorage.getItem("id");
       const formData = new FormData(e.target);
       let dryerData = Object.fromEntries(formData.entries());
 
@@ -131,13 +114,30 @@ function DryerInformation() {
         maximum_capacity: dryerData.maximum_capacity,
         rate: dryerData.rate,
         image_url: dryerData.img_image_url,
-        created_by_id: createdById,
+        created_by_id: localStorage.getItem("id"),
         qr_code: dryerData.img_qr_code,
-        is_operation: dryerData.is_operation === "true",
-        operation_reason: dryerData.is_operation === "false" ? dryerData.operation_reason : null,
+        business_permit: dryerData.pdf_business_permit,
       });
 
       toast.success(res.data.message);
+
+      axios.post(`${import.meta.env.VITE_API}/notification`, {
+        user: "4c3f4aae-54e9-40a3-b14f-39638c4894a5",
+        context:
+          `A owner successfully created a new dryer located on "${
+            dryerData.location
+          }" at ` + new Date().toLocaleString(),
+        url: "/home/availability",
+      });
+
+      axios.post(`${import.meta.env.VITE_API}/notification`, {
+        user: localStorage.getItem("id"),
+        context:
+          `You've successfully created a new dryer located on "${
+            dryerData.location
+          }" at ` + new Date().toLocaleString(),
+        url: "/home/dryer-information",
+      });
 
       fetchData();
       setModalAdd(false);
@@ -192,9 +192,29 @@ function DryerInformation() {
         qr_code: updatedData.img_qr_code,
         is_operation: updatedData.is_operation === "true",
         operation_reason: updatedData.is_operation === "false" ? updatedData.operation_reason : null,
+        business_permit: updatedData.pdf_business_permit,
       });
 
       toast.success(res.data.message);
+
+      axios.post(`${import.meta.env.VITE_API}/notification`, {
+        user: "4c3f4aae-54e9-40a3-b14f-39638c4894a5",
+        context:
+          `A owner successfully updated dryer details of a dryer located on "${
+            updatedData.location
+          }" at ` + new Date().toLocaleString(),
+        url: "/home/availability",
+      });
+
+      axios.post(`${import.meta.env.VITE_API}/notification`, {
+        user: localStorage.getItem("id"),
+        context:
+          `You've successfully update dryer details of a dryer located on "${
+            updatedData.location
+          }" at ` + new Date().toLocaleString(),
+        url: "/home/dryer-information",
+      });
+
       fetchData();
       setModalEdit(false);
       setSelectedDryer(null);
@@ -374,6 +394,12 @@ function DryerInformation() {
       type: "file",
       name: "image_url",
       defaultValue: selectedDryer?.image_url,
+    },
+    {
+      label: "Business Permit",
+      type: "file",
+      name: "business_permit",
+      defaultValue: selectedDryer?.business_permit,
     },
   ].filter(Boolean);
 

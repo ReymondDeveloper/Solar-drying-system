@@ -139,6 +139,7 @@ export const createDryer = async (req, res) => {
       image_url,
       created_by_id,
       qr_code,
+      business_permit,
       is_operation = false,
       operation_reason = null,
     } = req.body;
@@ -157,6 +158,7 @@ export const createDryer = async (req, res) => {
           qr_code,
           is_operation,
           operation_reason,
+          business_permit,
         },
       ])
       .select()
@@ -185,7 +187,8 @@ export const updateDryer = async (req, res) => {
       image_url,
       qr_code,
       is_operation,
-      operation_reason = null, 
+      operation_reason = null,
+      business_permit,
     } = req.body;
 
     const { data: existingData, error: existingError } = await supabase
@@ -216,6 +219,7 @@ export const updateDryer = async (req, res) => {
         qr_code,
         is_operation,
         operation_reason,
+        business_permit,
       })
       .eq("id", id)
       .select()

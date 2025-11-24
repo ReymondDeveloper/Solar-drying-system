@@ -203,7 +203,7 @@ function Availability() {
     } finally {
       setIsLoading(false);
     }
-  }, [limit, currentPage]);
+  }, [navigate, limit, currentPage]);
 
   useEffect(() => {
     fetchData();
