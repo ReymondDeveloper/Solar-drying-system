@@ -351,16 +351,14 @@ export default function Dryer() {
             </div>
           )}
 
-          {(data.available_capacity > 0 &&
-            data.owner !== localStorage.getItem("full_name")) ||
-            (localStorage.getItem("role") !== "admin" && (
-              <Button
-                className="w-full bg-green-500 text-white py-3 rounded-full hover:bg-green-600 mt-4"
-                onClick={() => setModalAdd(true)}
-              >
-                Reserve
-              </Button>
-            ))}
+          { data.available_capacity > 0 && data.owner !== localStorage.getItem("full_name") && localStorage.getItem("role") !== "admin" && (
+            <Button
+              className="w-full bg-green-500 text-white py-3 rounded-full hover:bg-green-600 mt-4"
+              onClick={() => setModalAdd(true)}
+            >
+              Reserve
+            </Button>
+          )}
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
