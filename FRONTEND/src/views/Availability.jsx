@@ -237,7 +237,7 @@ function Availability() {
 
     const filterBySearch = search
       ? Object.entries(info)
-          .filter(([key]) => key !== "status")
+          .filter(([key]) => key !== "action" && key !== "status" && key !== "location" && key !== "is_operation")
           .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
