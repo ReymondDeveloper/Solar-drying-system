@@ -281,10 +281,7 @@ function Accounts() {
 
     const filterBySearch = search
       ? Object.entries(info)
-          .filter(
-            ([key]) =>
-              key !== "status" && key !== "location" && key !== "action"
-          )
+          .filter(([key]) => key !== "role")
           .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )

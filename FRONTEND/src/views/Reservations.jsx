@@ -14,7 +14,7 @@ function Reservations() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState(false);
-  const [filter, setFilter] = useState({ location: "all" });
+  const [filter, setFilter] = useState({ status: "all", location: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const tableHeadings = [
@@ -22,13 +22,16 @@ function Reservations() {
     "Dryers",
     "Location",
     "Date Created",
+    "Status",
     "Duration",
   ];
+
   const tableDataCell = [
     "farmer_name",
     "dryer_name",
     "location",
     "created_at",
+    "status",
     "duration",
   ];
   const { addresses } = useAddresses();
@@ -67,6 +70,20 @@ function Reservations() {
       defaultValue: filter.location,
       colspan: 2,
     },
+    {
+      label: "Status",
+      type: "select",
+      name: "status",
+      options: [
+        { value: "all", phrase: "All" },
+        { value: "pending", phrase: "Pending" },
+        { value: "approved", phrase: "Approved" },
+        { value: "denied", phrase: "Denied" },
+        { value: "completed", phrase: "Completed" },
+      ],
+      defaultValue: filter.status,
+      colspan: 2,
+    },
   ];
 
   const handleSubmit = (e) => {
@@ -99,6 +116,7 @@ function Reservations() {
                   day: "numeric",
                 })
               : "N/A",
+            status: res.status || "pending",
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
           }))
         : []
@@ -135,6 +153,7 @@ function Reservations() {
                   day: "numeric",
                 })
               : "N/A",
+            status: res.status || "pending",
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
           }))
         );
@@ -161,6 +180,9 @@ function Reservations() {
     return () => clearInterval(interval);
   }, [fetchData]);
 
+ 
+      
+
   const FilteredData = data.filter((info) => {
     const filterByLocation =
       filter.location && filter.location !== "all"
@@ -169,15 +191,21 @@ function Reservations() {
         .includes(String(filter.location).toLowerCase())
       : true;
 
+    const filterByStatus =
+      filter.status && filter.status !== "all"
+      ? info.status
+        .toLowerCase() === filter.status.toLowerCase()
+      : true;
+
     const filterBySearch = search
       ? Object.entries(info)
-          .filter(([key]) => key !== "location")
+          .filter(([key]) => key !== "location" && key !== "status")
           .some(([, value]) =>
             String(value).toLowerCase().includes(search.toLowerCase())
           )
       : true;
 
-    return filterByLocation && filterBySearch;
+    return filterByStatus &&filterByLocation && filterBySearch;
   });
 
   const currentPageSafe = Math.min(currentPage, totalPages);
