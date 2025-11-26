@@ -54,7 +54,7 @@ function BookingRequests() {
     "Farmer Name",
     "Dryer Location",
     "Crop Type",
-    "Quantity (Cavans)",
+    "Quantity (Cavan)",
     "Date Created",
     "Duration",
     "Status",

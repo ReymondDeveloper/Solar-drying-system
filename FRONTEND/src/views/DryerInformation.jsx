@@ -32,8 +32,8 @@ function DryerInformation() {
   const tableHeadings = [
     "Dryer Name",
     "Location (Sablayan)",
-    "Capacity (Cavans)",
-    "Available Capacity (Cavans)",
+    "Capacity (Cavan)",
+    "Available Capacity (Cavan)",
     "Rate",
     "Operation Status",
     "Date Created",
@@ -89,7 +89,7 @@ function DryerInformation() {
       options: addresses.map((a) => ({ value: a.name, phrase: a.name })),
     },
     {
-      label: "Maximum Capacity (Cavans)",
+      label: "Maximum Capacity (Cavan)",
       type: "number",
       name: "maximum_capacity",
       required: true,
@@ -350,7 +350,7 @@ function DryerInformation() {
       defaultValue: selectedDryer?.location,
     },
     {
-      label: "Capacity (Cavans)",
+      label: "Capacity (Cavan)",
       type: "number",
       name: "maximum_capacity",
       required: true,

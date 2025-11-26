@@ -138,11 +138,6 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                     ) : (
                       el[dataCell]
                     )
-                  ) : dataCell === "available_capacity" ||
-                    dataCell === "maximum_capacity" ? (
-                    <span className="text-center font-medium text-gray-700">
-                      {el[dataCell]} kg
-                    </span>
                   ) : dataCell === "location" || dataCell === "address" ? (
                     el[dataCell]?.length > 11 ? (
                       el[dataCell].slice(0, 11) + "..."

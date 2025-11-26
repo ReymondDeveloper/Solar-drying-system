@@ -50,8 +50,8 @@ function CreateReservation() {
       ? [
           "Rehistradong Patuyuan",
           "Lokasyon (Sablayan)",
-          "Kabuuang Kapasidad",
-          "Magagamit na Kapasidad",
+          "Kabuuang Kapasidad (Kaban)",
+          "Magagamit na Kapasidad (Kaban)",
           "Petsa ng Pagkakagawa",
           "Katayuan",
           "Aksyon",
@@ -59,8 +59,8 @@ function CreateReservation() {
       : [
           "Registered Dryer",
           "Location (Sablayan)",
-          "Maximum Capacity",
-          "Available Capacity",
+          "Maximum Capacity (Cavan)",
+          "Available Capacity (Cavan)",
           "Date Created",
           "Status",
           "Action",
