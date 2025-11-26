@@ -248,8 +248,8 @@ function Modal({
                 <>
                   <label className="text-[rgba(0,100,0,255)] font-bold text-md">
                     {userRole === "farmer"
-                      ? "Dami (Canvans)"
-                      : "Quantity (Canvans)"}
+                      ? "Dami (Canvan)"
+                      : "Quantity (Canvan)"}
                   </label>
                   <input
                     type="number"
@@ -744,7 +744,7 @@ function Modal({
                   </span>
                 </p>
                 <p>
-                  {userRole === "farmer" ? "Dami: " : "Quantity (Canvans): "}
+                  {userRole === "farmer" ? "Dami: " : "Quantity (Canvan): "}
                   <span className="capitalize font-bold">
                     {datas.crop_type_id.quantity}
                   </span>
