@@ -79,10 +79,15 @@ function SignIn() {
 
         toast.success(res.data.message);
         setTimeout(() => {
-          if (role === "admin") navigate("/home");
-          else if (role === "owner") navigate("/home");
-          else if (role === "farmer") navigate("/home");
-          else navigate("/home");
+          if (localStorage.getItem("redirect")) {
+            navigate(localStorage.getItem("redirect"));
+            localStorage.removeItem("redirect");
+          } else {
+            if (role === "admin") navigate("/home");
+            else if (role === "owner") navigate("/home");
+            else if (role === "farmer") navigate("/home");
+            else navigate("/home");
+          }
         }, 2000);
       }
     } catch (err) {
