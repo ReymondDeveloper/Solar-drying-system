@@ -135,7 +135,9 @@ function ReportPie({ data = [], title }) {
           ))}
         </select>
       </div>
-      {pieChartData.length > 0 && ((pieChartData[0].value !== 0 && pieChartData[1].value !== 0) || !pieChartData.every(item => item.value === 0)) ? (
+      {pieChartData.length > 0 &&
+      ((pieChartData[0].value !== 0 && pieChartData[1].value !== 0) ||
+        !pieChartData.every((item) => item.value === 0)) ? (
         <ResponsiveContainer width="100%" height={400}>
           <PieChart>
             <Pie
@@ -267,7 +269,12 @@ function Home() {
     };
 
     function pieChart(data) {
-      const cropMap = { rice: "rice", corn: "corn", palay: "rice", mais: "corn" };
+      const cropMap = {
+        rice: "rice",
+        corn: "corn",
+        palay: "rice",
+        mais: "corn",
+      };
 
       const monthsOrder = [
         "January",
@@ -289,23 +296,37 @@ function Home() {
         monthlyTotals[month] = { rice: 0, corn: 0 };
       });
 
-      (data.quantity || data[0].quantity) && data.forEach(({ quantity, crop_type, created_at }) => {
-        const date = new Date(created_at);
-        const month = date.toLocaleString("default", { month: "long" });
-        const crop = cropMap[crop_type.toLowerCase()];
-        if (crop && monthlyTotals[month]) {
-          monthlyTotals[month][crop] += quantity;
-        }
-      });
-      
-      (data.crop_type_id || data[0].crop_type_id) && data.forEach(({ crop_type_id }) => {
-        const date = new Date(crop_type_id.created_at);
-        const month = date.toLocaleString("default", { month: "long" });
-        const crop = cropMap[crop_type_id.crop_type_name.toLowerCase()];
-        if (crop && monthlyTotals[month]) {
-          monthlyTotals[month][crop] += crop_type_id.quantity;
-        }
-      });
+      // Guard against empty array
+      if (!data || data.length === 0) {
+        return monthsOrder.map((month) => ({
+          month,
+          rice: 0,
+          corn: 0,
+        }));
+      }
+
+      // Check first element to determine data structure
+      const firstItem = data[0];
+
+      if (firstItem.quantity !== undefined) {
+        data.forEach(({ quantity, crop_type, created_at }) => {
+          const date = new Date(created_at);
+          const month = date.toLocaleString("default", { month: "long" });
+          const crop = cropMap[crop_type.toLowerCase()];
+          if (crop && monthlyTotals[month]) {
+            monthlyTotals[month][crop] += quantity;
+          }
+        });
+      } else if (firstItem.crop_type_id !== undefined) {
+        data.forEach(({ crop_type_id }) => {
+          const date = new Date(crop_type_id.created_at);
+          const month = date.toLocaleString("default", { month: "long" });
+          const crop = cropMap[crop_type_id.crop_type_name.toLowerCase()];
+          if (crop && monthlyTotals[month]) {
+            monthlyTotals[month][crop] += crop_type_id.quantity;
+          }
+        });
+      }
 
       const result = monthsOrder.map((month) => ({
         month,
@@ -608,7 +629,10 @@ function Home() {
 
             <ReportChart data={cards.yearly_reservation} title="Taonang Ulat" />
 
-            <ReportPie data={cards.pie} title="Kaban Ng Mga Naka Reserbang Pananim" />
+            <ReportPie
+              data={cards.pie}
+              title="Kaban Ng Mga Naka Reserbang Pananim"
+            />
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
