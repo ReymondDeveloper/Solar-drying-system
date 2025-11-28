@@ -106,9 +106,9 @@ function Reservations() {
     setData(
       Array.isArray(data)
         ? data?.map((res) => ({
-            farmer_name: res.farmer_name,
-            dryer_name: res.dryer_name,
-            location: res.dryer_location,
+            farmer_name: res.farmer_id.first_name,
+            dryer_name: res.dryer_id.dryer_name,
+            location: res.dryer_id.location,
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",
@@ -119,7 +119,7 @@ function Reservations() {
             status: res.status || "pending",
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
           }))
-        : []
+        : [],
     );
 
     if (!Array.isArray(data)) setIsLoading(true);
@@ -129,6 +129,9 @@ function Reservations() {
         params: {
           limit: limit,
           offset: currentPage * limit - limit,
+          status: filter.status,
+          location: filter.location,
+          search: search,
         },
       });
 
@@ -143,9 +146,9 @@ function Reservations() {
       if (isDifferent) {
         setData(
           result.data.data?.map((res) => ({
-            farmer_name: res.farmer_name,
-            dryer_name: res.dryer_name,
-            location: res.dryer_location,
+            farmer_name: res.farmer_id.first_name,
+            dryer_name: res.dryer_id.dryer_name,
+            location: res.dryer_id.location,
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",
@@ -155,11 +158,11 @@ function Reservations() {
               : "N/A",
             status: res.status || "pending",
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
-          }))
+          })),
         );
         localStorage.setItem(
           "reservation_data",
-          JSON.stringify(result.data.data)
+          JSON.stringify(result.data.data),
         );
       }
     } catch (error) {
@@ -168,7 +171,7 @@ function Reservations() {
     } finally {
       setIsLoading(false);
     }
-  }, [limit, currentPage]);
+  }, [limit, currentPage, filter.status, filter.location, search]);
 
   useEffect(() => {
     fetchData();
@@ -179,34 +182,6 @@ function Reservations() {
 
     return () => clearInterval(interval);
   }, [fetchData]);
-
- 
-      
-
-  const FilteredData = data.filter((info) => {
-    const filterByLocation =
-      filter.location && filter.location !== "all"
-      ? info.location
-        .toLowerCase()
-        .includes(String(filter.location).toLowerCase())
-      : true;
-
-    const filterByStatus =
-      filter.status && filter.status !== "all"
-      ? info.status
-        .toLowerCase() === filter.status.toLowerCase()
-      : true;
-
-    const filterBySearch = search
-      ? Object.entries(info)
-          .filter(([key]) => key !== "location" && key !== "status")
-          .some(([, value]) =>
-            String(value).toLowerCase().includes(search.toLowerCase())
-          )
-      : true;
-
-    return filterByStatus &&filterByLocation && filterBySearch;
-  });
 
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
@@ -236,12 +211,12 @@ function Reservations() {
             ) : (
               <>
                 <Table
-                  data={FilteredData}
+                  data={data}
                   startIndex={startIndex}
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}
                 />
-                {FilteredData.length === 0 && (
+                {data.length === 0 && (
                   <div className="flex justify-center items-center font-bold py-5">
                     No Reservations Found.
                   </div>

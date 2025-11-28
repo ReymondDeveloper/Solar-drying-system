@@ -2,7 +2,14 @@ import supabase from "../../database/supabase.db.js";
 import { v4 as uuidv4 } from "uuid";
 import { subMonths } from "date-fns";
 const Reservations = {
-  findAll: async ({ farmer_id, limit, offset } = {}) => {
+  findAll: async ({
+    farmer_id,
+    limit,
+    offset,
+    status,
+    location,
+    search,
+  } = {}) => {
     const oneMonthAgo = subMonths(new Date(), 1).toISOString();
     let query = supabase
       .from("reservations")
@@ -18,7 +25,7 @@ const Reservations = {
         date_from,
         date_to
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .order("created_at", { ascending: false });
 
@@ -26,6 +33,18 @@ const Reservations = {
       const start = Number(offset);
       const end = start + Number(limit) - 1;
       query = query.range(start, end);
+    }
+
+    if (typeof location !== "undefined" && location && location !== "all") {
+      query = query.eq("dryer_id.location", location);
+    }
+
+    if (typeof status !== "undefined" && status && status !== "all") {
+      query = query.eq("status", status);
+    }
+
+    if (typeof search !== "undefined" && search) {
+      query = query.ilike("dryer_id.dryer_name", `%${search}%`);
     }
 
     if (farmer_id) query = query.eq("farmer_id", farmer_id); // Filter by farmer_id
@@ -46,15 +65,15 @@ const Reservations = {
         farmer_id:farmer_id (
           id, first_name, last_name, email, mobile_number
         ),
-        dryer_id:dryer_id ( 
+        dryer_id:dryer_id (
           id, dryer_name, location, rate, available_capacity,is_operation,operation_reason
         ),
-        crop_type_id:crop_type_id ( 
+        crop_type_id:crop_type_id (
           crop_type_id, crop_type_name, quantity, payment, notes
         ),
         status,
         created_at
-      `
+      `,
       )
       .eq("farmer_id.id", id)
       .single();

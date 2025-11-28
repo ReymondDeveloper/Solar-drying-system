@@ -12,7 +12,7 @@ const generateToken = (id) => {
 
 export const getUsers = async (req, res, next) => {
   try {
-    const { role, limit, offset } = req.query;
+    const { role, limit, offset, search } = req.query;
     let query = supabase
       .from("users")
       .select("*", { count: "exact" })
@@ -24,8 +24,14 @@ export const getUsers = async (req, res, next) => {
       query = query.range(start, end);
     }
 
-    if (role && role !== "all") {
+    if (typeof role !== "undefined" && role !== "all") {
       query = query.eq("role", role.toLowerCase());
+    }
+
+    if (typeof search !== "undefined" && search) {
+      query = query.or(
+        `first_name.ilike.%${search}%,last_name.ilike.%${search}%`,
+      );
     }
 
     const { data, count, error } = await query;
@@ -67,7 +73,7 @@ export const verifyUser = async (req, res, next) => {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-      }
+      },
     );
 
     res
@@ -137,7 +143,7 @@ export const registerUser = async (req, res, next) => {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-      }
+      },
     );
 
     res.status(201).json({
@@ -182,7 +188,7 @@ export const loginUser = async (req, res) => {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-        }
+        },
       );
 
       return res.status(200).json({

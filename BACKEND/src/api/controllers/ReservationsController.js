@@ -6,11 +6,39 @@ import { subMonths } from "date-fns";
 
 export const getReservations = async (req, res) => {
   try {
-    const { dryer_id, limit, offset } = req.query;
+    const { limit, offset, status, location, search } = req.query;
     let query = supabase
       .from("reservations")
-      .select("*", { count: "exact" })
+      .select(
+        `
+        id,
+        farmer_id:farmer_id(id, first_name, last_name),
+        dryer_id:dryer_id(id, dryer_name, location, rate),
+        crop_type_id:crop_type_id(crop_type_name, quantity, created_at),
+        status,
+        created_at,
+        date_from,
+        date_to
+      `,
+        { count: "exact" },
+      )
       .order("created_at", { ascending: false });
+
+    if (typeof status !== "undefined" && status !== "all") {
+      query = query.eq("status", status);
+    }
+
+    if (typeof location !== "undefined" && location !== "all") {
+      query = query
+        .not("dryer_id", "is", null)
+        .eq("dryer_id.location", location);
+    }
+
+    if (typeof search !== "undefined" && search) {
+      query = query
+        .not("farmer_id", "is", null)
+        .ilike("farmer_id.first_name", `%${search}%`);
+    }
 
     if (typeof limit !== "undefined" && typeof offset !== "undefined") {
       const start = Number(offset);
@@ -22,66 +50,7 @@ export const getReservations = async (req, res) => {
 
     if (resError) throw resError;
 
-    const formatted = await Promise.all(
-      reservations.map(async (r) => {
-        console.log("Processing reservation:", r);
-
-        const { data: dryer, error: dryerError } = await supabase
-          .from("dryers")
-          .select("*")
-          .eq("id", r.dryer_id)
-          .single();
-
-        if (dryerError) {
-          console.error("Error fetching dryer:", dryerError);
-          return null;
-        }
-
-        if (dryer_id && dryer.id !== dryer_id) return null;
-
-        const { data: farmer, error: farmerError } = await supabase
-          .from("users")
-          .select("id, first_name, last_name")
-          .eq("id", r.farmer_id)
-          .single();
-
-        if (farmerError) console.error("Error fetching farmer:", farmerError);
-
-        const { data: cropType, error: cropTypeError } = await supabase
-          .from("crop_types")
-          .select("crop_type_name, quantity, payment, notes")
-          .eq("crop_type_id", r.crop_type_id)
-          .single();
-
-        if (cropTypeError)
-          console.error("Error fetching crop type:", cropTypeError);
-
-        const mapped = {
-          id: r.id,
-          farmer_id: farmer?.id || null,
-          farmer_name: farmer
-            ? `${farmer.first_name} ${farmer.last_name}`
-            : "N/A",
-          dryer_id: dryer?.id || null,
-          dryer_name: dryer?.dryer_name || "N/A",
-          dryer_location: dryer?.location || "N/A",
-          crop_type: cropType?.crop_type_name || "N/A",
-          quantity: r.quantity || cropType?.quantity || 0,
-          payment: cropType?.payment || "N/A",
-          notes: cropType?.notes || r.notes || "",
-          rate: dryer?.rate || 0,
-          status: r.status || "pending",
-          created_at: r.created_at,
-          date_from: r.date_from,
-          date_to: r.date_to,
-        };
-
-        return mapped;
-      })
-    );
-
-    const filtered = formatted.filter((f) => f !== null);
-    res.json({ data: filtered, totalCount: count });
+    res.json({ data: reservations, totalCount: count });
   } catch (err) {
     res
       .status(500)
@@ -91,7 +60,7 @@ export const getReservations = async (req, res) => {
 
 export const getReservationById = async (req, res) => {
   try {
-    const { farmer_id, limit, offset } = req.query;
+    const { farmer_id, limit, offset, status, location, search } = req.query;
     if (!farmer_id)
       return res.status(400).json({ message: "farmer_id is required" });
 
@@ -99,6 +68,9 @@ export const getReservationById = async (req, res) => {
       farmer_id,
       limit,
       offset,
+      status,
+      location,
+      search,
     });
 
     res.json(reservations);
@@ -124,7 +96,7 @@ export const getArchivedReservations = async (req, res) => {
         status,
         created_at
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .lt("created_at", oneMonthAgo.toISOString())
       .order("created_at", { ascending: false });
@@ -265,7 +237,10 @@ export const updateReservation = async (req, res) => {
       if (cropError) throw cropError;
     }
 
-    if (status.toLowerCase() === "denied" || status.toLowerCase() === "completed") {
+    if (
+      status.toLowerCase() === "denied" ||
+      status.toLowerCase() === "completed"
+    ) {
       const { data: cropType, error: cropError } = await supabase
         .from("crop_types")
         .select("quantity")
@@ -296,7 +271,7 @@ export const updateReservation = async (req, res) => {
       if (updateDryerError) throw updateDryerError;
 
       console.log(
-        `Rolled back ${cropType.quantity} cavans to dryer ${reservation.dryer_id}`
+        `Rolled back ${cropType.quantity} cavans to dryer ${reservation.dryer_id}`,
       );
     }
 
@@ -339,7 +314,8 @@ export const checkReservation = async (req, res) => {
 
 export const getReservationsByOwner = async (req, res) => {
   try {
-    const { ownerId, limit, offset } = req.query;
+    const { ownerId, limit, offset, location, status, search } = req.query;
+
     if (!ownerId) {
       return res.status(400).json({ message: "Missing ID." });
     }
@@ -358,8 +334,9 @@ export const getReservationsByOwner = async (req, res) => {
         date_from,
         date_to
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
+      .eq("owner_id", ownerId)
       .order("created_at", { ascending: false });
 
     if (typeof limit !== "undefined" && typeof offset !== "undefined") {
@@ -368,7 +345,21 @@ export const getReservationsByOwner = async (req, res) => {
       query = query.range(start, end);
     }
 
-    const { data, count, error } = await query.eq("owner_id", ownerId);
+    if (typeof location !== "undefined" && location && location !== "all") {
+      query = query.eq("dryer_id.location", location);
+    }
+
+    if (typeof status !== "undefined" && status && status !== "all") {
+      query = query.eq("status", status);
+    }
+
+    if (typeof search !== "undefined" && search) {
+      query = query
+        .not("farmer_id", "is", null)
+        .ilike("farmer_id.first_name", `%${search}%`);
+    }
+
+    const { data, count, error } = await query;
     if (error) throw error;
     res.json({ data, totalCount: count });
   } catch (err) {

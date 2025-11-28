@@ -95,7 +95,7 @@ function DryerInformation() {
       required: true,
     },
     { label: "Rate (PHP)", type: "number", name: "rate", required: true },
-    { label: "Dryer Image", type: "file", name: "image_url", },
+    { label: "Dryer Image", type: "file", name: "image_url" },
     { label: "QR Code", type: "file", name: "qr_code" },
     { label: "Business Permit", type: "file", name: "business_permit" },
   ];
@@ -191,7 +191,10 @@ function DryerInformation() {
         image_url: updatedData.img_image_url,
         qr_code: updatedData.img_qr_code,
         is_operation: updatedData.is_operation === "true",
-        operation_reason: updatedData.is_operation === "false" ? updatedData.operation_reason : null,
+        operation_reason:
+          updatedData.is_operation === "false"
+            ? updatedData.operation_reason
+            : null,
         business_permit: updatedData.pdf_business_permit,
       });
 
@@ -240,11 +243,14 @@ function DryerInformation() {
                 })
               : "N/A",
             isverified: res.isverified ? "Verified" : "Not Verified",
-            is_operation: res.is_operation ? "Operational" : "Not Operational", 
+            is_operation: res.is_operation ? "Operational" : "Not Operational",
             action: (
               <div className="flex justify-center gap-2">
                 <Button
-                  onClick={() => (handleEdit(res), setIsOperational(res.is_operation))}
+                  onClick={() => (
+                    handleEdit(res),
+                    setIsOperational(res.is_operation)
+                  )}
                   className="bg-blue-400 hover:bg-blue-500 text-white"
                 >
                   Edit
@@ -258,7 +264,7 @@ function DryerInformation() {
               </div>
             ),
           }))
-        : []
+        : [],
     );
 
     if (!Array.isArray(data)) setIsLoading(true);
@@ -269,6 +275,8 @@ function DryerInformation() {
           id: localStorage.getItem("id"),
           limit: limit,
           offset: currentPage * limit - limit,
+          location: filter.location,
+          search: search,
         },
       });
 
@@ -291,7 +299,7 @@ function DryerInformation() {
                   day: "numeric",
                 })
               : "N/A",
-            is_operation: res.is_operation ? "Operational" : "Not Operational", 
+            is_operation: res.is_operation ? "Operational" : "Not Operational",
             action: (
               <div className="flex justify-center gap-2">
                 <Button
@@ -308,11 +316,11 @@ function DryerInformation() {
                 </Button>
               </div>
             ),
-          }))
+          })),
         );
         localStorage.setItem(
           "dryer_information_data",
-          JSON.stringify(result.data.data)
+          JSON.stringify(result.data.data),
         );
       }
     } catch (err) {
@@ -321,7 +329,7 @@ function DryerInformation() {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate, limit, currentPage]);
+  }, [navigate, limit, currentPage, filter.location, search]);
 
   useEffect(() => {
     fetchData();
@@ -403,24 +411,6 @@ function DryerInformation() {
     },
   ].filter(Boolean);
 
-  const FilteredData = data.filter((info) => {
-    const filterByLocation =
-      filter.location && filter.location !== "all"
-      ? info.location
-        .toLowerCase()
-        .includes(String(filter.location).toLowerCase())
-      : true;
-
-    const filterBySearch = search
-      ? Object.entries(info)
-          .filter(([key]) => key !== "action" && key !== "location")
-          .some(([, value]) =>
-            String(value).toLowerCase().includes(search.toLowerCase())
-          )
-      : true;
-    return filterByLocation && filterBySearch;
-  });
-
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
 
@@ -483,12 +473,12 @@ function DryerInformation() {
             ) : (
               <>
                 <Table
-                  data={FilteredData}
+                  data={data}
                   startIndex={startIndex}
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}
                 />
-                {FilteredData?.length === 0 && (
+                {data?.length === 0 && (
                   <>
                     <div className="hidden lg:flex justify-center items-center font-bold py-5">
                       No records to display at the moment.

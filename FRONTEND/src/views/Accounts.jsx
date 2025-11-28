@@ -219,7 +219,7 @@ function Accounts() {
             email: res.email,
             role: res.role,
           }))
-        : []
+        : [],
     );
 
     if (!Array.isArray(data)) setIsLoading(true);
@@ -229,6 +229,8 @@ function Accounts() {
         params: {
           limit: limit,
           offset: currentPage * limit - limit,
+          role: filter.role,
+          search: search,
         },
       });
 
@@ -250,7 +252,7 @@ function Accounts() {
             address: res.address,
             email: res.email,
             role: res.role,
-          }))
+          })),
         );
         localStorage.setItem("accounts_data", JSON.stringify(result.data.data));
       }
@@ -261,7 +263,7 @@ function Accounts() {
     } finally {
       setIsLoading(false);
     }
-  }, [limit, currentPage]);
+  }, [limit, currentPage, filter.role, search]);
 
   useEffect(() => {
     fetchData();
@@ -272,23 +274,6 @@ function Accounts() {
 
     return () => clearInterval(interval);
   }, [fetchData]);
-
-  const FilteredData = data.filter((info) => {
-    const filterByRole =
-      filter.role && filter.role !== "all"
-        ? info.role.toLowerCase() === filter.role.toLowerCase()
-        : true;
-
-    const filterBySearch = search
-      ? Object.entries(info)
-          .filter(([key]) => key !== "role")
-          .some(([, value]) =>
-            String(value).toLowerCase().includes(search.toLowerCase())
-          )
-      : true;
-
-    return filterByRole && filterBySearch;
-  });
 
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
@@ -342,12 +327,12 @@ function Accounts() {
             ) : (
               <>
                 <Table
-                  data={FilteredData}
+                  data={data}
                   startIndex={startIndex}
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}
                 />
-                {FilteredData?.length === 0 && (
+                {data?.length === 0 && (
                   <>
                     <div className="hidden lg:flex justify-center items-center font-bold py-5">
                       No Accounts Found.

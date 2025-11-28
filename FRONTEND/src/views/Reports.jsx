@@ -101,30 +101,22 @@ function Reports() {
     doc.text(
       "Solar Dryer Monitoring System",
       getCenteredPage("Solar Dryer Monitoring System"),
-      10
+      10,
     );
     doc.text(
       "Department of Agriculture, Philippines",
       getCenteredPage("Department of Agriculture, Philippines"),
-      13
+      13,
     );
     doc.text(
       `Date Range: ${startDate} to ${endDate}`,
       getCenteredPage(`Date Range: ${startDate} to ${endDate}`),
-      16
+      16,
     );
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const tableWidth = pageWidth - 6;
     let y = 30;
-
-    const boxHeight = 7;
-    const boxY = 22;
-    // doc.setFillColor(230, 230, 230); // light gray background
-    // doc.setFont("helvetica", "bold");
-    // doc.setFontSize(9);
-    // doc.rect(5, boxY, tableWidth, boxHeight, "F"); // F = fill
-    // doc.text("REPORT SUMMARY", getCenteredPage("REPORT SUMMARY"), boxY + 5);
 
     const columns = [
       { label: "#", ratio: 0.05 },
@@ -212,7 +204,7 @@ function Reports() {
       bg: "from-green-400 to-green-500",
     },
     {
-      label: "Verified Solar Dryer Owners",
+      label: "Verified Solar Dryers",
       value: dryers.length,
       icon: "☀️",
       bg: "from-blue-400 to-blue-500",
@@ -331,8 +323,8 @@ function Reports() {
                               user.role === "owner"
                                 ? "bg-green-200 text-green-800"
                                 : user.role === "farmer"
-                                ? "bg-red-200 text-red-800"
-                                : "bg-blue-200 text-blue-800"
+                                  ? "bg-red-200 text-red-800"
+                                  : "bg-blue-200 text-blue-800"
                             }`}
                         >
                           {user.role}

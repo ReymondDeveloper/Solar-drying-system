@@ -145,7 +145,7 @@ function Availability() {
               </Button>
             ),
           }))
-        : []
+        : [],
     );
 
     if (!Array.isArray(data)) setIsLoading(true);
@@ -155,6 +155,10 @@ function Availability() {
         params: {
           limit: limit,
           offset: currentPage * limit - limit,
+          status: filter.status,
+          location: filter.location,
+          is_operation: filter.is_operation,
+          search: search,
         },
       });
 
@@ -190,11 +194,11 @@ function Availability() {
                 View
               </Button>
             ),
-          }))
+          })),
         );
         localStorage.setItem(
           "availability_data",
-          JSON.stringify(result.data.data)
+          JSON.stringify(result.data.data),
         );
       }
     } catch (error) {
@@ -203,7 +207,15 @@ function Availability() {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate, limit, currentPage]);
+  }, [
+    navigate,
+    limit,
+    currentPage,
+    filter.status,
+    filter.location,
+    filter.is_operation,
+    search,
+  ]);
 
   useEffect(() => {
     fetchData();
@@ -214,39 +226,6 @@ function Availability() {
 
     return () => clearInterval(interval);
   }, [fetchData]);
-
-  const FilteredData = data.filter((info) => {
-    const filterByStatus =
-      filter.status && filter.status !== "all"
-        ? info.status.toLowerCase() === filter.status.toLowerCase()
-        : true;
-
-    const filterByLocation =
-      filter.location && filter.location !== "all"
-        ? info.location
-            .toLowerCase()
-            .includes(String(filter.location).toLowerCase())
-        : true;
-
-    const filterByOperation =
-      filter.is_operation && filter.is_operation !== "all"
-        ? info.is_operation
-            .toLowerCase()
-            .includes(String(filter.is_operation).toLowerCase())
-        : true;
-
-    const filterBySearch = search
-      ? Object.entries(info)
-          .filter(([key]) => key !== "action" && key !== "status" && key !== "location" && key !== "is_operation")
-          .some(([, value]) =>
-            String(value).toLowerCase().includes(search.toLowerCase())
-          )
-      : true;
-
-    return (
-      filterByStatus && filterByLocation && filterByOperation && filterBySearch
-    );
-  });
 
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
@@ -276,12 +255,12 @@ function Availability() {
             ) : (
               <>
                 <Table
-                  data={FilteredData}
+                  data={data}
                   startIndex={startIndex}
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}
                 />
-                {FilteredData?.length === 0 && (
+                {data?.length === 0 && (
                   <>
                     <div className="hidden lg:flex justify-center items-center font-bold py-5">
                       No Available Solar Dryers Found.
