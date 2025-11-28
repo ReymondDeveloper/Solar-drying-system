@@ -144,7 +144,7 @@ function CreateReservation() {
               </Button>
             ),
           }))
-        : []
+        : [],
     );
 
     if (!Array.isArray(data)) setIsLoading(true);
@@ -155,6 +155,9 @@ function CreateReservation() {
           limit: limit,
           offset: currentPage * limit - limit,
           role: localStorage.getItem("role"),
+          status: filter.status,
+          location: filter.location,
+          search: search,
         },
       });
 
@@ -169,34 +172,34 @@ function CreateReservation() {
       if (isDifferent) {
         setData(
           result.data.data
-          ?.filter((res) => res.is_operation)
-          .map((res) => ({
-            id: res.id,
-            dryer_name: res.dryer_name,
-            location: res.location,
-            maximum_capacity: res.maximum_capacity,
-            available_capacity: res.available_capacity,
-            status: res.available_capacity > 0 ? "available" : "occupied",
-            created_at: res.created_at
-              ? new Date(res.created_at).toLocaleString("en-PH", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })
-              : "N/A",
-            action: (
-              <Button
-                onClick={() => navigate("/home/create-reservation/" + res.id)}
-                className="bg-blue-400 hover:bg-blue-500 text-white"
-              >
-                View
-              </Button>
-            ),
-          }))
+            ?.filter((res) => res.is_operation)
+            .map((res) => ({
+              id: res.id,
+              dryer_name: res.dryer_name,
+              location: res.location,
+              maximum_capacity: res.maximum_capacity,
+              available_capacity: res.available_capacity,
+              status: res.available_capacity > 0 ? "available" : "occupied",
+              created_at: res.created_at
+                ? new Date(res.created_at).toLocaleString("en-PH", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })
+                : "N/A",
+              action: (
+                <Button
+                  onClick={() => navigate("/home/create-reservation/" + res.id)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  View
+                </Button>
+              ),
+            })),
         );
         localStorage.setItem(
           "create_reservation_data",
-          JSON.stringify(result.data.data)
+          JSON.stringify(result.data.data),
         );
       }
     } catch (error) {
@@ -205,7 +208,7 @@ function CreateReservation() {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate, limit, currentPage]);
+  }, [navigate, limit, currentPage, filter.status, filter.location, search]);
 
   useEffect(() => {
     fetchData();
@@ -216,30 +219,6 @@ function CreateReservation() {
 
     return () => clearInterval(interval);
   }, [fetchData]);
-
-  const FilteredData = data.filter((info) => {
-    const filterByStatus =
-      filter.status && filter.status !== "all"
-        ? info.status.toLowerCase() === filter.status.toLowerCase()
-        : true;
-
-    const filterByLocation =
-      filter.location && filter.location !== "all"
-      ? info.location
-        .toLowerCase()
-        .includes(String(filter.location).toLowerCase())
-      : true;
-
-    const filterBySearch = search
-      ? Object.entries(info)
-          .filter(([key]) => key !== "status" && key !== "location" && key !== "action")
-          .some(([, value]) =>
-            String(value).toLowerCase().includes(search.toLowerCase())
-          )
-      : true;
-
-    return filterByStatus && filterBySearch && filterByLocation;
-  });
 
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
@@ -269,12 +248,12 @@ function CreateReservation() {
             ) : (
               <>
                 <Table
-                  data={FilteredData}
+                  data={data}
                   startIndex={startIndex}
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}
                 />
-                {FilteredData?.length === 0 && (
+                {data?.length === 0 && (
                   <>
                     <div className="hidden lg:flex justify-center items-center font-bold py-5">
                       No Available Solar Dryers Found.

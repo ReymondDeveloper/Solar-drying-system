@@ -232,7 +232,7 @@ function ReservationHistory() {
               </Button>
             ),
           }))
-        : []
+        : [],
     );
 
     if (!Array.isArray(data)) setIsLoading(true);
@@ -243,6 +243,9 @@ function ReservationHistory() {
           farmer_id: localStorage.getItem("id"),
           limit: limit,
           offset: currentPage * limit - limit,
+          status: filter.status,
+          location: filter.location,
+          search: search,
         },
       });
 
@@ -282,11 +285,11 @@ function ReservationHistory() {
                 View
               </Button>
             ),
-          }))
+          })),
         );
         localStorage.setItem(
           "reservation_history_data",
-          JSON.stringify(result.data.data)
+          JSON.stringify(result.data.data),
         );
       }
     } catch (error) {
@@ -295,7 +298,7 @@ function ReservationHistory() {
     } finally {
       setIsLoading(false);
     }
-  }, [handleView, limit, currentPage]);
+  }, [handleView, limit, currentPage, filter.status, filter.location, search]);
 
   useEffect(() => {
     fetchData();
@@ -306,30 +309,6 @@ function ReservationHistory() {
 
     return () => clearInterval(interval);
   }, [fetchData]);
-
-  const FilteredData = data.filter((info) => {
-    const filterByStatus =
-      filter.status && filter.status !== "all"
-        ? info.status.toLowerCase() === filter.status.toLowerCase()
-        : true;
-
-    const filterByLocation =
-      filter.location && filter.location !== "all"
-      ? info.location
-        .toLowerCase()
-        .includes(String(filter.location).toLowerCase())
-      : true;
-
-    const filterBySearch = search
-      ? Object.entries(info)
-          .filter(([key]) => key !== "status" && key !== "location" && key !== "action")
-          .some(([, value]) =>
-            String(value).toLowerCase().includes(search.toLowerCase())
-          )
-      : true;
-
-    return filterByStatus && filterBySearch && filterByLocation;
-  });
 
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
@@ -382,12 +361,12 @@ function ReservationHistory() {
             ) : (
               <>
                 <Table
-                  data={FilteredData}
+                  data={data}
                   startIndex={startIndex}
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}
                 />
-                {FilteredData?.length === 0 && (
+                {data?.length === 0 && (
                   <div className="flex justify-center items-center font-bold py-5">
                     {role === "farmer"
                       ? "Wala ka pang kasaysayan ng transaksyon."

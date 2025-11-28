@@ -120,12 +120,10 @@ function BookingRequests() {
     const data = Object.fromEntries(formData.entries());
     try {
       setLoading(true);
-      await api.put(`/reservations/${data.id}`,
-        {
-          status: data.status,
-          notes: data.notes || null,
-        }
-      );
+      await api.put(`/reservations/${data.id}`, {
+        status: data.status,
+        notes: data.notes || null,
+      });
 
       toast.success("Booking is updated successfully!");
 
@@ -153,7 +151,7 @@ function BookingRequests() {
     localStorage.setItem("booking_requests_farmer_id", data.farmer_id.id);
     localStorage.setItem(
       "booking_requests_dryer_name",
-      data.dryer_id.dryer_name
+      data.dryer_id.dryer_name,
     );
 
     const handleStatusChange = (e) => {
@@ -275,7 +273,9 @@ function BookingRequests() {
             action: (
               <div className="flex justify-center gap-2">
                 <Button
-                  onClick={() => res.status && res.status !== "completed" && handleEdit(res)}
+                  onClick={() =>
+                    res.status && res.status !== "completed" && handleEdit(res)
+                  }
                   className="bg-blue-400 hover:bg-blue-500 text-white"
                 >
                   Edit
@@ -289,7 +289,7 @@ function BookingRequests() {
               </div>
             ),
           }))
-        : []
+        : [],
     );
 
     if (!Array.isArray(data)) setIsLoading(true);
@@ -300,6 +300,9 @@ function BookingRequests() {
           ownerId: localStorage.getItem("id"),
           limit: limit,
           offset: currentPage * limit - limit,
+          status: filter.status,
+          location: filter.location,
+          search: search,
         },
       });
 
@@ -345,11 +348,11 @@ function BookingRequests() {
                 </Button>
               </div>
             ),
-          }))
+          })),
         );
         localStorage.setItem(
           "booking_requests_data",
-          JSON.stringify(result.data.data)
+          JSON.stringify(result.data.data),
         );
       }
     } catch (error) {
@@ -358,7 +361,15 @@ function BookingRequests() {
     } finally {
       setIsLoading(false);
     }
-  }, [handleEdit, handleView, limit, currentPage]);
+  }, [
+    handleEdit,
+    handleView,
+    limit,
+    currentPage,
+    filter.status,
+    filter.location,
+    search,
+  ]);
 
   useEffect(() => {
     fetchData();
@@ -369,30 +380,6 @@ function BookingRequests() {
 
     return () => clearInterval(interval);
   }, [fetchData]);
-
-  const FilteredData = data.filter((info) => {
-    const filterByStatus =
-      filter.status && filter.status !== "all"
-        ? info.status.toLowerCase() === filter.status.toLowerCase()
-        : true;
-
-    const filterByLocation =
-      filter.location && filter.location !== "all"
-      ? info.location
-        .toLowerCase()
-        .includes(String(filter.location).toLowerCase())
-      : true;
-
-    const filterBySearch = search
-      ? Object.entries(info)
-          .filter(([key]) => key !== "status" && key !== "location" && key !== "action")
-          .some(([, value]) =>
-            String(value).toLowerCase().includes(search.toLowerCase())
-          )
-      : true;
-
-    return filterByStatus && filterBySearch && filterByLocation;
-  });
 
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
@@ -451,12 +438,12 @@ function BookingRequests() {
             ) : (
               <>
                 <Table
-                  data={FilteredData}
+                  data={data}
                   startIndex={startIndex}
                   tableHeadings={tableHeadings}
                   tableDataCell={tableDataCell}
                 />
-                {FilteredData?.length === 0 && (
+                {data?.length === 0 && (
                   <div className="text-center font-bold py-5">
                     No transactions to display at the moment.
                   </div>

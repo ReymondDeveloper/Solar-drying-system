@@ -2,7 +2,7 @@ import supabase from "../../database/supabase.db.js";
 
 export const getOwned = async (req, res) => {
   console.log("Getting Owned Dryers: BEGIN:", req.query);
-  const { id, limit, offset } = req.query;
+  const { id, limit, offset, location, search } = req.query;
   try {
     let query = supabase
       .from("dryers")
@@ -13,6 +13,14 @@ export const getOwned = async (req, res) => {
       const start = Number(offset);
       const end = start + Number(limit) - 1;
       query = query.range(start, end);
+    }
+
+    if (location !== undefined && location !== "all") {
+      query = query.eq("location", location);
+    }
+
+    if (search !== undefined && search) {
+      query = query.ilike("dryer_name", `%${search}%`);
     }
 
     query = query.eq("created_by_id", id);
@@ -31,14 +39,14 @@ export const getOwned = async (req, res) => {
 };
 
 export const getDryers = async (req, res) => {
-  const { limit, offset, role } = req.query;
-
+  const { limit, offset, role, status, location, search, is_operation } =
+    req.query;
   try {
     let query = supabase
       .from("dryers")
       .select(
         "id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id, created_at, is_operation, operation_reason",
-        { count: "exact" }
+        { count: "exact" },
       )
       .order("created_at", { ascending: false });
 
@@ -48,10 +56,30 @@ export const getDryers = async (req, res) => {
       query = query.range(start, end);
     }
 
-    if (typeof role !== "undefined") {
+    if (typeof location !== "undefined" && location && location !== "all") {
+      query = query.eq("location", location);
+    }
+
+    if (typeof status !== "undefined" && status && status !== "all") {
+      if (status === "available") {
+        query = query.gt("available_capacity", 0);
+      } else if (status === "occupied") {
+        query = query.eq("available_capacity", 0);
+      }
+    }
+
+    if (typeof search !== "undefined" && search) {
+      query = query.ilike("dryer_name", `%${search}%`);
+    }
+
+    if (typeof role !== "undefined" && role) {
       if (role === "farmer") {
-        query = query.eq("is_operation", true) 
-      } 
+        query = query.eq("is_operation", true);
+      }
+    }
+
+    if (typeof is_operation !== "undefined" && is_operation !== "all") {
+      query = query.eq("is_operation", is_operation === "yes" ? true : false);
     }
 
     const { data, count, error } = await query;
@@ -88,7 +116,7 @@ export const getDryerById = async (req, res) => {
     const { data: reservations, error: reservationsError } = await supabase
       .from("reservations")
       .select(
-        "id, farmer_id, status, created_at, crop_type_id, crop_types(crop_type_name, quantity), date_from, date_to"
+        "id, farmer_id, status, created_at, crop_type_id, crop_types(crop_type_name, quantity), date_from, date_to",
       )
       .eq("dryer_id", id);
     if (reservationsError) throw reservationsError;
@@ -112,7 +140,7 @@ export const getDryerById = async (req, res) => {
           date_from: reservation.date_from,
           date_to: reservation.date_to,
         };
-      })
+      }),
     );
 
     const validFarmers = farmers.filter(Boolean);
