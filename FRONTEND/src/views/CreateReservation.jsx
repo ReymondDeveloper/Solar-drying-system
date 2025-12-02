@@ -52,7 +52,7 @@ function CreateReservation() {
           "Lokasyon (Sablayan)",
           "Kabuuang Kapasidad (Kaban)",
           "Magagamit na Kapasidad (Kaban)",
-          "Petsa ng Pagkakagawa",
+          "Uri ng Patuyuan",
           "Katayuan",
           "Aksyon",
         ]
@@ -61,7 +61,7 @@ function CreateReservation() {
           "Location (Sablayan)",
           "Maximum Capacity (Cavan)",
           "Available Capacity (Cavan)",
-          "Date Created",
+          "Type",
           "Status",
           "Action",
         ];
@@ -71,7 +71,7 @@ function CreateReservation() {
     "location",
     "maximum_capacity",
     "available_capacity",
-    "created_at",
+    "type",
     "status",
     "action",
   ];
@@ -128,13 +128,7 @@ function CreateReservation() {
             maximum_capacity: res.maximum_capacity,
             available_capacity: res.available_capacity,
             status: res.available_capacity > 0 ? "available" : "occupied",
-            created_at: res.created_at
-              ? new Date(res.created_at).toLocaleString("en-PH", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })
-              : "N/A",
+            type: res.type,
             action: (
               <Button
                 onClick={() => navigate("/home/create-reservation/" + res.id)}
@@ -144,7 +138,7 @@ function CreateReservation() {
               </Button>
             ),
           }))
-        : [],
+        : []
     );
 
     if (!Array.isArray(data)) setIsLoading(true);
@@ -180,13 +174,7 @@ function CreateReservation() {
               maximum_capacity: res.maximum_capacity,
               available_capacity: res.available_capacity,
               status: res.available_capacity > 0 ? "available" : "occupied",
-              created_at: res.created_at
-                ? new Date(res.created_at).toLocaleString("en-PH", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })
-                : "N/A",
+              type: res.type,
               action: (
                 <Button
                   onClick={() => navigate("/home/create-reservation/" + res.id)}
@@ -195,11 +183,11 @@ function CreateReservation() {
                   View
                 </Button>
               ),
-            })),
+            }))
         );
         localStorage.setItem(
           "create_reservation_data",
-          JSON.stringify(result.data.data),
+          JSON.stringify(result.data.data)
         );
       }
     } catch (error) {

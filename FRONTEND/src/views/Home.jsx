@@ -21,7 +21,7 @@ import {
 
 function ReportChart({ data, title }) {
   return (
-    <div className="col-span-1 sm:col-span-2 lg:col-span-3 w-full text-center text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl p-5">
+    <div className="col-span-1 sm:col-span-2 lg:col-span-4 w-full text-center text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl p-5">
       <h3 className="text-lg font-bold mb-4 text-start">{title}</h3>
       {data && data.length > 0 ? (
         <ResponsiveContainer width="100%" height={300}>
@@ -118,7 +118,7 @@ function ReportPie({ data = [], title }) {
         ];
 
   return (
-    <div className="col-span-1 sm:col-span-2 lg:col-span-3 w-full text-center text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl p-5">
+    <div className="col-span-1 sm:col-span-2 lg:col-span-4 w-full text-center text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl p-5">
       <h3 className="text-lg font-bold mb-4 text-start">{title}</h3>
 
       <div className="w-full max-w-xs mb-3">
@@ -172,6 +172,23 @@ function ReportPie({ data = [], title }) {
   );
 }
 
+function ReportCard({ onClick, icon, title, logic }) {
+  return (
+    <div
+      className={`text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl shadow-lg p-6 flex flex-col justify-between transform hover:scale-[1.03] transition cursor-pointer`}
+      onClick={onClick}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-2xl">{icon}</span>
+        <span className="text-lg text-end font-semibold">{title}</span>
+      </div>
+      <div className="mt-5 text-5xl font-bold text-center">
+        {logic ?? "..."}
+      </div>
+    </div>
+  );
+}
+
 function Home() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -207,6 +224,7 @@ function Home() {
           ...prev,
           reservation: data.reservation ?? 0,
           pending: data.pending ?? 0,
+          approved: data.approved ?? 0,
           dryers: data.dryers ?? 0,
           completed: data.completed ?? 0,
           pie: data.pie ?? 0,
@@ -365,6 +383,15 @@ function Home() {
 
         setCards((prev) => ({
           ...prev,
+          approved: result.data.filter((item) => item.status === "approved")
+            .length,
+        }));
+        cache.approved = result.data.filter(
+          (item) => item.status === "approved"
+        ).length;
+
+        setCards((prev) => ({
+          ...prev,
           pie: pieChart(result.data),
         }));
         cache.pie = pieChart(result.data);
@@ -415,6 +442,15 @@ function Home() {
         }));
         cache.pending = result.data.filter(
           (item) => item.status === "pending"
+        ).length;
+
+        setCards((prev) => ({
+          ...prev,
+          approved: result.data.filter((item) => item.status === "approved")
+            .length,
+        }));
+        cache.approved = result.data.filter(
+          (item) => item.status === "approved"
         ).length;
 
         setCards((prev) => ({
@@ -511,53 +547,34 @@ function Home() {
       {loading && <Loading />}
       <div className="w-full h-[calc(100dvh-160px)] rounded-lg lg:p-5 lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] overflow-y-auto overflow-x-hidden">
         {localStorage.getItem("role") === "owner" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div
-              className={`text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl shadow-lg p-6 flex flex-col justify-between transform hover:scale-[1.03] transition cursor-pointer`}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <ReportCard
               onClick={() => navigate("/home/booking-requests")}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-2xl">
-                  <GiBookmarklet className="w-full h-full" />
-                </span>
-                <span className="text-lg font-semibold">Reservations</span>
-              </div>
-              <div className="mt-5 text-5xl font-bold text-center">
-                {cards.reservation ?? "..."}
-              </div>
-            </div>
+              icon={<GiBookmarklet className="w-full h-full" />}
+              title={"Requests"}
+              logic={cards.reservation}
+            />
 
-            <div
-              className={`text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl shadow-lg p-6 flex flex-col justify-between transform hover:scale-[1.03] transition cursor-pointer`}
-              onClick={() => navigate("/home/booking-requests")}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-2xl">
-                  <MdOutlinePendingActions className="w-full h-full" />
-                </span>
-                <span className="text-lg font-semibold">
-                  Pending Reservations
-                </span>
-              </div>
-              <div className="mt-5 text-5xl font-bold text-center">
-                {cards.pending ?? "..."}
-              </div>
-            </div>
+            <ReportCard
+              onClick={() => navigate("/home/booking-requests?pending=true")}
+              icon={<MdOutlinePendingActions className="w-full h-full" />}
+              title={"Pending Requests"}
+              logic={cards.pending}
+            />
 
-            <div
-              className={`text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl shadow-lg p-6 flex flex-col justify-between transform hover:scale-[1.03] transition cursor-pointer`}
+            <ReportCard
+              onClick={() => navigate("/home/booking-requests?approved=true")}
+              icon={<MdOutlinePendingActions className="w-full h-full" />}
+              title={"Approved Requests"}
+              logic={cards.approved}
+            />
+
+            <ReportCard
               onClick={() => navigate("/home/dryer-information")}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-2xl">
-                  <HiClipboardDocumentList className="w-full h-full" />
-                </span>
-                <span className="text-lg font-semibold">Dryers Owned</span>
-              </div>
-              <div className="mt-5 text-5xl font-bold text-center">
-                {cards.dryers ?? "..."}
-              </div>
-            </div>
+              icon={<HiClipboardDocumentList className="w-full h-full" />}
+              title={"Dryers Owned"}
+              logic={cards.dryers}
+            />
 
             <ReportChart
               data={cards.monthly_reservation}
@@ -572,55 +589,38 @@ function Home() {
             <ReportPie data={cards.pie} title="Reserved Crop Types (Cavan)" />
           </div>
         ) : localStorage.getItem("role") === "farmer" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div
-              className={`text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl shadow-lg p-6 flex flex-col justify-between transform hover:scale-[1.03] transition cursor-pointer`}
-              onClick={() => navigate("/home/create-reservation")}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-2xl">
-                  <GiBookmarklet className="w-full h-full" />
-                </span>
-                <span className="text-lg font-semibold">Mga Reserbasyon</span>
-              </div>
-              <div className="mt-5 text-5xl font-bold text-center">
-                {cards.reservation ?? "..."}
-              </div>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <ReportCard
+              onClick={() => navigate("/home/reservation-history")}
+              icon={<GiBookmarklet className="w-full h-full" />}
+              title={"Mga Reserbasyon"}
+              logic={cards.reservation}
+            />
 
-            <div
-              className={`text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl shadow-lg p-6 flex flex-col justify-between transform hover:scale-[1.03] transition cursor-pointer`}
-              onClick={() => navigate("/home/create-reservation")}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-2xl">
-                  <MdOutlinePendingActions className="w-full h-full" />
-                </span>
-                <span className="text-lg font-semibold">
-                  Mga Kasalukuyang Reserbasyon
-                </span>
-              </div>
-              <div className="mt-5 text-5xl font-bold text-center">
-                {cards.pending ?? "..."}
-              </div>
-            </div>
+            <ReportCard
+              onClick={() => navigate("/home/reservation-history?pending=true")}
+              icon={<MdOutlinePendingActions className="w-full h-full" />}
+              title={"Mga Nag hi-hintay na Reserbasyon"}
+              logic={cards.pending}
+            />
 
-            <div
-              className={`text-green-500 bg-gradient-to-b from-white to-green-100 rounded-xl shadow-lg p-6 flex flex-col justify-between transform hover:scale-[1.03] transition cursor-pointer`}
-              onClick={() => navigate("/home/create-reservation")}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-2xl">
-                  <HiClipboardDocumentList className="w-full h-full" />
-                </span>
-                <span className="text-lg font-semibold">
-                  Mga Natapos na Reserbasyon
-                </span>
-              </div>
-              <div className="mt-5 text-5xl font-bold text-center">
-                {cards.completed ?? "..."}
-              </div>
-            </div>
+            <ReportCard
+              onClick={() =>
+                navigate("/home/reservation-history?approved=true")
+              }
+              icon={<MdOutlinePendingActions className="w-full h-full" />}
+              title={"Mga Naaprobadong Reserbasyon"}
+              logic={cards.approved}
+            />
+
+            <ReportCard
+              onClick={() =>
+                navigate("/home/reservation-history?completed=true")
+              }
+              icon={<HiClipboardDocumentList className="w-full h-full" />}
+              title={"Mga Natapos na Reserbasyon"}
+              logic={cards.completed}
+            />
 
             <ReportChart
               data={cards.monthly_reservation}

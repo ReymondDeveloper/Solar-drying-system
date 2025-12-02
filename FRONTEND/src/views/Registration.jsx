@@ -186,54 +186,73 @@ function Registration() {
         />
       )}
       <div className="h-full bg-gray-200 flex flex-col gap-1">
-        <div className="flex min-h-full flex-col justify-start overflow-auto lg:px-8 bg-gradient-to-t from-[rgba(0,100,0,255)] via-green-600 to-[rgba(0,100,0,255)]">
-          <div className="bg-white p-8 rounded-2xl shadow-lg min-w-[320px] m-auto">
-            <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-5">
-              {formField.map((data, index) =>
-                data.type === "select" ? (
-                  <div
-                    key={index}
-                    className={`col-span-2 ${
-                      data.colspan === 1 ? "md:col-span-1" : "md:col-span-2"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <label
-                        htmlFor={data.name}
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        {data.label}
-                      </label>
-                    </div>
-                    <select
-                      required={data.required}
-                      name={data.name}
-                      className="outline-0 capitalize mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+        <div className="min-h-full overflow-auto bg-[url(/landing_page.avif)] bg-cover">
+          <div className="w-full h-dvh backdrop-blur-sm backdrop-brightness-75 flex flex-col justify-start lg:px-8">
+            <div className="bg-white p-8 rounded-2xl shadow-lg min-w-[320px] m-auto">
+              <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-5">
+                {formField.map((data, index) =>
+                  data.type === "select" ? (
+                    <div
+                      key={index}
+                      className={`col-span-2 ${
+                        data.colspan === 1 ? "md:col-span-1" : "md:col-span-2"
+                      }`}
                     >
-                      {data.options.map((option, i) => (
-                        <option key={i} value={option.value}>
-                          {option.value}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                ) : (
-                  <div
-                    key={index}
-                    className={`col-span-2 ${
-                      data.colspan === 1 ? "md:col-span-1" : "md:col-span-2"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <label
-                        htmlFor={data.name}
-                        className="block text-sm font-medium text-gray-700"
+                      <div className="flex items-center justify-between">
+                        <label
+                          htmlFor={data.name}
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          {data.label}
+                        </label>
+                      </div>
+                      <select
+                        required={data.required}
+                        name={data.name}
+                        className="outline-0 capitalize mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
                       >
-                        {data.label}
-                      </label>
+                        {data.options.map((option, i) => (
+                          <option key={i} value={option.value}>
+                            {option.value}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    {data.name === "address" ? (
-                      <>
+                  ) : (
+                    <div
+                      key={index}
+                      className={`col-span-2 ${
+                        data.colspan === 1 ? "md:col-span-1" : "md:col-span-2"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <label
+                          htmlFor={data.name}
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          {data.label}
+                        </label>
+                      </div>
+                      {data.name === "address" ? (
+                        <>
+                          <input
+                            className="outline-0 mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                            name={data.name}
+                            type={data.type}
+                            required={data.required}
+                            minLength={data.minLength}
+                            maxLength={data.maxLength}
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                          />
+                          <span
+                            onClick={(e) => handleLocation(e)}
+                            className="text-sm font-bold text-gray-400 hover:text-blue-400 cursor-pointer"
+                          >
+                            Use Current Location
+                          </span>
+                        </>
+                      ) : (
                         <input
                           className="outline-0 mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
                           name={data.name}
@@ -241,52 +260,35 @@ function Registration() {
                           required={data.required}
                           minLength={data.minLength}
                           maxLength={data.maxLength}
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
+                          onChange={data.onchange}
                         />
-                        <span
-                          onClick={(e) => handleLocation(e)}
-                          className="text-sm font-bold text-gray-400 hover:text-blue-400 cursor-pointer"
-                        >
-                          Use Current Location
-                        </span>
-                      </>
-                    ) : (
-                      <input
-                        className="outline-0 mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-                        name={data.name}
-                        type={data.type}
-                        required={data.required}
-                        minLength={data.minLength}
-                        maxLength={data.maxLength}
-                        onChange={data.onchange}
-                      />
-                    )}
-                  </div>
-                )
-              )}
+                      )}
+                    </div>
+                  )
+                )}
 
-              <div className="col-span-2">
-                <Button
-                  type={"submit"}
-                  className={
-                    "w-full bg-green-600 hover:bg-green-700 text-white"
-                  }
+                <div className="col-span-2">
+                  <Button
+                    type={"submit"}
+                    className={
+                      "w-full bg-green-600 hover:bg-green-700 text-white"
+                    }
+                  >
+                    Register
+                  </Button>
+                </div>
+              </form>
+
+              <p className="mt-6 text-center text-sm text-gray-400">
+                Already have an account?{" "}
+                <a
+                  className="font-semibold text-green-400 hover:text-gray-400 underline cursor-pointer"
+                  onClick={handleSignIn}
                 >
-                  Register
-                </Button>
-              </div>
-            </form>
-
-            <p className="mt-6 text-center text-sm text-gray-400">
-              Already have an account?{" "}
-              <a
-                className="font-semibold text-green-400 hover:text-gray-400 underline cursor-pointer"
-                onClick={handleSignIn}
-              >
-                Click here to sign in.
-              </a>
-            </p>
+                  Click here to sign in.
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </div>

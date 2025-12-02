@@ -501,6 +501,7 @@ function Modal({
                     className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500 outline-0"
                     defaultValue={field.defaultValue || ""}
                     onChange={(e) => field.onChange && field.onChange(e)}
+                    disabled={field.disabled}
                   >
                     {field.options.map((option, idx) => (
                       <option

@@ -45,8 +45,8 @@ export const getDryers = async (req, res) => {
     let query = supabase
       .from("dryers")
       .select(
-        "id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id, created_at, is_operation, operation_reason",
-        { count: "exact" },
+        "id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id, created_at, is_operation, operation_reason, type",
+        { count: "exact" }
       )
       .order("created_at", { ascending: false });
 
@@ -116,7 +116,7 @@ export const getDryerById = async (req, res) => {
     const { data: reservations, error: reservationsError } = await supabase
       .from("reservations")
       .select(
-        "id, farmer_id, status, created_at, crop_type_id, crop_types(crop_type_name, quantity), date_from, date_to",
+        "id, farmer_id, status, created_at, crop_type_id, crop_types(crop_type_name, quantity), date_from, date_to"
       )
       .eq("dryer_id", id);
     if (reservationsError) throw reservationsError;
@@ -140,7 +140,7 @@ export const getDryerById = async (req, res) => {
           date_from: reservation.date_from,
           date_to: reservation.date_to,
         };
-      }),
+      })
     );
 
     const validFarmers = farmers.filter(Boolean);

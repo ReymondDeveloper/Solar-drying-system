@@ -25,7 +25,9 @@ function SignIn() {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.target);
-    const { email, password, selected_role } = Object.fromEntries(formData.entries());
+    const { email, password, selected_role } = Object.fromEntries(
+      formData.entries()
+    );
 
     try {
       const res = await axios.post(
@@ -61,7 +63,9 @@ function SignIn() {
         }, 2000);
       } else {
         if (role !== selected_role) {
-          toast.error(`Access denied: You are not authorized as ${selected_role}.`);
+          toast.error(
+            `Access denied: You are not authorized as ${selected_role}.`
+          );
           setLoading(false);
           return;
         }
@@ -179,7 +183,6 @@ function SignIn() {
       const { password, confirm_password } = data;
 
       if (password === confirm_password) {
-
         const res = await axios.put(
           `${import.meta.env.VITE_API}/users/update`,
           { password, email: localStorage.getItem("email") }
@@ -237,73 +240,78 @@ function SignIn() {
         />
       )}
       <div className="h-full bg-gray-200 flex flex-col gap-1">
-        <div className="flex-grow flex flex-col justify-center bg-gradient-to-t from-[rgba(0,100,0,255)] via-green-600 to-[rgba(0,100,0,255)]">
-          <div className="mx-auto min-w-[320px]">
-            <div className="bg-white p-8 rounded-2xl shadow-lg">
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {formField.map((field, index) => (
-                  <div key={index}>
+        <div className="flex-grow bg-[url(/landing_page.avif)] bg-cover">
+          <div className="w-full h-dvh backdrop-blur-sm backdrop-brightness-75 flex flex-col justify-center">
+            <div className="mx-auto min-w-[320px]">
+              <div className="bg-white p-8 rounded-2xl shadow-lg">
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {formField.map((field, index) => (
+                    <div key={index}>
+                      <label
+                        className="block text-sm font-medium text-gray-700"
+                        htmlFor={field.name}
+                      >
+                        {field.label}
+                      </label>
+                      <div className="mt-2">
+                        <input
+                          className="outline-0 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                          type={field.type}
+                          name={field.name}
+                          required={field.required}
+                          defaultValue={field.defaultValue}
+                          minLength={field.minLength}
+                          maxLength={field.maxLength}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <div>
                     <label
                       className="block text-sm font-medium text-gray-700"
-                      htmlFor={field.name}
+                      htmlFor="role"
                     >
-                      {field.label}
+                      Role
                     </label>
                     <div className="mt-2">
-                      <input
+                      <select
+                        name="selected_role"
+                        required
                         className="outline-0 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-                        type={field.type}
-                        name={field.name}
-                        required={field.required}
-                        defaultValue={field.defaultValue}
-                        minLength={field.minLength}
-                        maxLength={field.maxLength}
-                      />
+                      >
+                        <option value="admin">Admin</option>
+                        <option value="owner">Owner</option>
+                        <option value="farmer">Farmer</option>
+                      </select>
                     </div>
                   </div>
-                ))}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700" htmlFor="role">
-                    Role
-                  </label>
-                  <div className="mt-2">
-                    <select
-                      name="selected_role"
-                      required
-                      className="outline-0 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-                    >
-                      <option value="admin">Admin</option>
-                      <option value="owner">Owner</option>
-                      <option value="farmer">Farmer</option>
-                    </select>
-                  </div>
-                </div>
 
-                <Button
-                  type={`submit`}
-                  className={`w-full bg-green-600 hover:bg-green-700 text-white`}
-                >
-                  Sign In
-                </Button>
+                  <Button
+                    type={`submit`}
+                    className={`w-full bg-green-600 hover:bg-green-700 text-white`}
+                  >
+                    Sign In
+                  </Button>
 
-                <Button
-                  type={`button`}
-                  onClick={() => setModalVerify(true)}
-                  className={`w-full hover:bg-[rgba(0,0,0,0.3)] hover:text-white text-green-400`}
-                >
-                  Forgot password?
-                </Button>
-              </form>
+                  <Button
+                    type={`button`}
+                    onClick={() => setModalVerify(true)}
+                    className={`w-full hover:bg-[rgba(0,0,0,0.3)] hover:text-white text-green-400`}
+                  >
+                    Forgot password?
+                  </Button>
+                </form>
 
-              <p className="mt-6 text-center text-sm text-gray-400">
-                Don't have an account yet?{" "}
-                <a
-                  className="font-semibold text-green-400 hover:text-gray-400 underline cursor-pointer"
-                  onClick={handleRegister}
-                >
-                  Click here to register
-                </a>
-              </p>
+                <p className="mt-6 text-center text-sm text-gray-400">
+                  Don't have an account yet?{" "}
+                  <a
+                    className="font-semibold text-green-400 hover:text-gray-400 underline cursor-pointer"
+                    onClick={handleRegister}
+                  >
+                    Click here to register
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
         </div>
