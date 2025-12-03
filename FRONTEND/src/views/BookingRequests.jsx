@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
@@ -27,6 +28,7 @@ function BookingRequests() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const { addresses } = useAddresses();
+  const location = useLocation();
 
   function useAddresses() {
     const [addresses, setAddresses] = useState([]);
@@ -134,7 +136,7 @@ function BookingRequests() {
             .getItem("booking_requests_dryer_name")
             .toUpperCase()}" successfully updated your reservation status at ` +
           new Date().toLocaleString(),
-        url: "/home/reservation-history",
+        url: `/home/reservation-history?id=${data.id}`,
       });
 
       setModalEdit(false);
@@ -151,7 +153,7 @@ function BookingRequests() {
     localStorage.setItem("booking_requests_farmer_id", data.farmer_id.id);
     localStorage.setItem(
       "booking_requests_dryer_name",
-      data.dryer_id.dryer_name,
+      data.dryer_id.dryer_name
     );
 
     const handleStatusChange = (e) => {
@@ -176,6 +178,36 @@ function BookingRequests() {
     };
 
     const isOwner = localStorage.getItem("role") === "owner";
+    const options = [];
+    if (data.status === "pending") {
+      options.push(
+        { value: "pending", phrase: "Pending" },
+        { value: "approved", phrase: "Approved" },
+        { value: "denied", phrase: "Denied" }
+      );
+    } else if (data.status === "approved") {
+      options.push(
+        { value: "approved", phrase: "Approved" },
+        { value: "completed", phrase: "Completed" }
+      );
+    } else if (data.status === "denied") {
+      options.push({ value: "denied", phrase: "denied" });
+    } else {
+      options.push(
+        { value: "pending", phrase: "Pending" },
+        { value: "approved", phrase: "Approved" },
+        { value: "denied", phrase: "Denied" }
+      );
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // normalize to start of day
+
+    const isDateLessThanToday = (dateString) => {
+      if (!dateString) return false;
+      const date = new Date(dateString + "T00:00:00");
+      return data.status === "denied" ? true : date > today ;
+    };
+
     const baseFields = [
       {
         type: "hidden",
@@ -211,12 +243,8 @@ function BookingRequests() {
         type: "select",
         name: "status",
         defaultValue: data.status,
-        options: [
-          { value: "pending", phrase: "Pending" },
-          { value: "approved", phrase: "Approved" },
-          { value: "denied", phrase: "Denied" },
-          { value: "completed", phrase: "Completed" },
-        ],
+        options: options,
+        disabled: isDateLessThanToday(data.date_to),
         colspan: 2,
         onChange: isOwner ? handleStatusChange : undefined,
       },
@@ -289,7 +317,7 @@ function BookingRequests() {
               </div>
             ),
           }))
-        : [],
+        : []
     );
 
     if (!Array.isArray(data)) setIsLoading(true);
@@ -335,7 +363,9 @@ function BookingRequests() {
             action: (
               <div className="flex justify-center gap-2">
                 <Button
-                  onClick={() => handleEdit(res)}
+                  onClick={() =>
+                    res.status && res.status !== "completed" && handleEdit(res)
+                  }
                   className="bg-blue-400 hover:bg-blue-500 text-white"
                 >
                   Edit
@@ -348,11 +378,11 @@ function BookingRequests() {
                 </Button>
               </div>
             ),
-          })),
+          }))
         );
         localStorage.setItem(
           "booking_requests_data",
-          JSON.stringify(result.data.data),
+          JSON.stringify(result.data.data)
         );
       }
     } catch (error) {
@@ -360,6 +390,16 @@ function BookingRequests() {
       setData([]);
     } finally {
       setIsLoading(false);
+      const params = new URLSearchParams(location.search);
+      if (params.get("id")) {
+        if (JSON.parse(localStorage.getItem("booking_requests_notification")) === null) {
+          localStorage.setItem("booking_requests_notification", params.get("id"));
+          const data = JSON.parse(localStorage.getItem("booking_requests_data"));
+          const targetReservation = data.find(item => item.id === params.get("id"));
+          handleView(targetReservation);
+          window.history.replaceState({}, '', location.pathname);
+        }
+      }
     }
   }, [
     handleEdit,
@@ -369,7 +409,17 @@ function BookingRequests() {
     filter.status,
     filter.location,
     search,
+    location,
   ]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("pending")) {
+      setFilter((prev) => ({ ...prev, status: "pending" }));
+    } else if (params.get("approved")) {
+      setFilter((prev) => ({ ...prev, status: "approved" }));
+    }
+  }, [location.search]);
 
   useEffect(() => {
     fetchData();

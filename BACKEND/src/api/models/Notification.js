@@ -24,15 +24,13 @@ const Notification = {
   },
 
   create: async (context, url, user) => {
-    const { error } = await supabase.from("notifications").insert([
-      {
-        context,
-        url,
-        user,
-      },
-    ]);
+    const { data, error } = await supabase
+      .from("notifications")
+      .insert([{ context, url, user }])
+      .select();
 
     if (error) throw error;
+    return data;
   },
 
   update: async (id) => {

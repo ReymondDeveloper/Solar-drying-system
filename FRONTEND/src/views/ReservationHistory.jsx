@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import TableSkeleton from "../component/TableSkeleton";
 import Table from "../component/Table";
 import Pagination from "../utils/Pagination";
@@ -24,6 +25,7 @@ function ReservationHistory() {
   const [datasView, setDatasView] = useState([]);
   const role = localStorage.getItem("role");
   const { addresses } = useAddresses();
+  const location = useLocation();
 
   function useAddresses() {
     const [addresses, setAddresses] = useState([]);
@@ -50,38 +52,32 @@ function ReservationHistory() {
   const tableHeadings =
     role === "farmer"
       ? [
-          "Magsasaka",
           "Pinag-book na Patuyuan",
           "Lokasyon",
           "Uri ng Pananim",
           "Dami (Kaban)",
           "Paraan ng Pagbabayad",
-          "Petsa",
           "Durasyon",
           "Katayuan",
           "Aksyon",
         ]
       : [
-          "Farmer",
           "Booked Dryer",
           "Location",
           "Crop Type",
           "Quantity (Canvan)",
           "Payment",
-          "Date",
           "Duration",
           "Status",
           "Action",
         ];
 
   const tableDataCell = [
-    "farmer_name",
     "dryer_name",
     "location",
     "crop_type",
     "quantity",
     "payment",
-    "date",
     "duration",
     "status",
     "action",
@@ -207,20 +203,12 @@ function ReservationHistory() {
     setData(
       Array.isArray(data)
         ? data?.map((res) => ({
-            farmer_name: res.farmer_id.first_name || "N/A",
             dryer_name: res.dryer_id.dryer_name || "N/A",
             location: res.dryer_id.location || "N/A",
             crop_type: res.crop_type_id.crop_type_name || "N/A",
             quantity: res.crop_type_id.quantity || 0,
             payment: res.crop_type_id.payment || "N/A",
             notes: res.notes || res.crop_type_id.notes || "",
-            date: res.created_at
-              ? new Date(res.created_at).toLocaleString("en-PH", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })
-              : "N/A",
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
             status: res.status || "pending",
             action: (
@@ -232,7 +220,7 @@ function ReservationHistory() {
               </Button>
             ),
           }))
-        : [],
+        : []
     );
 
     if (!Array.isArray(data)) setIsLoading(true);
@@ -261,20 +249,12 @@ function ReservationHistory() {
       if (isDifferent) {
         setData(
           result.data.data?.map((res) => ({
-            farmer_name: res.farmer_id.first_name || "N/A",
             dryer_name: res.dryer_id.dryer_name || "N/A",
             location: res.dryer_id.location || "N/A",
             crop_type: res.crop_type_id.crop_type_name || "N/A",
             quantity: res.crop_type_id.quantity || 0,
             payment: res.crop_type_id.payment || "N/A",
             notes: res.notes || res.crop_type_id.notes || "",
-            date: res.created_at
-              ? new Date(res.created_at).toLocaleString("en-PH", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })
-              : "N/A",
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
             status: res.status || "pending",
             action: (
@@ -285,11 +265,11 @@ function ReservationHistory() {
                 View
               </Button>
             ),
-          })),
+          }))
         );
         localStorage.setItem(
           "reservation_history_data",
-          JSON.stringify(result.data.data),
+          JSON.stringify(result.data.data)
         );
       }
     } catch (error) {
@@ -297,8 +277,29 @@ function ReservationHistory() {
       setData([]);
     } finally {
       setIsLoading(false);
+      const params = new URLSearchParams(location.search);
+      if (params.get("id")) {
+        if (JSON.parse(localStorage.getItem("reservation_history_notification")) === null) {
+          localStorage.setItem("reservation_history_notification", params.get("id"));
+          const data = JSON.parse(localStorage.getItem("reservation_history_data"));
+          const targetReservation = data.find(item => item.id === params.get("id"));
+          handleView(targetReservation);
+          window.history.replaceState({}, '', location.pathname);
+        }
+      }
     }
-  }, [handleView, limit, currentPage, filter.status, filter.location, search]);
+  }, [handleView, limit, currentPage, filter.status, filter.location, search, location]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("pending")) {
+      setFilter((prev) => ({ ...prev, status: "pending" }));
+    } else if (params.get("approved")) {
+      setFilter((prev) => ({ ...prev, status: "approved" }));
+    } else if (params.get("completed")) {
+      setFilter((prev) => ({ ...prev, status: "completed" }));
+    }
+  }, [location.search]);
 
   useEffect(() => {
     fetchData();

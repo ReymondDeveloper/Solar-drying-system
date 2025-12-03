@@ -36,8 +36,8 @@ export const getReservations = async (req, res) => {
 
     if (typeof search !== "undefined" && search) {
       query = query
-        .not("farmer_id", "is", null)
-        .ilike("farmer_id.first_name", `%${search}%`);
+        .not("dryer_id", "is", null)
+        .ilike("dryer_id.dryer_name", `%${search}%`);
     }
 
     if (typeof limit !== "undefined" && typeof offset !== "undefined") {
@@ -210,75 +210,80 @@ export const updateReservation = async (req, res) => {
     const { id } = req.params;
     const { status, notes, payment, quantity } = req.body;
 
-    const { data: updatedReservations, error: resError } = await supabase
+    const { data: validation, error: failedValidation} = await supabase
       .from("reservations")
-      .update({ status })
-      .eq("id", id)
-      .select();
+      .select("status")
+      .eq("id", id);
 
-    if (resError) throw resError;
-    if (!updatedReservations || updatedReservations.length === 0) {
+    if (failedValidation) throw failedValidation;
+
+    if (!validation || validation.length === 0) {
       return res.status(404).json({ message: "Reservation not found" });
     }
 
-    const reservation = updatedReservations[0];
+    if (validation.status !== status) {
+      const { data: updatedReservations, error: resError } = await supabase
+        .from("reservations")
+        .update({ status })
+        .eq("id", id)
+        .select();
 
-    const cropUpdate = {};
-    if (notes !== undefined) cropUpdate.notes = notes;
-    if (payment !== undefined) cropUpdate.payment = payment;
-    if (quantity !== undefined) cropUpdate.quantity = quantity;
+      if (resError) throw resError;
 
-    if (Object.keys(cropUpdate).length > 0) {
-      const { error: cropError } = await supabase
-        .from("crop_types")
-        .update(cropUpdate)
-        .eq("crop_type_id", reservation.crop_type_id);
+      const reservation = updatedReservations[0];
 
-      if (cropError) throw cropError;
+      const cropUpdate = {};
+
+      if (notes !== undefined) cropUpdate.notes = notes;
+      if (payment !== undefined) cropUpdate.payment = payment;
+      if (quantity !== undefined) cropUpdate.quantity = quantity;
+
+      if (Object.keys(cropUpdate).length > 0) {
+        const { error: cropError } = await supabase
+          .from("crop_types")
+          .update(cropUpdate)
+          .eq("crop_type_id", reservation.crop_type_id);
+
+        if (cropError) throw cropError;
+      }
+
+      if (status.toLowerCase() === "denied" || status.toLowerCase() === "completed") {
+        const { data: cropType, error: cropError } = await supabase
+          .from("crop_types")
+          .select("quantity")
+          .eq("crop_type_id", reservation.crop_type_id)
+          .single();
+        if (cropError) throw cropError;
+
+        const { data: dryer, error: dryerError } = await supabase
+          .from("dryers")
+          .select("available_capacity, maximum_capacity")
+          .eq("id", reservation.dryer_id)
+          .single();
+        if (dryerError) throw dryerError;
+
+        const newAvailable =
+          Number(dryer.available_capacity) + Number(cropType.quantity);
+
+        const safeAvailable =
+          newAvailable > dryer.maximum_capacity
+            ? dryer.maximum_capacity
+            : newAvailable;
+
+        const { error: updateDryerError } = await supabase
+          .from("dryers")
+          .update({ available_capacity: safeAvailable })
+          .eq("id", reservation.dryer_id);
+
+        if (updateDryerError) throw updateDryerError;
+
+        console.log(
+          `Rolled back ${cropType.quantity} cavans to dryer ${reservation.dryer_id}`,
+        );
+      }
     }
 
-    if (
-      status.toLowerCase() === "denied" ||
-      status.toLowerCase() === "completed"
-    ) {
-      const { data: cropType, error: cropError } = await supabase
-        .from("crop_types")
-        .select("quantity")
-        .eq("crop_type_id", reservation.crop_type_id)
-        .single();
-      if (cropError) throw cropError;
-
-      const { data: dryer, error: dryerError } = await supabase
-        .from("dryers")
-        .select("available_capacity, maximum_capacity")
-        .eq("id", reservation.dryer_id)
-        .single();
-      if (dryerError) throw dryerError;
-
-      const newAvailable =
-        Number(dryer.available_capacity) + Number(cropType.quantity);
-
-      const safeAvailable =
-        newAvailable > dryer.maximum_capacity
-          ? dryer.maximum_capacity
-          : newAvailable;
-
-      const { error: updateDryerError } = await supabase
-        .from("dryers")
-        .update({ available_capacity: safeAvailable })
-        .eq("id", reservation.dryer_id);
-
-      if (updateDryerError) throw updateDryerError;
-
-      console.log(
-        `Rolled back ${cropType.quantity} cavans to dryer ${reservation.dryer_id}`,
-      );
-    }
-
-    res.json({
-      message: "Reservation updated successfully.",
-      reservation,
-    });
+    res.status(200).json({ success: true });
   } catch (err) {
     console.error("Error updating reservation:", err);
     res.status(400).json({

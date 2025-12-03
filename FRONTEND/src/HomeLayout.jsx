@@ -15,10 +15,11 @@ function HomeLayout() {
   return (
     <div className="h-screen w-screen flex overflow-hidden relative">
       {<Navigation button={button} setButton={setButton} />}
+
       {accountModal && <AccountModal setAccountModal={setAccountModal} />}
-      {notificationModal && (
-        <NotificationModal setNotificationModal={setNotificationModal} />
-      )}
+
+      <NotificationModal notificationModal={notificationModal} setNotificationModal={setNotificationModal} />
+
       <div className="flex-1 overflow-auto">
         <div className="h-full flex flex-col">
           <Header

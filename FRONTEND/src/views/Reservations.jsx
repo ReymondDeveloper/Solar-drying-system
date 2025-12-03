@@ -6,6 +6,7 @@ import Search from "../component/Search";
 import Modal from "../component/Modal";
 import Loading from "../component/Loading";
 import api from "../api/api";
+import Button from "../component/Button";
 
 function Reservations() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,22 +18,25 @@ function Reservations() {
   const [filter, setFilter] = useState({ status: "all", location: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const [modalView, setModalView] = useState(false);
+  const [datasView, setDatasView] = useState([]);
+
   const tableHeadings = [
-    "Farmer",
     "Dryers",
     "Location",
     "Date Created",
     "Status",
     "Duration",
+    "Action",
   ];
 
   const tableDataCell = [
-    "farmer_name",
     "dryer_name",
     "location",
     "created_at",
     "status",
     "duration",
+    "action",
   ];
   const { addresses } = useAddresses();
 
@@ -100,13 +104,17 @@ function Reservations() {
     }
   };
 
+  const handleView = useCallback((data) => {
+    setDatasView(() => data);
+    setModalView(true);
+  }, []);
+
   const fetchData = useCallback(async () => {
     const local = localStorage.getItem("reservation_data");
     const data = JSON.parse(local);
     setData(
       Array.isArray(data)
         ? data?.map((res) => ({
-            farmer_name: res.farmer_id.first_name,
             dryer_name: res.dryer_id.dryer_name,
             location: res.dryer_id.location,
             created_at: res.created_at
@@ -118,6 +126,14 @@ function Reservations() {
               : "N/A",
             status: res.status || "pending",
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
+            action: (
+              <Button
+                onClick={() => handleView(res)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
+              >
+                View
+              </Button>
+            ),
           }))
         : [],
     );
@@ -146,7 +162,6 @@ function Reservations() {
       if (isDifferent) {
         setData(
           result.data.data?.map((res) => ({
-            farmer_name: res.farmer_id.first_name,
             dryer_name: res.dryer_id.dryer_name,
             location: res.dryer_id.location,
             created_at: res.created_at
@@ -158,6 +173,14 @@ function Reservations() {
               : "N/A",
             status: res.status || "pending",
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
+            action: (
+              <Button
+                onClick={() => handleView(res)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
+              >
+                View
+              </Button>
+            ),
           })),
         );
         localStorage.setItem(
@@ -171,7 +194,7 @@ function Reservations() {
     } finally {
       setIsLoading(false);
     }
-  }, [limit, currentPage, filter.status, filter.location, search]);
+  }, [handleView, limit, currentPage, filter.status, filter.location, search]);
 
   useEffect(() => {
     fetchData();
@@ -196,6 +219,14 @@ function Reservations() {
           fields={fields}
           title="Filters"
           button_name="Apply Status"
+        />
+      )}
+      {modalView && (
+        <Modal
+          setModal={setModalView}
+          datas={datasView}
+          title="Reservation Details"
+          button_name="Done"
         />
       )}
       <div

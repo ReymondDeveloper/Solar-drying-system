@@ -28,11 +28,11 @@ export const putNotifications = async (req, res) => {
 
 export const postNotifications = async (req, res) => {
   try {
-    let { context, url, user } = req.body;
-    url ? url : (url = null);
+    const { context, url, user } = req.body;
     await Notification.create(context, url, user);
-    res.status(200);
+    res.status(200).json({ success: true });
   } catch (err) {
-    console.log(err);
+    console.error(err);
+    res.status(500).json({ error: err.message });
   }
 };
