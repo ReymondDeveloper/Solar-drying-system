@@ -136,7 +136,7 @@ function BookingRequests() {
             .getItem("booking_requests_dryer_name")
             .toUpperCase()}" successfully updated your reservation status at ` +
           new Date().toLocaleString(),
-        url: "/home/reservation-history",
+        url: `/home/reservation-history?id=${data.id}`,
       });
 
       setModalEdit(false);
@@ -192,8 +192,6 @@ function BookingRequests() {
       );
     } else if (data.status === "denied") {
       options.push({ value: "denied", phrase: "denied" });
-    } else if (data.status === "completed") {
-      options.push({ value: "completed", phrase: "completed" });
     } else {
       options.push(
         { value: "pending", phrase: "Pending" },
@@ -207,7 +205,7 @@ function BookingRequests() {
     const isDateLessThanToday = (dateString) => {
       if (!dateString) return false;
       const date = new Date(dateString + "T00:00:00");
-      return date > today;
+      return data.status === "denied" ? true : date > today ;
     };
 
     const baseFields = [
@@ -392,6 +390,16 @@ function BookingRequests() {
       setData([]);
     } finally {
       setIsLoading(false);
+      const params = new URLSearchParams(location.search);
+      if (params.get("id")) {
+        if (JSON.parse(localStorage.getItem("booking_requests_notification")) === null) {
+          localStorage.setItem("booking_requests_notification", params.get("id"));
+          const data = JSON.parse(localStorage.getItem("booking_requests_data"));
+          const targetReservation = data.find(item => item.id === params.get("id"));
+          handleView(targetReservation);
+          window.history.replaceState({}, '', location.pathname);
+        }
+      }
     }
   }, [
     handleEdit,
@@ -401,6 +409,7 @@ function BookingRequests() {
     filter.status,
     filter.location,
     search,
+    location,
   ]);
 
   useEffect(() => {

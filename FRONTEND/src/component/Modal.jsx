@@ -7,6 +7,7 @@ import api from "../api/api.js";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./datepicker.css";
+import axios from "axios";
 
 function Modal({
   setModal,
@@ -177,6 +178,23 @@ function Modal({
         JSON.stringify([...chats, newChat])
       );
       setChatTextArea("");
+
+      if (userRole === "owner") {
+        axios.post(`${import.meta.env.VITE_API}/notification`, {
+          user: datas.farmer_id.id,
+          context:
+            `A dryer owner message you regarding your reservation at "${datas.dryer_id.dryer_name.toUpperCase()}" dryer on ${new Date().toLocaleDateString()}. Tap to respond.`,
+          url: `/home/reservation-history?id=${datas.id}`,
+        });
+      } else if (userRole === "farmer") {
+        axios.post(`${import.meta.env.VITE_API}/notification`, {
+          user: datas.owner_id.id,
+          context:
+            `A farmer messaged you regarding their reservation at "${datas.dryer_id.dryer_name.toUpperCase()}" dryer on ${new Date().toLocaleDateString()}. Tap to respond.`,
+          url: `/home/booking-requests?id=${datas.id}`,
+        });
+      }
+      
     } catch (error) {
       console.error(error);
     }
@@ -759,85 +777,88 @@ function Modal({
                   </span>
                 </p>
 
-                <div className="my-4 flex flex-col">
-                  <div className="rounded-t-md bg-green-400 px-5 py-2 text-white">
-                    {userRole === "farmer"
-                      ? "Makipag-usap sa Dryer Owner"
-                      : "Chat with Farmer"}
-                  </div>
-                  <div
-                    ref={chatRef}
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
-                    className="p-1 border-x-4 border-green-400 flex flex-col gap-6 h-[150px] overflow-y-auto"
-                  >
-                    {chats.length > 0 ? (
-                      chats.map((chat, index) => (
-                        <div
-                          className={`flex mt-auto relative ${
-                            chat.sender === localStorage.getItem("id")
-                              ? "justify-end"
-                              : "justify-start"
-                          }`}
-                          key={index}
-                        >
-                          <div className="bg-green-200 text-sm font-normal rounded px-5 py-2 max-w-3/4">
-                            <span
-                              className="italic"
-                              style={{ whiteSpace: "pre-line" }}
-                            >
-                              {chat.message}
+                {userRole !== "admin" && (
+                  <div className="flex flex-col mt-4">
+                    <div className="rounded-t-md bg-green-400 px-5 py-2 text-white">
+                      {userRole === "farmer"
+                        ? "Makipag-usap sa Dryer Owner"
+                        : "Chat with Farmer"}
+                    </div>
+                    <div
+                      ref={chatRef}
+                      onMouseEnter={() => setIsHovered(true)}
+                      onMouseLeave={() => setIsHovered(false)}
+                      className="p-1 border-x-4 border-green-400 flex flex-col gap-6 h-[150px] overflow-y-auto"
+                    >
+                      {chats.length > 0 ? (
+                        chats.map((chat, index) => (
+                          <div
+                            className={`flex mt-auto relative ${
+                              chat.sender === localStorage.getItem("id")
+                                ? "justify-end"
+                                : "justify-start"
+                            }`}
+                            key={index}
+                          >
+                            <div className="bg-green-200 text-sm font-normal rounded px-5 py-2 max-w-3/4">
+                              <span
+                                className="italic"
+                                style={{ whiteSpace: "pre-line" }}
+                              >
+                                {chat.message}
+                              </span>
+                            </div>
+                            <span className="absolute bottom-[calc(0%-18px)] text-[10px] text-gray-500 italic px-1">
+                              {new Date(chat.created_at).toLocaleString()}
                             </span>
                           </div>
-                          <span className="absolute bottom-[calc(0%-18px)] text-[10px] text-gray-500 italic px-1">
-                            {new Date(chat.created_at).toLocaleString()}
-                          </span>
+                        ))
+                      ) : (
+                        <div className="text-center my-auto italic">
+                          {userRole === "farmer"
+                            ? "Walang pang mensahe na makikita."
+                            : "Theres no messages to show."}
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-center my-auto italic">
-                        {userRole === "farmer"
-                          ? "Walang pang mensahe na makikita."
-                          : "Theres no messages to show."}
-                      </div>
-                    )}
-                  </div>
-                  <div className="bg-green-400 p-1 h-[46px] text-white flex gap-2">
-                    <textarea
-                      value={chatTextArea}
-                      onChange={(e) => setChatTextArea(e.target.value)}
-                      className="bg-[rgba(255,255,255,0.9)] flex-grow p-2 text-black resize-none"
-                    ></textarea>
-                    {userRole === "farmer" &&
-                      datas.status !== "denied" &&
-                      datas.status !== "pending" && (
-                        <span
-                          onClick={() => {
-                            setGcashModal(true);
-                            setModal(false);
-                          }}
-                          className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer"
-                        >
-                          <span className="max-[768px]:hidden">
-                            {userRole === "farmer" ? "I-upload" : "Upload"}
-                          </span>
-                          <ImFolderUpload />
-                        </span>
                       )}
-                    <span
-                      onClick={() => handleChat()}
-                      className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer"
-                    >
-                      <span className="max-[768px]:hidden">
-                        {userRole === "farmer" ? "Ipadala" : "Send"}
+                    </div>
+                    <div className="bg-green-400 p-1 h-[46px] text-white flex gap-2">
+                      <textarea
+                        value={chatTextArea}
+                        onChange={(e) => setChatTextArea(e.target.value)}
+                        className="bg-[rgba(255,255,255,0.9)] flex-grow p-2 text-black resize-none"
+                      ></textarea>
+                      {userRole === "farmer" &&
+                        datas.status !== "denied" &&
+                        datas.status !== "pending" && (
+                          <span
+                            onClick={() => {
+                              setGcashModal(true);
+                              setModal(false);
+                            }}
+                            className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer"
+                          >
+                            <span className="max-[768px]:hidden">
+                              {userRole === "farmer" ? "I-upload" : "Upload"}
+                            </span>
+                            <ImFolderUpload />
+                          </span>
+                        )}
+                      <span
+                        onClick={() => handleChat()}
+                        className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer"
+                      >
+                        <span className="max-[768px]:hidden">
+                          {userRole === "farmer" ? "Ipadala" : "Send"}
+                        </span>
+                        <FaLocationArrow className="rotate-45" />
                       </span>
-                      <FaLocationArrow className="rotate-45" />
-                    </span>
+                    </div>
                   </div>
-                </div>
+                )}
+                
 
                 {datas.status !== "denied" && datas.status !== "pending" && (
-                  <div className="w-full overflow-x-auto">
+                  <div className="w-full overflow-x-auto mt-4">
                     <table className="min-w-[700px] w-full">
                       <thead>
                         <tr className="bg-gray-200">

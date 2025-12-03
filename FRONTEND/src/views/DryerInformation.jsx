@@ -124,19 +124,10 @@ function DryerInformation() {
       axios.post(`${import.meta.env.VITE_API}/notification`, {
         user: "4c3f4aae-54e9-40a3-b14f-39638c4894a5",
         context:
-          `A owner successfully created a new dryer located on "${
+          `An owner created a new dryer "${dryerData.dryer_name.toUpperCase()}" located on "${
             dryerData.location
           }" at ` + new Date().toLocaleString(),
         url: "/home/availability",
-      });
-
-      axios.post(`${import.meta.env.VITE_API}/notification`, {
-        user: localStorage.getItem("id"),
-        context:
-          `You've successfully created a new dryer located on "${
-            dryerData.location
-          }" at ` + new Date().toLocaleString(),
-        url: "/home/dryer-information",
       });
 
       fetchData();
@@ -203,19 +194,10 @@ function DryerInformation() {
       axios.post(`${import.meta.env.VITE_API}/notification`, {
         user: "4c3f4aae-54e9-40a3-b14f-39638c4894a5",
         context:
-          `A owner successfully updated dryer details of a dryer located on "${
+          `An owner updated the details of "${updatedData.dryer_name.toUpperCase()}" located on "${
             updatedData.location
           }" at ` + new Date().toLocaleString(),
-        url: "/home/availability",
-      });
-
-      axios.post(`${import.meta.env.VITE_API}/notification`, {
-        user: localStorage.getItem("id"),
-        context:
-          `You've successfully update dryer details of a dryer located on "${
-            updatedData.location
-          }" at ` + new Date().toLocaleString(),
-        url: "/home/dryer-information",
+        url: `/home/create-reservation/${selectedDryer.id}`,
       });
 
       fetchData();

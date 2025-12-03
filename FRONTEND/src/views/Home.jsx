@@ -100,9 +100,10 @@ function ReportPie({ data = [], title }) {
   const safeData = Array.isArray(data) ? data : [];
 
   const filteredData =
-    pieFilter === "all"
-      ? safeData
-      : [safeData[Number(pieFilter)]].filter(Boolean);
+  pieFilter === "all"
+    ? [{ rice: safeData.reduce((sum, item) => sum + (item?.rice || 0), 0),
+        corn: safeData.reduce((sum, item) => sum + (item?.corn || 0), 0) }]
+    : [safeData[Number(pieFilter)]].filter(Boolean);
 
   const pieChartData =
     filteredData.length > 0

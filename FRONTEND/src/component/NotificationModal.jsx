@@ -16,7 +16,7 @@ function Notification({ index, item, setNotificationModal }) {
   return (
     <div
       key={index}
-      className="bg-gray-200 rounded-md p-5 w-full relative hover:opacity-[75%] cursor-pointer overflow-hidden"
+      className="bg-gray-200 rounded-md p-5 w-full relative hover:opacity-[75%] cursor-pointer overflow-hidden select-none"
       onClick={() => handleClick()}
     >
       {item.seen === false && (
@@ -27,7 +27,7 @@ function Notification({ index, item, setNotificationModal }) {
   );
 }
 
-function NotificationModal({ setNotificationModal }) {
+function NotificationModal({ notificationModal, setNotificationModal }) {
   const [data, setData] = useState([]);
   const fetchData = useCallback(async () => {
     const local = localStorage.getItem("notification_data");
@@ -71,7 +71,7 @@ function NotificationModal({ setNotificationModal }) {
     <>
       <div
         onClick={() => setNotificationModal(false)}
-        className="absolute z-1 top-0 left-0 flex items-start justify-end h-[calc(100dvh-56px)] w-full pt-[56px] pe-5"
+        className={`absolute z-1 top-0 left-0 flex items-start justify-end h-[calc(100dvh-56px)] w-full pt-[56px] pe-5 ${notificationModal ? 'show' : 'hidden'}`}
       >
         <div
           onClick={(e) => e.stopPropagation()}
@@ -87,14 +87,14 @@ function NotificationModal({ setNotificationModal }) {
                 />
               ))
             ) : (
-              <div className="bg-gray-200 rounded-md p-5 w-full relative hover:opacity-[75%] cursor-pointer">
-                <div className="italic ms-5 text-sm">
+              <div className="bg-gray-200 rounded-md p-5 w-full relative hover:opacity-[75%] cursor-pointer select-none">
+                <div className="italic ms-5 text-sm ">
                   The system found no notifications.
                 </div>
               </div>
             )}
             <Button
-              className={"w-full bg-green-600 hover:bg-green-700 text-white"}
+              className={"w-full bg-green-600 hover:bg-green-700 text-white select-none"}
               onClick={() => handleClick()}
             >
               Mark all as read

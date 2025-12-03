@@ -57,7 +57,6 @@ function ReservationHistory() {
           "Uri ng Pananim",
           "Dami (Kaban)",
           "Paraan ng Pagbabayad",
-          "Petsa",
           "Durasyon",
           "Katayuan",
           "Aksyon",
@@ -68,7 +67,6 @@ function ReservationHistory() {
           "Crop Type",
           "Quantity (Canvan)",
           "Payment",
-          "Date",
           "Duration",
           "Status",
           "Action",
@@ -80,7 +78,6 @@ function ReservationHistory() {
     "crop_type",
     "quantity",
     "payment",
-    "date",
     "duration",
     "status",
     "action",
@@ -212,13 +209,6 @@ function ReservationHistory() {
             quantity: res.crop_type_id.quantity || 0,
             payment: res.crop_type_id.payment || "N/A",
             notes: res.notes || res.crop_type_id.notes || "",
-            date: res.created_at
-              ? new Date(res.created_at).toLocaleString("en-PH", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })
-              : "N/A",
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
             status: res.status || "pending",
             action: (
@@ -265,13 +255,6 @@ function ReservationHistory() {
             quantity: res.crop_type_id.quantity || 0,
             payment: res.crop_type_id.payment || "N/A",
             notes: res.notes || res.crop_type_id.notes || "",
-            date: res.created_at
-              ? new Date(res.created_at).toLocaleString("en-PH", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })
-              : "N/A",
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
             status: res.status || "pending",
             action: (
@@ -294,8 +277,18 @@ function ReservationHistory() {
       setData([]);
     } finally {
       setIsLoading(false);
+      const params = new URLSearchParams(location.search);
+      if (params.get("id")) {
+        if (JSON.parse(localStorage.getItem("reservation_history_notification")) === null) {
+          localStorage.setItem("reservation_history_notification", params.get("id"));
+          const data = JSON.parse(localStorage.getItem("reservation_history_data"));
+          const targetReservation = data.find(item => item.id === params.get("id"));
+          handleView(targetReservation);
+          window.history.replaceState({}, '', location.pathname);
+        }
+      }
     }
-  }, [handleView, limit, currentPage, filter.status, filter.location, search]);
+  }, [handleView, limit, currentPage, filter.status, filter.location, search, location]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
