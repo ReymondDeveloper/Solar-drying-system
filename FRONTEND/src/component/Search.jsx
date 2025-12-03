@@ -24,7 +24,7 @@ function Search({ setSearch, setModal }) {
   return (
     <div
       className="bg-gray-200 rounded-full w-full border-5 border-gray-300 p-1 flex items-center gap-3
-    md:w-1/2 lg:w-1/3 md:mx-auto"
+    md:w-1/2 lg:w-1/3"
     >
       <div
         onClick={handleSearchIcon}

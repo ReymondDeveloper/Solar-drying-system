@@ -7,6 +7,7 @@ import Modal from "../component/Modal";
 import Loading from "../component/Loading";
 import api from "../api/api";
 import Button from "../component/Button";
+import Report from "../component/Report"
 
 function Reservations() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,8 +23,8 @@ function Reservations() {
   const [datasView, setDatasView] = useState([]);
 
   const tableHeadings = [
-    "Dryers",
-    "Location",
+    "Registered Dryer",
+    "Location (Sablayan)",
     "Date Created",
     "Status",
     "Duration",
@@ -234,7 +235,22 @@ function Reservations() {
           modal ? "overflow-hidden" : "overflow-auto"
         }`}
       >
-        <Search setSearch={setSearch} setModal={setModal} />
+        <div className="w-full flex justify-center gap-5">
+          <Search setSearch={setSearch} setModal={setModal} />
+          <Report 
+            column={[
+              { label: "#", ratio: 0.05 },
+              { label: "Registered Dryer", ratio: 0.2 },
+              { label: "Location (Sablayan)", ratio: 0.22 },
+              { label: "Date Created", ratio: 0.15 },
+              { label: "Status", ratio: 0.15 },
+              { label: "Duration", ratio: 0.23 },
+            ]}
+            data={JSON.parse(localStorage.getItem("reservation_data"))} 
+            report_title="LIST OF RESERVATIONS"
+          />
+        </div>
+        
         <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
           <div className="overflow-auto max-h-[400px]">
             {isLoading ? (

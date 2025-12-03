@@ -10,6 +10,7 @@ import Loading from "../component/Loading";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import api from "../api/api";
+import Report from "../component/Report"
 
 function Accounts() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -311,7 +312,21 @@ function Accounts() {
           modalFilter || modalAdd ? "overflow-hidden" : "overflow-auto"
         }`}
       >
-        <Search setSearch={setSearch} setModal={setModalFilter} />
+        <div className="w-full flex justify-center gap-5">
+          <Search setSearch={setSearch} setModal={setModalFilter} />
+          <Report 
+            column={[
+              { label: "#", ratio: 0.05 },
+              { label: "First Name", ratio: 0.2 },
+              { label: "Last Name", ratio: 0.2 },
+              { label: "Address", ratio: 0.2 },
+              { label: "Email", ratio: 0.2 },
+              { label: "Role", ratio: 0.15 },
+            ]} 
+            data={JSON.parse(localStorage.getItem("accounts_data"))} 
+            report_title="LIST OF USERS"
+          />
+        </div>
         <div className="w-full text-right mt-5">
           <Button
             onClick={() => setModalAdd(true)}
