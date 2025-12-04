@@ -24,6 +24,7 @@ function Accounts() {
   const [filter, setFilter] = useState({ role: "all" });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const [report, setReport] = useState([]);
 
   const tableHeadings = [
     "First Name",
@@ -279,12 +280,31 @@ function Accounts() {
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
 
-  if (isError)
+  useEffect(() => {
+    async function fetchReport() {
+      try {
+        const response = await api.get("/users", {
+          params: {
+            role: filter.role,
+            search: search,
+          },
+        });
+        setReport(response.data.data);
+      } catch {
+        setReport([]);
+      }
+    }
+    fetchReport();
+  }, [filter.role, search]);
+
+  if (isError) {
     return (
       <div className="absolute top-0 left-0 w-full h-[calc(100dvh-56px)] text-5xl flex justify-center items-center font-bold py-5">
         Error while fetching the data
       </div>
-    );
+    )
+  };
+
   return (
     <>
       {loading && <Loading />}
@@ -323,7 +343,7 @@ function Accounts() {
               { label: "Email", ratio: 0.2 },
               { label: "Role", ratio: 0.15 },
             ]} 
-            data={JSON.parse(localStorage.getItem("accounts_data"))} 
+            data={report} 
             report_title="LIST OF USERS"
           />
         </div>

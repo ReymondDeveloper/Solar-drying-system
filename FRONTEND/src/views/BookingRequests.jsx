@@ -205,7 +205,7 @@ function BookingRequests() {
     const isDateLessThanToday = (dateString) => {
       if (!dateString) return false;
       const date = new Date(dateString + "T00:00:00");
-      return data.status === "denied" ? true : date > today ;
+      return data.status === "denied" ? true : data.status === "pending" ? false : date > today ;
     };
 
     const baseFields = [
@@ -480,7 +480,9 @@ function BookingRequests() {
           modalFilter || modalView ? "overflow-hidden" : "overflow-auto"
         }`}
       >
-        <Search setSearch={setSearch} setModal={setModalFilter} />
+        <div className="w-full flex justify-center">
+          <Search setSearch={setSearch} setModal={setModalFilter} />
+        </div>
         <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
           <div className="overflow-auto max-h-[400px]">
             {isLoading ? (

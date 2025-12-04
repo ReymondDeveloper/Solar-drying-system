@@ -21,7 +21,8 @@ function Reservations() {
   const [loading, setLoading] = useState(false);
   const [modalView, setModalView] = useState(false);
   const [datasView, setDatasView] = useState([]);
-
+  const [report, setReport] = useState([]);
+  
   const tableHeadings = [
     "Registered Dryer",
     "Location (Sablayan)",
@@ -210,6 +211,24 @@ function Reservations() {
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
 
+  useEffect(() => {
+    async function fetchReport() {
+      try {
+        const response = await api.get("/reservations", {
+          params: {
+            status: filter.status,
+            location: filter.location,
+            search: search,
+          },
+        });
+        setReport(response.data.data);
+      } catch {
+        setReport([]);
+      }
+    }
+    fetchReport();
+  }, [filter.status, filter.location, search]);
+
   return (
     <>
       {loading && <Loading />}
@@ -246,7 +265,7 @@ function Reservations() {
               { label: "Status", ratio: 0.15 },
               { label: "Duration", ratio: 0.23 },
             ]}
-            data={JSON.parse(localStorage.getItem("reservation_data"))} 
+            data={report} 
             report_title="LIST OF RESERVATIONS"
           />
         </div>

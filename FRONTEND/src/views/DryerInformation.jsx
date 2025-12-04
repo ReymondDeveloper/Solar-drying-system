@@ -439,7 +439,9 @@ function DryerInformation() {
           modalFilter ? "overflow-hidden" : "overflow-auto"
         }`}
       >
-        <Search setSearch={setSearch} setModal={setModalFilter} />
+        <div className="w-full flex justify-center">
+          <Search setSearch={setSearch} setModal={setModalFilter} />
+        </div>
         <div className="w-full text-right mt-5">
           <Button
             onClick={() => setModalAdd(true)}
