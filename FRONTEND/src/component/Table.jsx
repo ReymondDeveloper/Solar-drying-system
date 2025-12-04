@@ -1,7 +1,6 @@
 function Table({ data, tableHeadings, tableDataCell, startIndex }) {
   const columnCount = tableHeadings.length;
   const columnWidth = `${100 / columnCount}%`;
-  const role = localStorage.getItem("role");
   return (
     <div className="max-w-full overflow-x-auto">
       <table
@@ -60,14 +59,14 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                       <span className="flex items-center gap-2 justify-center">
                         <span className="w-3.5 h-3.5 rounded-full bg-green-600" />
                         <span className="hidden md:inline text-green-600 font-medium">
-                          {role === "farmer" ? "Magagamit" : "Available"}
+                          Available
                         </span>
                       </span>
                     ) : el.status?.toLowerCase().includes("occupied") ? (
                       <span className="flex items-center gap-2 justify-center">
                         <span className="w-3.5 h-3.5 rounded-full bg-red-500" />
                         <span className="hidden md:inline text-red-600 font-medium">
-                          {role === "farmer" ? "Nakareserba" : "Occupied"}
+                          Occupied
                         </span>
                       </span>
                     ) : (
@@ -128,12 +127,12 @@ function Table({ data, tableHeadings, tableDataCell, startIndex }) {
                     el.status?.toLowerCase().includes("available") ? (
                       <span className="inline-flex items-center gap-2 text-green-600">
                         <span className="w-3.5 h-3.5 rounded-full bg-green-600" />
-                        {role === "farmer" ? "Magagamit" : "Available"}
+                        Available
                       </span>
                     ) : el.status?.toLowerCase().includes("occupied") ? (
                       <span className="inline-flex items-center gap-2 text-red-600">
                         <span className="w-3.5 h-3.5 rounded-full bg-red-500" />
-                        {role === "farmer" ? "Nakareserba" : "Occupied"}
+                        Occupied
                       </span>
                     ) : (
                       el[dataCell]

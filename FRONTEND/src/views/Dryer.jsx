@@ -39,7 +39,6 @@ export default function Dryer() {
   const [modalAdd, setModalAdd] = useState(false);
   const navigate = useNavigate();
   const farmerId = localStorage.getItem("id");
-  const role = localStorage.getItem("role");
   const [filledStars, setFilledStars] = useState(new Array(5).fill(false));
 
   const fetchData = useCallback(async () => {
@@ -289,39 +288,39 @@ export default function Dryer() {
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
           <div className="flex items-center text-center border-b pb-2 mb-4">
-            <h2 className="text-2xl font-bold text-gray-800">{role !== "farmer" ? 'Dryer Details' : 'Detalye ng Patuyuan'}</h2>
+            <h2 className="text-2xl font-bold text-gray-800">Dryer Details</h2>
           </div>
           <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
-            <span className="font-medium text-gray-700">{role !== "farmer" ? 'Dryer Name:' : 'Pangalan ng Patuyuan:'}</span>
+            <span className="font-medium text-gray-700">Dryer Name:</span>
             <span className=" text-gray-900">{data.dryer_name}</span>
           </div>
 
           <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
-            <span className="font-medium text-gray-700">{role !== "farmer" ? 'Maximum Capacity (Cavan):' : 'Kabuuang Kapasidad (Kaban):'}</span>
+            <span className="font-medium text-gray-700">Maximum Capacity (Cavan):</span>
             <span className=" text-gray-900">{data.maximum_capacity}</span>
           </div>
 
           <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
             <span className="font-medium text-gray-700">
-              {role !== "farmer" ? 'Available Capacity (Cavan):' : 'Magagamit na Kapasidad (Kaban):'}
+              Available Capacity (Cavan):
             </span>
             <span className="text-gray-900">{data.available_capacity}</span>
           </div>
 
           <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
-            <span className="font-medium text-gray-700">{role !== "farmer" ? 'Rate:' : 'Tasa:'}</span>
+            <span className="font-medium text-gray-700">Rate:</span>
             <span className="text-gray-900">PHP {data.rate}</span>
           </div>
 
           <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
-            <span className="font-medium text-gray-700">{role !== "farmer" ? 'Date Created:' : 'Petsa ng Pagkakagawa:'}</span>
+            <span className="font-medium text-gray-700">Date Created:</span>
             <span className="text-gray-900">
               {new Date(data.created_at).toLocaleString()}
             </span>
           </div>
 
           <div className="flex flex-wrap justify-between items-center bg-white p-3 rounded-md shadow-sm hover:bg-gray-100 transition-all">
-            <span className="font-medium text-gray-700">{role !== "farmer" ? 'Owner:' : 'May Ari:'}</span>
+            <span className="font-medium text-gray-700">Owner:</span>
             <span className="text-gray-900">{data.owner}</span>
           </div>
 
@@ -329,7 +328,7 @@ export default function Dryer() {
             <div className="flex flex-col gap-2 bg-white p-4 rounded-lg shadow-sm   hover:bg-gray-100 transition-all">
               <div className="flex items-center justify-between">
                 <span className="font-medium text-gray-700">
-                  {role !== "farmer" ? 'Operation Status:' : 'Istado ng Operasyon:'}
+                  Operation Status:
                 </span>
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${
@@ -339,17 +338,9 @@ export default function Dryer() {
                   }`}
                 >
                   {data.is_operation ? (
-                    role === "farmer" ? (
-                      "Gumagana"
-                    ) : (
-                      "Operational"
-                    )
+                    "Operational"
                   ) : (
-                    role === "farmer" ? (
-                      "Hindi Gumagana"
-                    ) : (
-                      "Not Operational"
-                    )
+                    "Not Operational"
                   )}
                 </span>
               </div>
@@ -368,13 +359,13 @@ export default function Dryer() {
               className="w-full bg-green-500 text-white py-3 rounded-full hover:bg-green-600 mt-4"
               onClick={() => setModalAdd(true)}
             >
-              {role !== "farmer" ? 'Reserve' : 'Ireserba'}
+              Reserve
             </Button>
           )}
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
-          <h3 className="text-xl font-semibold">{role !== "farmer" ? 'Farmers Who Reserved' : 'Mga Nag Reserbang Magsasaka'}</h3>
+          <h3 className="text-xl font-semibold">Farmers Who Reserved</h3>
           <div>
             {farmersGrouped.length > 0 ? (
               <ul className="space-y-4">
@@ -430,21 +421,21 @@ export default function Dryer() {
                 ))}
               </ul>
             ) : (
-              <p>{role !== "farmer" ? 'No farmers associated with this dryer.' : 'Wala pang magsasaka na nag pa reserba.'}</p>
+              <p>No farmers associated with this dryer.</p>
             )}
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
           <div className="flex items-center text-center border-b pb-2 mb-4">
-            <h2 className="text-2xl font-bold text-gray-800">{role !== "farmer" ? 'Location' : 'Lokasyon'}</h2>
+            <h2 className="text-2xl font-bold text-gray-800">Location</h2>
           </div>
           <DynamicMap location={data.location} />
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md space-y-4 mt-5 md:mt-0">
           <div className="flex items-center text-center border-b pb-2 mb-4">
-            <h2 className="text-2xl font-bold text-gray-800">{role !== "farmer" ? 'Ratings' : 'Marka'}</h2>
+            <h2 className="text-2xl font-bold text-gray-800">Ratings</h2>
           </div>
           {data.available_capacity > 0 &&
             data.owner !== localStorage.getItem("full_name") && (
@@ -469,7 +460,7 @@ export default function Dryer() {
                 <div className="flex flex-col md:flex-row gap-1 md:h-12">
                   <textarea
                     name="rating_textarea"
-                    placeholder={role !== "farmer" ? 'Descrive your experience. (optional)' : 'Ibahagi ang iyong karanasan (opsyunal).'}
+                    placeholder="Descrive your experience. (optional)"
                     className="bg-[rgba(255,255,255,0.9)] border rounded flex-grow p-2 text-black resize-none"
                   ></textarea>
                   <Button

@@ -247,9 +247,7 @@ function Modal({
               {field.name === "payment" ? (
                 <>
                   <label className="text-[rgba(0,100,0,255)] font-bold text-md">
-                    {field.name === "payment" && userRole === "farmer"
-                      ? "Paraan ng Pagbabayad"
-                      : field.label}
+                    {field.label}
                   </label>
                   <select
                     name={field.name}
@@ -265,9 +263,7 @@ function Modal({
               ) : field.name === "quantity" ? (
                 <>
                   <label className="text-[rgba(0,100,0,255)] font-bold text-md">
-                    {userRole === "farmer"
-                      ? "Dami (Canvan)"
-                      : "Quantity (Canvan)"}
+                    Quantity (Canvan)
                   </label>
                   <input
                     type="number"
@@ -283,7 +279,7 @@ function Modal({
               ) : field.name === "crop_type" ? (
                 <>
                   <label className="text-[rgba(0,100,0,255)] font-bold text-md">
-                    {userRole === "farmer" ? "Uri ng pananim" : field.label}
+                    {field.label}
                   </label>
                   <select
                     name={field.name}
@@ -292,31 +288,11 @@ function Modal({
                     disabled={field.disabled}
                     required={field.required}
                   >
-                    {(() => {
-                      if (userRole === "farmer") {
-                        return (
-                          <>
-                            <option value="" disabled>
-                              {userRole === "farmer"
-                                ? "Pumili ng uri ng pananim"
-                                : field.label}
-                            </option>
-                            <option value="mais">Mais</option>
-                            <option value="rice">Palay</option>
-                          </>
-                        );
-                      } else {
-                        return (
-                          <>
-                            <option value="" disabled>
-                              Select crop type
-                            </option>
-                            <option value="corn">Corn</option>
-                            <option value="rice">Rice</option>
-                          </>
-                        );
-                      }
-                    })()}
+                    <option value="" disabled>
+                      Select crop type
+                    </option>
+                    <option value="corn">Corn</option>
+                    <option value="rice">Rice</option>
                   </select>
                 </>
               ) : field.name === "business_permit" ? (
@@ -578,7 +554,7 @@ function Modal({
               ) : field.type === "date" ? (
                 <>
                   <label className="text-[rgba(0,100,0,255)] font-bold text-md">
-                    {userRole === "farmer" ? "Saklaw na petsa" : field.label}
+                    {field.label}
                   </label>
                   <br />
 
@@ -613,11 +589,7 @@ function Modal({
                     //     })) || []
                     // }
                     className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 outline-0"
-                    placeholderText={
-                      userRole === "farmer"
-                        ? "Pumili ng saklaw na petsa"
-                        : "Select a date range"
-                    }
+                    placeholderText="Select a date range"
                   />
 
                   <input
@@ -687,13 +659,13 @@ function Modal({
                 )}
 
                 <p>
-                  {userRole === "farmer" ? "Patuyuan: " : "Dryer: "}
+                  {"Dryer: "}
                   <span className="capitalize font-bold">
                     {datas.dryer_id.dryer_name}
                   </span>
                 </p>
                 <p>
-                  {userRole === "farmer" ? "Lokasyon: " : "Location: "}
+                  {"Location: "}
                   <span className="capitalize font-bold">
                     {String(datas.dryer_id.location).includes("Sablayan") ||
                     String(datas.dryer_id.location).includes(
@@ -705,20 +677,20 @@ function Modal({
                   </span>
                 </p>
                 <p>
-                  {userRole === "farmer" ? "Tasa: " : "Rate: "}
+                  {"Rate: "}
                   <span className="capitalize font-bold">
                     {datas.dryer_id.rate}
                   </span>
                 </p>
                 <br />
                 <p>
-                  {userRole === "farmer" ? "Nireserba ni: " : "Reserved by: "}
+                  {"Reserved by: "}
                   <span className="capitalize font-bold">
                     {datas.farmer_id.first_name}
                   </span>
                 </p>
                 <p>
-                  {userRole === "farmer" ? "Nireserba nang: " : "Reserved on: "}
+                  {"Reserved on: "}
                   <span className="capitalize font-bold">
                     {new Date(datas.created_at).toLocaleDateString("en-US", {
                       year: "numeric",
@@ -732,14 +704,12 @@ function Modal({
                   </span>
                 </p>
                 <p>
-                  {userRole === "farmer" ? "Katayuan: " : "Status: "}
+                  {"Status: "}
                   <span className="capitalize font-bold">{datas.status}</span>
                 </p>
                 {datas.status === "denied" && (
                   <p>
-                    {userRole === "farmer"
-                      ? "Rason sa pag tangi: "
-                      : "Reason for denial: "}
+                    {"Reason for denial: "}
                     <span className="capitalize font-bold">
                       {datas.notes ||
                         datas.crop_type_id.notes ||
@@ -749,28 +719,26 @@ function Modal({
                 )}
                 <br />
                 <p>
-                  {userRole === "farmer"
-                    ? "Paraan ng pag babayad: "
-                    : "Payment method: "}
+                  {"Payment method: "}
                   <span className="capitalize font-bold">
                     {datas.crop_type_id.payment}
                   </span>
                 </p>
                 <p>
-                  {userRole === "farmer" ? "Uri ng pananim: " : "Crop type: "}
+                  {"Crop type: "}
                   <span className="capitalize font-bold">
                     {datas.crop_type_id.crop_type_name}
                   </span>
                 </p>
                 <p>
-                  {userRole === "farmer" ? "Dami: " : "Quantity (Canvan): "}
+                  {"Quantity (Canvan): "}
                   <span className="capitalize font-bold">
                     {datas.crop_type_id.quantity}
                   </span>
                 </p>
 
                 <p>
-                  {userRole === "farmer" ? "Kabuoan: " : "Total: "}
+                  {"Total: "}
                   <span className="capitalize font-bold">
                     {safeNumber(datas.dryer_id.rate) *
                       safeNumber(datas.crop_type_id.quantity)}
@@ -781,7 +749,7 @@ function Modal({
                   <div className="flex flex-col mt-4">
                     <div className="rounded-t-md bg-green-400 px-5 py-2 text-white">
                       {userRole === "farmer"
-                        ? "Makipag-usap sa Dryer Owner"
+                        ? "Chat with Dryer Owner"
                         : "Chat with Farmer"}
                     </div>
                     <div
@@ -815,9 +783,7 @@ function Modal({
                         ))
                       ) : (
                         <div className="text-center my-auto italic">
-                          {userRole === "farmer"
-                            ? "Walang pang mensahe na makikita."
-                            : "Theres no messages to show."}
+                          Theres no messages to show.
                         </div>
                       )}
                     </div>
@@ -838,7 +804,7 @@ function Modal({
                             className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer"
                           >
                             <span className="max-[768px]:hidden">
-                              {userRole === "farmer" ? "I-upload" : "Upload"}
+                              Upload
                             </span>
                             <ImFolderUpload />
                           </span>
@@ -848,7 +814,7 @@ function Modal({
                         className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer"
                       >
                         <span className="max-[768px]:hidden">
-                          {userRole === "farmer" ? "Ipadala" : "Send"}
+                          Send
                         </span>
                         <FaLocationArrow className="rotate-45" />
                       </span>
