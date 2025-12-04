@@ -551,6 +551,36 @@ function Modal({
                     className="w-full h-32 border border-gray-300 rounded-lg p-2 text-sm resize-none focus:ring-2 focus:ring-green-500"
                   />
                 </>
+              ) : field.name === "date_from" ? (
+                <>
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                    {field.label}
+                  </label>
+                  <input
+                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 outline-0"
+                    type={field.type}
+                    required={field.required}
+                    name={field.name}
+                    defaultValue={field.defaultValue || ""}
+                    min={field.min}
+                    onChange={field.onchange}
+                  />
+                </>
+              ) : field.name === "date_to" ? (
+                <>
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                    {field.label}
+                  </label>
+                  <input
+                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 outline-0"
+                    type={field.type}
+                    required={field.required}
+                    name={field.name}
+                    defaultValue={field.defaultValue || ""}
+                    min={field.min}
+                    onChange={field.onchange}
+                  />
+                </>
               ) : field.type === "date" ? (
                 <>
                   <label className="text-[rgba(0,100,0,255)] font-bold text-md">
@@ -567,7 +597,7 @@ function Modal({
                       setStartDate(start);
                       setEndDate(end);
                     }}
-                    minDate={new Date()}
+                    minDate={field.min ?? null}
                     // excludeDates={
                     //   JSON.parse(localStorage.getItem("dryer_data"))
                     //     ?.farmers.filter(

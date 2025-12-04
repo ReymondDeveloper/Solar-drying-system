@@ -16,7 +16,7 @@ function Reservations() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState(false);
-  const [filter, setFilter] = useState({ status: "all", location: "all" });
+  const [filter, setFilter] = useState({ status: "all", location: "all", date_from: null, date_to: null });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [modalView, setModalView] = useState(false);
@@ -90,6 +90,23 @@ function Reservations() {
       defaultValue: filter.status,
       colspan: 2,
     },
+    {
+      label: "Date From",
+      type: "date",
+      name: "date_from",
+      colspan: 1,
+      onchange: (e) => {
+        if (document.querySelector('input[name="date_to"]')) {
+          document.querySelector('input[name="date_to"]').min = e.target.value;
+        }
+      },
+    },
+    {
+      label: "Date To",
+      type: "date",
+      name: "date_to",
+      colspan: 1,
+    },
   ];
 
   const handleSubmit = (e) => {
@@ -149,6 +166,8 @@ function Reservations() {
           offset: currentPage * limit - limit,
           status: filter.status,
           location: filter.location,
+          date_from: filter.date_from,
+          date_to: filter.date_to,
           search: search,
         },
       });
@@ -196,7 +215,7 @@ function Reservations() {
     } finally {
       setIsLoading(false);
     }
-  }, [handleView, limit, currentPage, filter.status, filter.location, search]);
+  }, [handleView, limit, currentPage, filter.status, filter.location, filter.date_from, filter.date_to, search]);
 
   useEffect(() => {
     fetchData();
@@ -218,6 +237,8 @@ function Reservations() {
           params: {
             status: filter.status,
             location: filter.location,
+            date_from: filter.date_from,
+            date_to: filter.date_to,
             search: search,
           },
         });
@@ -227,7 +248,7 @@ function Reservations() {
       }
     }
     fetchReport();
-  }, [filter.status, filter.location, search]);
+  }, [filter.status, filter.location, filter.date_from, filter.date_to, search]);
 
   return (
     <>

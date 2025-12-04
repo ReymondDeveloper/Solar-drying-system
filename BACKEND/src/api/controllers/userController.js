@@ -12,7 +12,7 @@ const generateToken = (id) => {
 
 export const getUsers = async (req, res, next) => {
   try {
-    const { role, limit, offset, search } = req.query;
+    const { role, limit, offset, search, date_from, date_to } = req.query;
     let query = supabase
       .from("users")
       .select("*", { count: "exact" })
@@ -32,6 +32,16 @@ export const getUsers = async (req, res, next) => {
       query = query.or(
         `first_name.ilike.%${search}%,last_name.ilike.%${search}%`,
       );
+    }
+
+    if (typeof date_from !== "undefined" && date_from) {
+      const fromDate = `${date_from}T00:00:00Z`;
+      query = query.gte("created_at", fromDate);
+    }
+
+    if (typeof date_to !== "undefined" && date_to) {
+      const toDate = `${date_to}T23:59:59.999Z`;
+      query = query.lte("created_at", toDate);
     }
 
     const { data, count, error } = await query;

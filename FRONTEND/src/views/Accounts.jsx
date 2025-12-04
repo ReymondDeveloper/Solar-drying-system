@@ -21,7 +21,7 @@ function Accounts() {
   const [isError, setIsError] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
   const [modalAdd, setModalAdd] = useState(false);
-  const [filter, setFilter] = useState({ role: "all" });
+  const [filter, setFilter] = useState({ role: "all", date_from: null, date_to: null, });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState([]);
@@ -57,6 +57,23 @@ function Accounts() {
       ],
       defaultValue: filter.role,
       colspan: 2,
+    },
+    {
+      label: "Date From",
+      type: "date",
+      name: "date_from",
+      colspan: 1,
+      onchange: (e) => {
+        if (document.querySelector('input[name="date_to"]')) {
+          document.querySelector('input[name="date_to"]').min = e.target.value;
+        }
+      },
+    },
+    {
+      label: "Date To",
+      type: "date",
+      name: "date_to",
+      colspan: 1,
     },
   ];
 
@@ -232,6 +249,8 @@ function Accounts() {
           limit: limit,
           offset: currentPage * limit - limit,
           role: filter.role,
+          date_from: filter.date_from,
+          date_to: filter.date_to,
           search: search,
         },
       });
@@ -265,7 +284,7 @@ function Accounts() {
     } finally {
       setIsLoading(false);
     }
-  }, [limit, currentPage, filter.role, search]);
+  }, [limit, currentPage, filter.role, filter.date_from, filter.date_to, search]);
 
   useEffect(() => {
     fetchData();
@@ -286,6 +305,8 @@ function Accounts() {
         const response = await api.get("/users", {
           params: {
             role: filter.role,
+            date_from: filter.date_from,
+            date_to: filter.date_to,
             search: search,
           },
         });
@@ -295,7 +316,7 @@ function Accounts() {
       }
     }
     fetchReport();
-  }, [filter.role, search]);
+  }, [filter.role, filter.date_from, filter.date_to, search]);
 
   if (isError) {
     return (
