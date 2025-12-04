@@ -116,6 +116,7 @@ function Reservations() {
       const data = Object.fromEntries(new FormData(e.target).entries());
       setFilter((prev) => ({ ...prev, ...data }));
       setModal(false);
+      setCurrentPage(1);
     } catch (error) {
       console.log(error);
     } finally {

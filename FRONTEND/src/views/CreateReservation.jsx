@@ -97,6 +97,7 @@ function CreateReservation() {
       const data = Object.fromEntries(new FormData(e.target).entries());
       setFilter((prev) => ({ ...prev, ...data }));
       setModalFilter(false);
+      setCurrentPage(1);
     } catch (error) {
       console.log(error);
     } finally {
