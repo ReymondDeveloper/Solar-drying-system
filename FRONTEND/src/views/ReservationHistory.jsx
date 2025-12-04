@@ -23,7 +23,6 @@ function ReservationHistory() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [datasView, setDatasView] = useState([]);
-  const role = localStorage.getItem("role");
   const { addresses } = useAddresses();
   const location = useLocation();
 
@@ -49,28 +48,16 @@ function ReservationHistory() {
     return { addresses, loading };
   }
 
-  const tableHeadings =
-    role === "farmer"
-      ? [
-          "Pinag-book na Patuyuan",
-          "Lokasyon",
-          "Uri ng Pananim",
-          "Dami (Kaban)",
-          "Paraan ng Pagbabayad",
-          "Durasyon",
-          "Katayuan",
-          "Aksyon",
-        ]
-      : [
-          "Booked Dryer",
-          "Location",
-          "Crop Type",
-          "Quantity (Canvan)",
-          "Payment",
-          "Duration",
-          "Status",
-          "Action",
-        ];
+  const tableHeadings =[
+    "Booked Dryer",
+    "Location",
+    "Crop Type",
+    "Quantity (Canvan)",
+    "Payment",
+    "Duration",
+    "Status",
+    "Action",
+  ];
 
   const tableDataCell = [
     "dryer_name",
@@ -332,12 +319,8 @@ function ReservationHistory() {
           handleSubmit={handleSubmitView}
           setGcashModal={setGcashModal}
           datas={datasView}
-          title={
-            role === "farmer"
-              ? "Mga Detalye ng Reserbasyon"
-              : "Reservation Details"
-          }
-          button_name={role === "farmer" ? "Tapos" : "Done"}
+          title="Reservation Details"
+          button_name="Done"
         />
       )}
       {gcashModal && (
@@ -371,9 +354,7 @@ function ReservationHistory() {
                 />
                 {data?.length === 0 && (
                   <div className="flex justify-center items-center font-bold py-5">
-                    {role === "farmer"
-                      ? "Wala ka pang kasaysayan ng transaksyon."
-                      : "Your transaction history is empty."}
+                    Your reservation history is empty.
                   </div>
                 )}
               </>

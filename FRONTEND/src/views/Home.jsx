@@ -594,14 +594,14 @@ function Home() {
             <ReportCard
               onClick={() => navigate("/home/reservation-history")}
               icon={<GiBookmarklet className="w-full h-full" />}
-              title={"Mga Reserbasyon"}
+              title={"Reservations"}
               logic={cards.reservation}
             />
 
             <ReportCard
               onClick={() => navigate("/home/reservation-history?pending=true")}
               icon={<MdOutlinePendingActions className="w-full h-full" />}
-              title={"Mga Nag hi-hintay na Reserbasyon"}
+              title={"Pending Reservations"}
               logic={cards.pending}
             />
 
@@ -610,7 +610,7 @@ function Home() {
                 navigate("/home/reservation-history?approved=true")
               }
               icon={<MdOutlinePendingActions className="w-full h-full" />}
-              title={"Mga Naaprobadong Reserbasyon"}
+              title={"Approved Reservations"}
               logic={cards.approved}
             />
 
@@ -619,20 +619,20 @@ function Home() {
                 navigate("/home/reservation-history?completed=true")
               }
               icon={<HiClipboardDocumentList className="w-full h-full" />}
-              title={"Mga Natapos na Reserbasyon"}
+              title={"Completed Reservations"}
               logic={cards.completed}
             />
 
             <ReportChart
               data={cards.monthly_reservation}
-              title="Buwanang Ulat"
+              title="Monthly Report"
             />
 
             <ReportChart data={cards.yearly_reservation} title="Taonang Ulat" />
 
             <ReportPie
               data={cards.pie}
-              title="Kaban Ng Mga Naka Reserbang Pananim"
+              title="Yearly Report"
             />
           </div>
         ) : (

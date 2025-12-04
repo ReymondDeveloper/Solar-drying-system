@@ -10,7 +10,6 @@ import Button from "../component/Button";
 import api from "../api/api.js";
 
 function CreateReservation() {
-  const role = localStorage.getItem("role");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const [totalPages, setTotalPages] = useState(5);
@@ -45,26 +44,15 @@ function CreateReservation() {
     return { addresses, loading };
   }
 
-  const tableHeadings =
-    role === "farmer"
-      ? [
-          "Rehistradong Patuyuan",
-          "Lokasyon (Sablayan)",
-          "Kabuuang Kapasidad (Kaban)",
-          "Magagamit na Kapasidad (Kaban)",
-          "Uri ng Patuyuan",
-          "Katayuan",
-          "Aksyon",
-        ]
-      : [
-          "Registered Dryer",
-          "Location (Sablayan)",
-          "Maximum Capacity (Cavan)",
-          "Available Capacity (Cavan)",
-          "Type",
-          "Status",
-          "Action",
-        ];
+  const tableHeadings = [
+    "Registered Dryer",
+    "Location (Sablayan)",
+    "Maximum Capacity (Cavan)",
+    "Available Capacity (Cavan)",
+    "Type",
+    "Status",
+    "Action",
+  ];
 
   const tableDataCell = [
     "dryer_name",
