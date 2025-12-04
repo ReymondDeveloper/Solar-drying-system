@@ -70,9 +70,9 @@ function CreateReservation() {
       type: "select",
       name: "status",
       options: [
-        { value: "all", phrase: "Lahat" },
-        { value: "available", phrase: "Magagamit" },
-        { value: "occupied", phrase: "Nakareserba" },
+        { value: "all", phrase: "All" },
+        { value: "available", phrase: "Available" },
+        { value: "occupied", phrase: "Occupied" },
       ],
       defaultValue: filter.status,
       colspan: 2,
@@ -82,7 +82,7 @@ function CreateReservation() {
       type: "select",
       name: "location",
       options: [
-        { value: "all", phrase: "Lahat" },
+        { value: "all", phrase: "All" },
         ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
       ],
       defaultValue: filter.location,

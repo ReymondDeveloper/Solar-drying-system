@@ -275,7 +275,7 @@ function Reservations() {
           modal ? "overflow-hidden" : "overflow-auto"
         }`}
       >
-        <div className="w-full flex justify-center gap-5">
+        <div className="w-full flex flex-col md:flex-row justify-center gap-5">
           <Search setSearch={setSearch} setModal={setModal} />
           <Report 
             column={[

@@ -207,7 +207,9 @@ function Archive() {
       )}
 
       <div className="w-full h-[calc(100dvh-160px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5">
-        <Search setSearch={setSearch} />
+        <div className="w-full flex justify-center">
+          <Search setSearch={setSearch} />
+        </div>
         <div className="flex justify-end gap-4 my-4">
           <Button
             onClick={downloadExcel}

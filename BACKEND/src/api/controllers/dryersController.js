@@ -45,7 +45,7 @@ export const getDryers = async (req, res) => {
     let query = supabase
       .from("dryers")
       .select(
-        "id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id, created_at, is_operation, operation_reason, type",
+        "id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id, created_at, is_operation, operation_reason, type, created_by_id, business_permit",
         { count: "exact" }
       )
       .order("created_at", { ascending: false });
@@ -227,6 +227,7 @@ export const updateDryer = async (req, res) => {
       is_operation,
       operation_reason = null,
       business_permit,
+      type,
     } = req.body;
 
     const { data: existingData, error: existingError } = await supabase
@@ -258,6 +259,7 @@ export const updateDryer = async (req, res) => {
         is_operation,
         operation_reason,
         business_permit,
+        type,
       })
       .eq("id", id)
       .select()
