@@ -53,7 +53,7 @@ function OTP({ setOtp, onVerified, loading, setLoading }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-[rgba(0,0,0,0.75)] flex flex-col gap-5 items-center justify-center">
+    <div className="fixed inset-0 z-9999 bg-[rgba(0,0,0,0.75)] flex flex-col gap-5 items-center justify-center">
       <span className="font-bold text-white text-center px-5 mx-auto">
         Enter the 4 digit OTP sent to your provided Email Address.
       </span>

@@ -239,7 +239,7 @@ function SignIn() {
           setLoading={setLoading}
         />
       )}
-      <div className="h-full bg-gray-200 flex flex-col gap-1">
+      <div className="h-full flex">
         <div className="flex-grow bg-[url(/landing_page.avif)] bg-cover">
           <div className="w-full h-dvh backdrop-blur-sm backdrop-brightness-75 flex flex-col justify-center">
             <div className="mx-auto min-w-[320px]">
