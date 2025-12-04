@@ -26,6 +26,7 @@ function Availability() {
   const [loading, setLoading] = useState(false);
   const { addresses } = useAddresses();
   const navigate = useNavigate();
+  const [report, setReport] = useState([]);
 
   function useAddresses() {
     const [addresses, setAddresses] = useState([]);
@@ -231,6 +232,30 @@ function Availability() {
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
 
+  useEffect(() => {
+    async function fetchReport() {
+      try {
+        const response = await api.get("/dryers", {
+          params: {
+            status: filter.status,
+            location: filter.location,
+            is_operation: filter.is_operation,
+            search: search,
+          },
+        });
+        setReport(response.data.data);
+      } catch {
+        setReport([]);
+      }
+    }
+    fetchReport();
+  }, [
+    filter.status,
+    filter.location,
+    filter.is_operation,
+    search,
+  ]);
+
   return (
     <>
       {loading && <Loading />}
@@ -259,7 +284,7 @@ function Availability() {
               { label: "Operation Status", ratio: 0.15 },
               { label: "Reservation Status", ratio: 0.23 },
             ]} 
-            data={JSON.parse(localStorage.getItem("availability_data"))} 
+            data={report} 
             report_title="LIST OF DRYERS"
           />
         </div>
