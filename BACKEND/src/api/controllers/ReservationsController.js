@@ -6,7 +6,7 @@ import { subMonths } from "date-fns";
 
 export const getReservations = async (req, res) => {
   try {
-    const { limit, offset, status, location, search } = req.query;
+    const { limit, offset, status, location, date_from, date_to, search } = req.query;
     let query = supabase
       .from("reservations")
       .select(
@@ -38,6 +38,13 @@ export const getReservations = async (req, res) => {
       query = query
         .not("dryer_id", "is", null)
         .ilike("dryer_id.dryer_name", `%${search}%`);
+    }
+
+    if (typeof date_from !== "undefined" && date_from) {
+      query = query.gte("date_from", date_from);
+    }
+
+    if (typeof date_to !== "undefined" && date_to) {
     }
 
     if (typeof limit !== "undefined" && typeof offset !== "undefined") {

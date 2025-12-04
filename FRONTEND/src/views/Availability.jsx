@@ -21,6 +21,8 @@ function Availability() {
     status: "all",
     location: "all",
     is_operation: "all",
+    date_from: null,
+    date_to: null,
   });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -103,6 +105,23 @@ function Availability() {
       defaultValue: filter.is_operation,
       colspan: 2,
     },
+    {
+      label: "Date From",
+      type: "date",
+      name: "date_from",
+      colspan: 1,
+      onchange: (e) => {
+        if (document.querySelector('input[name="date_to"]')) {
+          document.querySelector('input[name="date_to"]').min = e.target.value;
+        }
+      },
+    },
+    {
+      label: "Date To",
+      type: "date",
+      name: "date_to",
+      colspan: 1,
+    },
   ];
 
   const handleSubmit = (e) => {
@@ -160,6 +179,8 @@ function Availability() {
           status: filter.status,
           location: filter.location,
           is_operation: filter.is_operation,
+          date_from: filter.date_from,
+          date_to: filter.date_to,
           search: search,
         },
       });
@@ -216,6 +237,8 @@ function Availability() {
     filter.status,
     filter.location,
     filter.is_operation,
+    filter.date_from,
+    filter.date_to,
     search,
   ]);
 
@@ -240,6 +263,8 @@ function Availability() {
             status: filter.status,
             location: filter.location,
             is_operation: filter.is_operation,
+            date_from: filter.date_from,
+            date_to: filter.date_to,
             search: search,
           },
         });
@@ -253,6 +278,8 @@ function Availability() {
     filter.status,
     filter.location,
     filter.is_operation,
+    filter.date_from,
+    filter.date_to,
     search,
   ]);
 

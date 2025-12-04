@@ -114,13 +114,8 @@ export default function Dryer() {
       label: "Date Range",
       type: "date",
       required: true,
-      min: new Date().toISOString().split("T")[0],
+      min: new Date(),
       colspan: 2,
-      onchange: (e) => {
-        if (document.querySelector('input[name="date_to"]')) {
-          document.querySelector('input[name="date_to"]').min = e.target.value;
-        }
-      },
     },
     {
       label: "Crop Type",

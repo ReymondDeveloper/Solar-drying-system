@@ -291,8 +291,6 @@ function Home() {
       const cropMap = {
         rice: "rice",
         corn: "corn",
-        palay: "rice",
-        mais: "corn",
       };
 
       const monthsOrder = [
