@@ -76,7 +76,7 @@ function ReservationHistory() {
       type: "select",
       name: "status",
       options: [
-        { value: "all", phrase: "Lahat" },
+        { value: "all", phrase: "All" },
         { value: "pending", phrase: "Pending" },
         { value: "approved", phrase: "Approved" },
         { value: "denied", phrase: "Denied" },
@@ -90,7 +90,7 @@ function ReservationHistory() {
       type: "select",
       name: "location",
       options: [
-        { value: "all", phrase: "Lahat" },
+        { value: "all", phrase: "All" },
         ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
       ],
       defaultValue: filter.location,

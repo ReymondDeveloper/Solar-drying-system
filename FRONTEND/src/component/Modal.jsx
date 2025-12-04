@@ -301,45 +301,48 @@ function Modal({
                     {field.label}
                   </label>
                   <div className="flex flex-col gap-3">
-                    <input
-                      type={field.type}
-                      name={field.name}
-                      accept="application/pdf"
-                      className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
-                      onChange={async (e) => {
-                        const file = e.target.files[0];
-                        if (!file) return;
-                        const localPreview = URL.createObjectURL(file);
+                    {field.disabled !== true && (
+                      <input
+                        type={field.type}
+                        name={field.name}
+                        accept="application/pdf"
+                        className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500"
+                        onChange={async (e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          const localPreview = URL.createObjectURL(file);
 
-                        setPreviewUrls((prev) => ({
-                          ...prev,
-                          [field.name]: localPreview,
-                        }));
+                          setPreviewUrls((prev) => ({
+                            ...prev,
+                            [field.name]: localPreview,
+                          }));
 
-                        const formData = new FormData();
-                        formData.append("file", file);
+                          const formData = new FormData();
+                          formData.append("file", file);
 
-                        try {
-                          const res = await api.post("/upload", formData, {
-                            headers: {
-                              "Content-Type": "multipart/form-data",
-                            },
-                          });
+                          try {
+                            const res = await api.post("/upload", formData, {
+                              headers: {
+                                "Content-Type": "multipart/form-data",
+                              },
+                            });
 
-                          const data = await res.data;
-                          if (data.url) {
-                            setPreviewUrls((prev) => ({
-                              ...prev,
-                              [field.name]: data.url,
-                            }));
+                            const data = await res.data;
+                            if (data.url) {
+                              setPreviewUrls((prev) => ({
+                                ...prev,
+                                [field.name]: data.url,
+                              }));
 
-                            URL.revokeObjectURL(localPreview);
+                              URL.revokeObjectURL(localPreview);
+                            }
+                          } catch (err) {
+                            console.error("Image upload failed:", err);
                           }
-                        } catch (err) {
-                          console.error("Image upload failed:", err);
-                        }
-                      }}
-                    />
+                        }}
+                      />
+                    )}
+                    
 
                     {previewUrls[field.name] ? (
                       <>

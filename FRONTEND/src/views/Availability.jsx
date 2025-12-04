@@ -9,6 +9,9 @@ import Loading from "../component/Loading";
 import Button from "../component/Button";
 import api from "../api/api";
 import Report from "../component/Report"
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Availability() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,6 +32,8 @@ function Availability() {
   const { addresses } = useAddresses();
   const navigate = useNavigate();
   const [report, setReport] = useState([]);
+  const [selectedDryer, setSelectedDryer] = useState(null);
+  const [modalEdit, setModalEdit] = useState(false);
 
   function useAddresses() {
     const [addresses, setAddresses] = useState([]);
@@ -138,6 +143,77 @@ function Availability() {
     }
   };
 
+  function handleEdit(dryer) {
+    setSelectedDryer(dryer);
+    setModalEdit(true);
+  }
+
+  const fieldsEdit = [
+    {
+      label: "Type",
+      type: "select",
+      name: "type",
+      required: true,
+      defaultValue: selectedDryer?.type,
+      options: [
+        { value: "PRIVATE", phrase: "PRIVATE" },
+        { value: "PUBLIC", phrase: "PUBLIC" },
+      ],
+    },
+    {
+      label: "Business Permit",
+      type: "file",
+      name: "business_permit",
+      disabled: true,
+      defaultValue: selectedDryer?.business_permit,
+    },
+  ];
+
+  const handleSubmitEdit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData(e.target);
+    let updatedData = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await api.put(`/dryers/${selectedDryer.id}`, {
+        dryer_name: selectedDryer?.dryer_name,
+        location: selectedDryer?.location,
+        maximum_capacity: selectedDryer?.maximum_capacity,
+        rate: selectedDryer?.rate,
+        image_url: selectedDryer?.img_image_url,
+        qr_code: selectedDryer?.img_qr_code,
+        is_operation: selectedDryer?.is_operation === "true",
+        operation_reason:
+          selectedDryer?.is_operation === "false"
+            ? selectedDryer?.operation_reason
+            : null,
+        business_permit: selectedDryer?.pdf_business_permit,
+        type: updatedData.type,
+      });
+
+      toast.success(res.data.message);
+
+      axios.post(`${import.meta.env.VITE_API}/notification`, {
+        user: selectedDryer.created_by_id,
+        context:
+          `An administrator updated the business type of "${selectedDryer.dryer_name.toUpperCase()}" to "${updatedData.type.toUpperCase()}" located on "${
+            selectedDryer.location
+          }" at ` + new Date().toLocaleString(),
+        url: `/home/dryer-information`,
+      });
+
+      fetchData();
+      setModalEdit(false);
+      setSelectedDryer(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update dryer");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchData = useCallback(async () => {
     const local = localStorage.getItem("availability_data");
     const data = JSON.parse(local);
@@ -158,12 +234,20 @@ function Availability() {
                 })
               : "N/A",
             action: (
-              <Button
-                onClick={() => navigate("/home/create-reservation/" + res.id)}
-                className="bg-blue-400 hover:bg-blue-500 text-white"
-              >
-                View
-              </Button>
+              <div className="flex justify-center gap-2">
+                <Button
+                  onClick={() => handleEdit(res)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  Edit
+                </Button>
+                <Button
+                  onClick={() => navigate("/home/create-reservation/" + res.id)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  View
+                </Button>
+              </div>
             ),
           }))
         : [],
@@ -210,12 +294,20 @@ function Availability() {
                 })
               : "N/A",
             action: (
-              <Button
-                onClick={() => navigate("/home/create-reservation/" + res.id)}
-                className="bg-blue-400 hover:bg-blue-500 text-white"
-              >
-                View
-              </Button>
+              <div className="flex justify-center gap-2">
+                <Button
+                  onClick={() => handleEdit(res)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  Edit
+                </Button>
+                <Button
+                  onClick={() => navigate("/home/create-reservation/" + res.id)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  View
+                </Button>
+              </div>
             ),
           })),
         );
@@ -286,6 +378,7 @@ function Availability() {
   return (
     <>
       {loading && <Loading />}
+      <ToastContainer position="top-center" autoClose={3000} />
       {modal && (
         <Modal
           setModal={setModal}
@@ -295,12 +388,21 @@ function Availability() {
           button_name={"Apply Status"}
         />
       )}
+      {modalEdit && (
+        <Modal
+          setModal={setModalEdit}
+          handleSubmit={handleSubmitEdit}
+          fields={fieldsEdit}
+          title={"Dryer Information"}
+          button_name={"Update"}
+        />
+      )}
       <div
         className={`w-full h-[calc(100dvh-160px)] lg:bg-[rgba(0,0,0,0.1)] lg:backdrop-blur-[6px] rounded-lg lg:p-5 ${
           modal ? "overflow-hidden" : "overflow-auto"
         }`}
       >
-        <div className="w-full flex justify-center gap-5">
+        <div className="w-full flex flex-col md:flex-row justify-center gap-5">
           <Search setSearch={setSearch} setModal={setModal} />
           <Report 
             column={[
