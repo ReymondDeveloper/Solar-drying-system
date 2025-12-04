@@ -70,9 +70,7 @@ function ReportChart({ data, title }) {
         </ResponsiveContainer>
       ) : (
         <span>
-          {localStorage.getItem("role") === "farmer"
-            ? "Walang reserbasyon na natagpuan."
-            : "No reservations were found."}
+          No reservations were found.
         </span>
       )}
     </div>
@@ -164,9 +162,7 @@ function ReportPie({ data = [], title }) {
         </ResponsiveContainer>
       ) : (
         <span>
-          {localStorage.getItem("role") === "farmer"
-            ? "Walang reserbasyon na natagpuan."
-            : "No reservations were found."}
+          No reservations were found.
         </span>
       )}
     </div>
@@ -626,11 +622,11 @@ function Home() {
               title="Monthly Report"
             />
 
-            <ReportChart data={cards.yearly_reservation} title="Taonang Ulat" />
+            <ReportChart data={cards.yearly_reservation} title="Yearly Report" />
 
             <ReportPie
               data={cards.pie}
-              title="Yearly Report"
+              title="Reserved Crop Types (Cavan)"
             />
           </div>
         ) : (
