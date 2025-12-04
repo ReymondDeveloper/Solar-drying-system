@@ -104,17 +104,33 @@ function ReservationHistory() {
       type: "tel",
       label: "Number",
       name: "sender",
-      pattern: `^\\+63\\s?9\\d{2}\\s?\\d{3}\\s?\\d{4}$`,
       placeholder: "ex. +63 9XX XXX XXXX",
       required: true,
+      onchange: (e) => {
+        let newValue = e.target.value.replace(/\D/g, "");
+
+        if (newValue.startsWith("0")) {
+          newValue = "+63" + newValue.slice(1);
+        } else if (newValue.startsWith("63")) {
+          newValue = "+" + newValue;
+        } else if (!newValue.startsWith("+63") && newValue.length > 0) {
+          newValue = "+63" + newValue;
+        }
+
+        if (newValue.length > 13) {
+          newValue = newValue.slice(0, 13);
+        }
+        e.target.value = newValue;
+      },
     },
     {
       type: "number",
-      label: "Amount",
+      label: "Amount Of Payment",
       name: "amount",
       step: "0.01",
       min: "0.01",
       placeholder: "ex. 1000.00",
+      disabled: typeof JSON.parse(localStorage.getItem("amount_of_payment")) !== "undefined" ? true : false,
       required: true,
     },
     {
@@ -141,6 +157,7 @@ function ReservationHistory() {
       setFilter((prev) => ({ ...prev, ...data }));
       setModalFilter(false);
       setCurrentPage(1);
+      localStorage.removeItem("amount_of_payment");
     } catch (error) {
       console.log(error);
     } finally {
@@ -153,10 +170,27 @@ function ReservationHistory() {
     const formData = new FormData(e.target);
     const fields = Object.fromEntries(formData.entries());
 
+    function number_format(e) {
+      let newValue = e.replace(/\D/g, "");
+
+      if (newValue.startsWith("0")) {
+        newValue = "+63" + newValue.slice(1);
+      } else if (newValue.startsWith("63")) {
+        newValue = "+" + newValue;
+      } else if (!newValue.startsWith("+63") && newValue.length > 0) {
+        newValue = "+63" + newValue;
+      }
+
+      if (newValue.length > 13) {
+        newValue = newValue.slice(0, 13);
+      }
+      return newValue;
+    }
+
     setLoading(true);
     const newEntry = {
-      from: fields.sender,
-      amount: fields.amount,
+      from: number_format(fields.sender),
+      amount: localStorage.getItem("amount_of_payment"),
       reference_no: fields.reference,
       date: fields.date,
       reservation_id: datasView.id,
@@ -170,6 +204,7 @@ function ReservationHistory() {
       setModalView(true);
       setGcashModal(false);
       setLoading(false);
+      localStorage.removeItem("amount_of_payment");
     }
   };
 

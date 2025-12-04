@@ -15,6 +15,7 @@ export default function GcashModal({
         "Are you sure you want to close? All changes you made would be lost."
       )
     ) {
+      localStorage.removeItem("amount_of_payment");
       onClick();
     }
   };
@@ -23,7 +24,7 @@ export default function GcashModal({
   const ocrScanner = Ocr();
   const [fields, setFields] = useState({
     sender: "",
-    amount: "",
+    amount: localStorage.getItem("amount_of_payment") || "",
     reference: "",
     date: "",
   });
@@ -33,10 +34,13 @@ export default function GcashModal({
     setLoading(true);
     try {
       const ocrResult = await ocrScanner.extract(file);
+
+      ocrResult.amount ? localStorage.setItem("amount_of_payment", ocrResult.amount.replace(/,/g, "")) : null;
+
       setFields((prev) => ({
         ...prev,
         sender: ocrResult.number,
-        amount: ocrResult.amount.replace(/,/g, ""),
+        amount: ocrResult.amount ? ocrResult.amount.replace(/,/g, "") : JSON.parse(localStorage.getItem("amount_of_payment")),
         reference: ocrResult.reference.split("\n")[0].trim(),
         date: ocrResult.date,
       }));
@@ -128,7 +132,6 @@ export default function GcashModal({
                   <input
                     name={field.name}
                     type={field.type}
-                    {...(field.pattern && { pattern: field.pattern })}
                     {...(field.step && { step: field.step })}
                     {...(field.min && { min: field.min })}
                     {...(field.inputMode && { inputMode: field.inputMode })}
@@ -139,6 +142,7 @@ export default function GcashModal({
                     }
                     className="outline-none w-full bg-transparent"
                     required={field.required}
+                    disabled={field.disabled}
                     {...(["sender", "amount", "reference", "date"].includes(
                       field.name
                     )

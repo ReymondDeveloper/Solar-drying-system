@@ -720,6 +720,12 @@ function Modal({
                   </span>
                 </p>
                 <p>
+                  {"Owner: "}
+                  <span className="capitalize font-bold">
+                    {datas.owner_id.first_name}
+                  </span>
+                </p>
+                <p>
                   {"Location: "}
                   <span className="capitalize font-bold">
                     {String(datas.dryer_id.location).includes("Sablayan") ||
@@ -793,10 +799,9 @@ function Modal({
                 </p>
 
                 <p>
-                  {"Total: "}
+                  {"Total amount of payment: "}
                   <span className="capitalize font-bold">
-                    {safeNumber(datas.dryer_id.rate) *
-                      safeNumber(datas.crop_type_id.quantity)}
+                    {safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity)}
                   </span>
                 </p>
 
@@ -853,6 +858,7 @@ function Modal({
                         datas.status !== "pending" && (
                           <span
                             onClick={() => {
+                              localStorage.setItem("amount_of_payment", safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity))
                               setGcashModal(true);
                               setModal(false);
                             }}
@@ -877,7 +883,6 @@ function Modal({
                   </div>
                 )}
                 
-
                 {datas.status !== "denied" && datas.status !== "pending" && (
                   <div className="w-full overflow-x-auto mt-4">
                     <table className="min-w-[700px] w-full">
