@@ -351,7 +351,21 @@ function Modal({
                           name={`pdf_${[field.name]}`}
                           value={previewUrls[field.name]}
                         />
-                        <div className="flex justify-center border rounded-lg p-4 bg-gray-50">
+                        <div className="flex flex-col gap-2 justify-center border rounded-lg p-4 bg-gray-50">
+                          <a
+                            href={
+                              previewUrls[field.name].startsWith("http") ||
+                              previewUrls[field.name].startsWith("blob:")
+                                ? previewUrls[field.name]
+                                : `${import.meta.env.VITE_API.replace(
+                                    "/api",
+                                    ""
+                                  )}${previewUrls[field.name]}`
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-bold text-green-500 hover:text-green-600"
+                          >View in another tab</a>
                           <iframe
                             src={
                               previewUrls[field.name].startsWith("http") ||
@@ -374,16 +388,24 @@ function Modal({
                           name={`pdf_${[field.name]}`}
                           value={field.defaultValue}
                         />
-                        <div className="flex justify-center border rounded-lg p-4 bg-gray-50">
+                        <div className="flex flex-col gap-2 justify-center border rounded-lg p-4 bg-gray-50">
+                          <a
+                            href={
+                              field.defaultValue.startsWith("http") ||
+                              field.defaultValue.startsWith("blob:")
+                                ? field.defaultValue
+                                : `${import.meta.env.VITE_API.replace("/api", "")}${field.defaultValue}`
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-bold text-green-500 hover:text-green-600"
+                          >View in another tab</a>
                           <iframe
                             src={
                               field.defaultValue.startsWith("http") ||
                               field.defaultValue.startsWith("blob:")
                                 ? field.defaultValue
-                                : `${import.meta.env.VITE_API.replace(
-                                    "/api",
-                                    ""
-                                  )}${field.defaultValue}`
+                                : `${import.meta.env.VITE_API.replace("/api", "")}${field.defaultValue}`
                             }
                             alt="Preview"
                             className="max-h-[400px] w-auto object-contain rounded-lg shadow-md"
