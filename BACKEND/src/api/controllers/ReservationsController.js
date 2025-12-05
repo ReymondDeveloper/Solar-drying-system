@@ -6,13 +6,15 @@ import { subMonths } from "date-fns";
 
 export const getReservations = async (req, res) => {
   try {
-    const { limit, offset, status, location, date_from, date_to, search } = req.query;
+    const { limit, offset, status, location, date_from, date_to, search } =
+      req.query;
     let query = supabase
       .from("reservations")
       .select(
         `
         id,
         farmer_id:farmer_id(id, first_name, last_name),
+        owner_id:owner_id(id, first_name, last_name),
         dryer_id:dryer_id(id, dryer_name, location, rate),
         crop_type_id:crop_type_id(crop_type_name, quantity, created_at),
         status,
@@ -20,7 +22,7 @@ export const getReservations = async (req, res) => {
         date_from,
         date_to
       `,
-        { count: "exact" },
+        { count: "exact" }
       )
       .order("created_at", { ascending: false });
 
@@ -103,7 +105,7 @@ export const getArchivedReservations = async (req, res) => {
         status,
         created_at
       `,
-        { count: "exact" },
+        { count: "exact" }
       )
       .lt("created_at", oneMonthAgo.toISOString())
       .order("created_at", { ascending: false });
@@ -217,7 +219,7 @@ export const updateReservation = async (req, res) => {
     const { id } = req.params;
     const { status, notes, payment, quantity } = req.body;
 
-    const { data: validation, error: failedValidation} = await supabase
+    const { data: validation, error: failedValidation } = await supabase
       .from("reservations")
       .select("status")
       .eq("id", id);
@@ -254,7 +256,10 @@ export const updateReservation = async (req, res) => {
         if (cropError) throw cropError;
       }
 
-      if (status.toLowerCase() === "denied" || status.toLowerCase() === "completed") {
+      if (
+        status.toLowerCase() === "denied" ||
+        status.toLowerCase() === "completed"
+      ) {
         const { data: cropType, error: cropError } = await supabase
           .from("crop_types")
           .select("quantity")
@@ -285,7 +290,7 @@ export const updateReservation = async (req, res) => {
         if (updateDryerError) throw updateDryerError;
 
         console.log(
-          `Rolled back ${cropType.quantity} cavans to dryer ${reservation.dryer_id}`,
+          `Rolled back ${cropType.quantity} cavans to dryer ${reservation.dryer_id}`
         );
       }
     }
@@ -346,7 +351,7 @@ export const getReservationsByOwner = async (req, res) => {
         date_from,
         date_to
       `,
-        { count: "exact" },
+        { count: "exact" }
       )
       .eq("owner_id", ownerId)
       .order("created_at", { ascending: false });
