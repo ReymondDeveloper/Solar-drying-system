@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Button from "../component/Button";
 import Loading from "../component/Loading";
@@ -6,6 +6,7 @@ import OTP from "../component/Otp";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { RiCloseLargeLine } from "react-icons/ri";
 
 function Registration() {
   const navigate = useNavigate();
@@ -189,6 +190,11 @@ function Registration() {
         <div className="min-h-full overflow-auto bg-[url(/landing_page.avif)] bg-cover">
           <div className="w-full h-dvh backdrop-blur-sm backdrop-brightness-75 flex flex-col justify-start lg:px-8">
             <div className="bg-white p-8 rounded-2xl shadow-lg min-w-[320px] m-auto">
+              <NavLink to={"/"} className="flex justify-end mb-4">
+                <div className="hover:bg-gray-200 rounded-full p-2">
+                  <RiCloseLargeLine size={22} />
+                </div>
+              </NavLink>
               <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-5">
                 {formField.map((data, index) =>
                   data.type === "select" ? (
