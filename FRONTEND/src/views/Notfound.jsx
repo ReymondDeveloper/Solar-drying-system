@@ -10,13 +10,17 @@ function Notfound() {
   const code_name = localStorage.getItem("code_name");
   const handleBack = (e) => {
     e.preventDefault();
-    if (window.history.length > 1 && navigationType === "PUSH" && code !== "401") {
+    if (
+      window.history.length > 1 &&
+      navigationType === "PUSH" &&
+      code !== "401"
+    ) {
       navigate(-1);
     } else {
       const redirect = localStorage.getItem("redirect");
       localStorage.clear();
       localStorage.setItem("redirect", redirect);
-      navigate("/", { replace: true });
+      navigate("/sign-in", { replace: true });
     }
   };
 

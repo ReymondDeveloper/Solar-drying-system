@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Button from "../component/Button";
 import Loading from "../component/Loading";
@@ -7,6 +7,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import OTP from "../component/Otp";
 import Modal from "../component/Modal";
+import { RiCloseLargeLine } from "react-icons/ri";
 
 function SignIn() {
   const navigate = useNavigate();
@@ -244,6 +245,11 @@ function SignIn() {
           <div className="w-full h-dvh backdrop-blur-sm backdrop-brightness-75 flex flex-col justify-center">
             <div className="mx-auto min-w-[320px]">
               <div className="bg-white p-8 rounded-2xl shadow-lg">
+                <NavLink to={"/"} className="flex justify-end mb-4">
+                  <div className="hover:bg-gray-200 rounded-full p-2">
+                    <RiCloseLargeLine size={22} />
+                  </div>
+                </NavLink>
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {formField.map((field, index) => (
                     <div key={index}>
