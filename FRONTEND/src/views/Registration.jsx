@@ -190,12 +190,12 @@ function Registration() {
         <div className="min-h-full overflow-auto bg-[url(/landing_page.avif)] bg-cover">
           <div className="w-full h-dvh backdrop-blur-sm backdrop-brightness-75 flex flex-col justify-start lg:px-8">
             <div className="bg-white p-8 rounded-2xl shadow-lg min-w-[320px] m-auto">
+              <NavLink to={"/"} className="flex justify-end mb-4">
+                <div className="hover:bg-gray-200 rounded-full p-2">
+                  <RiCloseLargeLine size={22} />
+                </div>
+              </NavLink>
               <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-5">
-                <NavLink to={"/"} className="flex justify-end mb-4">
-                  <div className="hover:bg-gray-200 rounded-full p-2">
-                    <RiCloseLargeLine size={22} />
-                  </div>
-                </NavLink>
                 {formField.map((data, index) =>
                   data.type === "select" ? (
                     <div
