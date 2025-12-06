@@ -16,7 +16,11 @@ function CreateReservation() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
-  const [filter, setFilter] = useState({ status: "all", location: "all" });
+  const [filter, setFilter] = useState({
+    status: "all",
+    location: "all",
+    type: "all",
+  });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -88,6 +92,18 @@ function CreateReservation() {
       defaultValue: filter.location,
       colspan: 2,
     },
+    {
+      label: "Type",
+      type: "select",
+      name: "type",
+      options: [
+        { value: "all", phrase: "All" },
+        { value: "PRIVATE", phrase: "PRIVATE" },
+        { value: "PUBLIC", phrase: "PUBLIC" },
+      ],
+      defaultValue: filter.type,
+      colspan: 2,
+    },
   ];
 
   const handleSubmitFilter = (e) => {
@@ -140,6 +156,7 @@ function CreateReservation() {
           role: localStorage.getItem("role"),
           status: filter.status,
           location: filter.location,
+          type: filter.type,
           search: search,
         },
       });
@@ -185,7 +202,15 @@ function CreateReservation() {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate, limit, currentPage, filter.status, filter.location, search]);
+  }, [
+    navigate,
+    limit,
+    currentPage,
+    filter.status,
+    filter.location,
+    filter.type,
+    search,
+  ]);
 
   useEffect(() => {
     fetchData();

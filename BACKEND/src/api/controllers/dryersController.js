@@ -39,8 +39,18 @@ export const getOwned = async (req, res) => {
 };
 
 export const getDryers = async (req, res) => {
-  const { limit, offset, role, status, location, search, is_operation, date_from, date_to } =
-    req.query;
+  const {
+    limit,
+    offset,
+    role,
+    status,
+    location,
+    search,
+    is_operation,
+    date_from,
+    date_to,
+    type,
+  } = req.query;
   try {
     let query = supabase
       .from("dryers")
@@ -90,6 +100,10 @@ export const getDryers = async (req, res) => {
     if (typeof date_to !== "undefined" && date_to) {
       const toDate = `${date_to}T23:59:59.999Z`;
       query = query.lte("created_at", toDate);
+    }
+
+    if (typeof type !== "undefined" && type !== "all") {
+      query = query.eq("type", type);
     }
 
     const { data, count, error } = await query;
