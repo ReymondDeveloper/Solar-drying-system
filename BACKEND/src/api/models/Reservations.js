@@ -18,14 +18,14 @@ const Reservations = {
         id,
         farmer_id:farmer_id (id, first_name, last_name, email, mobile_number),
         owner_id:owner_id (id, first_name, last_name, email, mobile_number),
-        dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity, qr_code, is_operation, operation_reason),
+        dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity, qr_code, is_operation, operation_reason, type),
         crop_type_id:crop_type_id (crop_type_id, crop_type_name, quantity, payment, notes, created_at),
         status,
         created_at,
         date_from,
         date_to
       `,
-        { count: "exact" },
+        { count: "exact" }
       )
       .order("created_at", { ascending: false });
 
@@ -73,7 +73,7 @@ const Reservations = {
         ),
         status,
         created_at
-      `,
+      `
       )
       .eq("farmer_id.id", id)
       .single();

@@ -15,7 +15,7 @@ export const getReservations = async (req, res) => {
         id,
         farmer_id:farmer_id(id, first_name, last_name),
         owner_id:owner_id(id, first_name, last_name),
-        dryer_id:dryer_id(id, dryer_name, location, rate),
+        dryer_id:dryer_id(id, dryer_name, location, rate, type),
         crop_type_id:crop_type_id(crop_type_name, quantity, created_at),
         status,
         created_at,
