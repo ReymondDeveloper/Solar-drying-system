@@ -204,8 +204,8 @@ export const loginUser = async (req, res) => {
 
     if (error && error.code !== "PGRST116") throw error;
 
-    if (!data || data.delete_at !== null)
-      return res.status(404).json({ message: "User ID doesn’t exist." });
+    if (!data) return res.status(404).json({ message: "User ID doesn’t exist." });
+    if (data.delete_at) return res.status(404).json({ message: "User ID doesn’t exist." });
 
     if (!data.password) {
       return res.status(200).json({
