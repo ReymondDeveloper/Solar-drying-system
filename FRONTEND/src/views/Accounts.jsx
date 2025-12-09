@@ -328,10 +328,9 @@ function Accounts() {
           <Report
             column={[
               { label: "#", ratio: 0.05 },
-              { label: "First Name", ratio: 0.2 },
-              { label: "Last Name", ratio: 0.2 },
-              { label: "Address", ratio: 0.2 },
-              { label: "Email", ratio: 0.2 },
+              { label: "User ID", ratio: 0.2 },
+              { label: "Name", ratio: 0.3 },
+              { label: "Address", ratio: 0.3 },
               { label: "Role", ratio: 0.15 },
             ]}
             data={report}

@@ -122,11 +122,11 @@ export default function Report({ report_title, column, data }) {
 					? "Yes"
 					: `No - ${u.operation_reason ?? "Maintenance"}`,
 				"Reservation Status": u.available_capacity > 0 ? "available" : "occupied",
-				"First Name": u.first_name,
-				"Last Name": u.last_name,
+				"Name": u.name,
 				"Address": u.address,
 				"Email": u.email,
 				"Role": u.role,
+				"User ID": u.user_id,
 			};
 
 			// Calculate max row height based on text wrapping
