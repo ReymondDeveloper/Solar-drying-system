@@ -22,11 +22,29 @@ function SignIn() {
     navigate("/registration");
   };
 
+  const formField = [
+    {
+      label: "User ID",
+      type: "text",
+      required: true,
+      name: "user_id",
+      defaultValue: localStorage.getItem("user_id"),
+    },
+    {
+      label: "Password",
+      type: "password",
+      minLength: 8,
+      maxLength: 16,
+      required: true,
+      name: "password",
+    },
+  ];
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.target);
-    const { email, password, selected_role } = Object.fromEntries(
+    const { user_id, password } = Object.fromEntries(
       formData.entries()
     );
 
@@ -34,7 +52,7 @@ function SignIn() {
       const res = await axios.post(
         `${import.meta.env.VITE_API}/users/login`,
         {
-          email: email.toLowerCase(),
+          user_id,
           password,
         },
         {
@@ -49,39 +67,26 @@ function SignIn() {
         id,
         role,
         address,
-        full_name,
-        first_name,
-        middle_name,
-        last_name,
+        name,
         profile_image,
         mobile_number,
+        user_id,
       } = user;
-      if (message === "Account is not yet verified.") {
+      if (message === "Account is not yet activated.") {
         toast.error(message);
         setTimeout(() => {
-          localStorage.setItem("email", email.toLowerCase());
+          localStorage.setItem("user_id", user_id);
           setOtp(true);
         }, 2000);
       } else {
-        if (role !== selected_role) {
-          toast.error(
-            `Access denied: You are not authorized as ${selected_role}.`
-          );
-          setLoading(false);
-          return;
-        }
         localStorage.setItem("token", token);
         localStorage.setItem("role", role);
-        localStorage.setItem("full_name", full_name);
-        localStorage.setItem("first_name", first_name);
-        localStorage.setItem("middle_name", middle_name);
-        localStorage.setItem("last_name", last_name);
-        localStorage.setItem("email", email.toLowerCase());
+        localStorage.setItem("name", name);
+        localStorage.setItem("user_id", user_id);
         localStorage.setItem("address", address);
         localStorage.setItem("id", id);
         profile_image && localStorage.setItem("profile_image", profile_image);
         mobile_number && localStorage.setItem("mobile_number", mobile_number);
-
         toast.success(res.data.message);
         setTimeout(() => {
           if (localStorage.getItem("redirect")) {
@@ -102,24 +107,6 @@ function SignIn() {
       setLoading(false);
     }
   };
-
-  const formField = [
-    {
-      label: "Email address",
-      type: "email",
-      required: true,
-      name: "email",
-      defaultValue: localStorage.getItem("email"),
-    },
-    {
-      label: "Password",
-      type: "password",
-      minLength: 8,
-      maxLength: 16,
-      required: true,
-      name: "password",
-    },
-  ];
 
   const fieldsVerify = [
     {
@@ -272,26 +259,6 @@ function SignIn() {
                       </div>
                     </div>
                   ))}
-                  <div>
-                    <label
-                      className="block text-sm font-medium text-gray-700"
-                      htmlFor="role"
-                    >
-                      Role
-                    </label>
-                    <div className="mt-2">
-                      <select
-                        name="selected_role"
-                        required
-                        className="outline-0 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-                      >
-                        <option value="admin">Admin</option>
-                        <option value="owner">Owner</option>
-                        <option value="farmer">Farmer</option>
-                      </select>
-                    </div>
-                  </div>
-
                   <Button
                     type={`submit`}
                     className={`w-full bg-green-600 hover:bg-green-700 text-white`}
@@ -299,22 +266,22 @@ function SignIn() {
                     Sign In
                   </Button>
 
-                  <Button
+                  {/* <Button
                     type={`button`}
                     onClick={() => setModalVerify(true)}
                     className={`w-full hover:bg-[rgba(0,0,0,0.3)] hover:text-white text-green-400`}
                   >
                     Forgot password?
-                  </Button>
+                  </Button> */}
                 </form>
 
                 <p className="mt-6 text-center text-sm text-gray-400">
-                  Don't have an account yet?{" "}
+                  Don't have a password yet?{" "}
                   <a
                     className="font-semibold text-green-400 hover:text-gray-400 underline cursor-pointer"
                     onClick={handleRegister}
                   >
-                    Click here to register
+                    Click here to activate
                   </a>
                 </p>
               </div>
