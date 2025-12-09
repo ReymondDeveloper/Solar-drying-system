@@ -99,6 +99,16 @@ function DryerInformation() {
     { label: "Dryer Image", type: "file", name: "image_url" },
     { label: "QR Code", type: "file", name: "qr_code" },
     { label: "Business Permit", type: "file", name: "business_permit" },
+    {
+      label: "Dryer Type",
+      type: "select",
+      name: "dryer_type",
+      required: true,
+      options: [
+        { value: "MANUAL", phrase: "Manual" },
+        { value: "MACHINE", phrase: "Machine" },
+      ],
+    },
   ];
 
   const handleSubmitAdd = async (e) => {
@@ -118,6 +128,7 @@ function DryerInformation() {
         created_by_id: localStorage.getItem("id"),
         qr_code: dryerData.img_qr_code,
         business_permit: dryerData.pdf_business_permit,
+        dryer_type: dryerData.dryer_type,
       });
 
       toast.success(res.data.message);
@@ -391,6 +402,17 @@ function DryerInformation() {
       type: "file",
       name: "business_permit",
       defaultValue: selectedDryer?.business_permit,
+    },
+    {
+      label: "Dryer Type",
+      type: "select",
+      name: "dryer_type",
+      required: true,
+      options: [
+        { value: "MANUAL", phrase: "Manual" },
+        { value: "MACHINE", phrase: "Machine" },
+      ],
+      defaultValue: selectedDryer?.dryer_type,
     },
   ].filter(Boolean);
 

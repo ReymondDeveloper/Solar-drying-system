@@ -13,9 +13,9 @@ export const getReservations = async (req, res) => {
       .select(
         `
         id,
-        farmer_id:farmer_id(id, first_name, last_name),
-        owner_id:owner_id(id, first_name, last_name),
-        dryer_id:dryer_id(id, dryer_name, location, rate, type),
+        farmer_id:farmer_id(id, name),
+        owner_id:owner_id(id, name),
+        dryer_id:dryer_id(id, dryer_name, location, rate, business_type),
         crop_type_id:crop_type_id(crop_type_name, quantity, created_at),
         status,
         created_at,
@@ -99,7 +99,7 @@ export const getArchivedReservations = async (req, res) => {
       .select(
         `
         id,
-        farmer_id:farmer_id(id, first_name, last_name, email, mobile_number),
+        farmer_id:farmer_id(id, name, mobile_number),
         dryer_id:dryer_id(id, dryer_name, location, rate, available_capacity, created_by_id),
         crop_type_id:crop_type_id(crop_type_name, quantity, payment, notes),
         status,
@@ -124,7 +124,7 @@ export const getArchivedReservations = async (req, res) => {
       return {
         id: r.id,
         farmer_id: r.farmer_id.id || null,
-        farmer_name: `${r.farmer_id.first_name} ${r.farmer_id.last_name}`,
+        farmer_name: r.farmer_id.name,
         dryer_id: r.dryer_id.id || null,
         dryer_name: r.dryer_id.dryer_name || "N/A",
         dryer_location: r.dryer_id.location || "N/A",
@@ -342,8 +342,8 @@ export const getReservationsByOwner = async (req, res) => {
       .select(
         `
         id,
-        farmer_id:farmer_id (id, first_name, last_name, email, mobile_number),
-        owner_id:owner_id (id, first_name, last_name, email, mobile_number),
+        farmer_id:farmer_id (id, name, mobile_number),
+        owner_id:owner_id (id, name, mobile_number),
         dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity),
         crop_type_id:crop_type_id (crop_type_id, crop_type_name, quantity, payment, notes, created_at),
         status,
@@ -373,7 +373,7 @@ export const getReservationsByOwner = async (req, res) => {
     if (typeof search !== "undefined" && search) {
       query = query
         .not("farmer_id", "is", null)
-        .ilike("farmer_id.first_name", `%${search}%`);
+        .ilike("farmer_id.name", `%${search}%`);
     }
 
     const { data, count, error } = await query;
@@ -399,7 +399,7 @@ export const getAllOwnersWithDryers = async (req, res) => {
     const ownerIds = [...new Set(dryers.map((d) => d.created_by_id))];
     const { data: owners, error: ownersError } = await supabase
       .from("users")
-      .select("id, first_name, last_name, email")
+      .select("id, name")
       .in("id", ownerIds);
 
     console.log("Owners fetched:", owners);
@@ -408,7 +408,7 @@ export const getAllOwnersWithDryers = async (req, res) => {
 
     const result = owners.map((owner) => ({
       id: owner.id,
-      name: `${owner.first_name} ${owner.last_name}`,
+      name: owner.name,
       email: owner.email,
       dryers: dryers
         .filter((d) => d.created_by_id === owner.id)

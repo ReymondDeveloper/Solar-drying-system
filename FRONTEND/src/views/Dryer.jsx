@@ -473,7 +473,7 @@ export default function Dryer() {
                 <div key={index} className="flex gap-3 border-b pb-3 mb-3">
                   <div className="flex flex-col">
                     <b className="text-lg">
-                      {rating.farmer_id.first_name}
+                      {rating.farmer_id.name}
                       <span className="ms-5 text-xs font-normal text-gray-500">
                         ON {new Date(rating.created_at).toLocaleString()}
                       </span>

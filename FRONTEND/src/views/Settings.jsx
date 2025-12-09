@@ -10,11 +10,9 @@ function Settings() {
   const [isEditing, setIsEditing] = useState(false);
 
   const [formData, setFormData] = useState({
-    first_name: localStorage.getItem("first_name") || "",
-    middle_name: localStorage.getItem("middle_name") || "",
-    last_name: localStorage.getItem("last_name") || "",
+    name: localStorage.getItem("name") || "",
+    address: localStorage.getItem("address") || "",
     mobile_number: localStorage.getItem("mobile_number") || "",
-    email: localStorage.getItem("email") || "",
   });
 
   const navigate = useNavigate();
@@ -70,11 +68,9 @@ function Settings() {
       const base = import.meta.env.VITE_API;
 
       const formDataToSend = new FormData();
-      formDataToSend.append("first_name", formData.first_name);
-      formDataToSend.append("middle_name", formData.middle_name);
-      formDataToSend.append("last_name", formData.last_name);
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("address", formData.address);
       formDataToSend.append("mobile_number", formData.mobile_number);
-      formDataToSend.append("email", formData.email);
 
       if (profileImage) {
         formDataToSend.append("file", profileImage);
@@ -91,15 +87,9 @@ function Settings() {
         }
       );
 
-      localStorage.setItem("first_name", formData.first_name);
-      localStorage.setItem("middle_name", formData.middle_name);
-      localStorage.setItem("last_name", formData.last_name);
+      localStorage.setItem("name", formData.name);
+      localStorage.setItem("address", formData.address);
       localStorage.setItem("mobile_number", formData.mobile_number);
-      localStorage.setItem("email", formData.email);
-      localStorage.setItem(
-        "full_name",
-        `${formData.last_name}, ${formData.first_name} ${formData.middle_name}`
-      );
 
       if (res.data.profile_image) {
         localStorage.setItem("profile_image", res.data.profile_image);
@@ -115,40 +105,25 @@ function Settings() {
     }
   };
 
-  // Define form fields
   const formFields = [
     {
-      label: "First Name",
-      name: "first_name",
+      label: "Full Name",
+      name: "name",
       type: "text",
-      colSpan: 1,
+      colSpan: 2,
       required: true,
     },
     {
-      label: "Middle Name",
-      name: "middle_name",
+      label: "Address",
+      name: "address",
       type: "text",
-      colSpan: 1,
-      required: false,
-    },
-    {
-      label: "Last Name",
-      name: "last_name",
-      type: "text",
-      colSpan: 1,
+      colSpan: 2,
       required: true,
     },
     {
       label: "Mobile Number",
       name: "mobile_number",
       type: "text",
-      colSpan: 1,
-      required: true,
-    },
-    {
-      label: "Email",
-      name: "email",
-      type: "email",
       colSpan: 2,
       required: true,
     },
@@ -172,10 +147,10 @@ function Settings() {
             />
           </div>
           <h2 className="font-semibold text-xl mb-1 capitalize">
-            {localStorage.getItem("full_name")}
+            {localStorage.getItem("name")}
           </h2>
           <p className="text-gray-500 text-sm mb-4">
-            {localStorage.getItem("email")}
+            {localStorage.getItem("user_id")}
           </p>
 
           {isEditing && (
@@ -183,6 +158,7 @@ function Settings() {
               Choose File
               <input
                 type="file"
+                accept="image/*"
                 onChange={handleFileChange}
                 className="hidden"
               />

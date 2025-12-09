@@ -7,7 +7,7 @@ const User = {
     const { data, error } = await supabase
       .from("users") // your table name in Supabase
       .select(
-        `id, first_name, middle_name, last_name, email, address, role`
+        `id, name, address, role`
       );
     if (error) throw error;
     return data;
@@ -19,8 +19,7 @@ const User = {
       .from("users")
       .select(
         `
-        id, created_at, first_name, middle_name, last_name, email,
-        role, created_by_id, deleted_at, deleted_by_id
+        id, created_at, name, role, created_by_id, deleted_at, deleted_by_id
       `
       )
       .eq("id", id)

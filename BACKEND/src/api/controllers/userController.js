@@ -157,6 +157,7 @@ export const registerUser = async (req, res, next) => {
     res.status(201).json({
       id: data.id,
       user_id: data.user_id,
+      name: data.name,
       message: `Registered successfully. ID: ${data.user_id}.`,
     });
   } catch (err) {
@@ -306,7 +307,7 @@ export const verifyOtp = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { first_name, middle_name, last_name, mobile_number, email } =
+    const { name, address, mobile_number } =
       req.body;
 
     let profileImage = null;
@@ -318,11 +319,9 @@ export const updateProfile = async (req, res) => {
     }
 
     const updateData = {
-      first_name,
-      middle_name,
-      last_name,
+      name,
+      address,
       mobile_number,
-      email: email.toLowerCase(),
     };
 
     if (profileImage) {

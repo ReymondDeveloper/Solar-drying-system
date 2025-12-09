@@ -68,10 +68,7 @@ _This endpoint makes an HTTP POST request to create a new user._
 
 | Name        | Location | Type    | Required |
 | ----------- | -------- | ------- | -------- |
-| first_name  | body     | varchar | yes      |
-| middle_name | body     | varchar | yes      |
-| last_name   | body     | varchar | yes      |
-| email       | body     | varchar | yes      |
+| name        | body     | varchar | yes      |
 | password    | body     | varchar | yes      |
 | role        | body     | varchar | yes      |
 | address     | body     | varchar | yes      |

@@ -8,18 +8,7 @@ function AccountModal({ setAccountModal }) {
   const handleLogOut = (e) => {
     e.preventDefault();
     navigate("/");
-    localStorage.removeItem("role");
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("full_name");
-    localStorage.removeItem("first_name");
-    localStorage.removeItem("middle_name");
-    localStorage.removeItem("last_name");
-    localStorage.removeItem("email");
-    localStorage.removeItem("address");
-    localStorage.removeItem("id");
-    localStorage.removeItem("profile_image");
-    localStorage.removeItem("mobile_number");
+    localStorage.clear();
   };
   return (
     <>

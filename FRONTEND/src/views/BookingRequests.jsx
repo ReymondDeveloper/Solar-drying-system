@@ -285,7 +285,7 @@ function BookingRequests() {
       Array.isArray(data)
         ? data?.map((res) => ({
             id: res.id,
-            farmer_name: res.farmer_id.first_name || "N/A",
+            farmer_name: res.farmer_id.name || "N/A",
             location: res.dryer_id.location || "N/A",
             crop_type: res.crop_type_id.crop_type_name || "N/A",
             quantity: res.crop_type_id.quantity || "N/A",
@@ -347,7 +347,7 @@ function BookingRequests() {
         setData(
           result.data.data?.map((res) => ({
             id: res.id,
-            farmer_name: res.farmer_id.first_name || "N/A",
+            farmer_name: res.farmer_id.name || "N/A",
             location: res.dryer_id.location || "N/A",
             crop_type: res.crop_type_id.crop_type_name || "N/A",
             quantity: res.crop_type_id.quantity || "N/A",
