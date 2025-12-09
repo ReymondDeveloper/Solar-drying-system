@@ -175,7 +175,7 @@ export const deleteUser = async (req, res) => {
 
     if (error) throw error;
 
-    if (!data || data.deleted_at !== null) {
+    if (!data) {
       return res.status(404).json({ message: "User not found." });
     }
 
@@ -357,6 +357,7 @@ export const findUser = async (req, res, next) => {
       .from("users")
       .select("user_id")
       .eq("user_id", user_id)
+      .is("deleted_at", null)
       .single();
 
     if (error && error.code !== "PGRST116") throw error;
