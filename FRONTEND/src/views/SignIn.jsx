@@ -17,99 +17,18 @@ function SignIn() {
   const [modalEdit, setModalEdit] = useState(false);
   const [modalVerify, setModalVerify] = useState(false);
 
-  const handleRegister = (e) => {
+  const handleRedirect = (e) => {
     e.preventDefault();
-    navigate("/registration");
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const formData = new FormData(e.target);
-    const { email, password, selected_role } = Object.fromEntries(
-      formData.entries()
-    );
-
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API}/users/login`,
-        {
-          email: email.toLowerCase(),
-          password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const { user = {}, token, message } = res.data;
-      const {
-        id,
-        role,
-        address,
-        full_name,
-        first_name,
-        middle_name,
-        last_name,
-        profile_image,
-        mobile_number,
-      } = user;
-      if (message === "Account is not yet verified.") {
-        toast.error(message);
-        setTimeout(() => {
-          localStorage.setItem("email", email.toLowerCase());
-          setOtp(true);
-        }, 2000);
-      } else {
-        if (role !== selected_role) {
-          toast.error(
-            `Access denied: You are not authorized as ${selected_role}.`
-          );
-          setLoading(false);
-          return;
-        }
-        localStorage.setItem("token", token);
-        localStorage.setItem("role", role);
-        localStorage.setItem("full_name", full_name);
-        localStorage.setItem("first_name", first_name);
-        localStorage.setItem("middle_name", middle_name);
-        localStorage.setItem("last_name", last_name);
-        localStorage.setItem("email", email.toLowerCase());
-        localStorage.setItem("address", address);
-        localStorage.setItem("id", id);
-        profile_image && localStorage.setItem("profile_image", profile_image);
-        mobile_number && localStorage.setItem("mobile_number", mobile_number);
-
-        toast.success(res.data.message);
-        setTimeout(() => {
-          if (localStorage.getItem("redirect")) {
-            navigate(localStorage.getItem("redirect"));
-            localStorage.removeItem("redirect");
-          } else {
-            if (role === "admin") navigate("/home");
-            else if (role === "owner") navigate("/home");
-            else if (role === "farmer") navigate("/home");
-            else navigate("/home");
-          }
-        }, 2000);
-      }
-    } catch (err) {
-      const message = err.response?.data?.message || err.message;
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
+    navigate("/activate");
   };
 
   const formField = [
     {
-      label: "Email address",
-      type: "email",
+      label: "User ID",
+      type: "text",
       required: true,
-      name: "email",
-      defaultValue: localStorage.getItem("email"),
+      name: "user_id",
+      defaultValue: localStorage.getItem("user_id"),
     },
     {
       label: "Password",
@@ -120,6 +39,52 @@ function SignIn() {
       name: "password",
     },
   ];
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const formData = new FormData(e.target);
+    const { user_id, password } = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API}/users/login`, {
+        user_id,
+        password,
+      });
+
+      const { user = {}, token, message } = res.data;
+      if (message === "User ID isn't activated yet.") {
+        toast.info(message);
+        setTimeout(() => {
+          navigate("/activate");
+        }, 2000);
+      } else {
+        localStorage.setItem("token", token);
+        localStorage.setItem("role", user.role);
+        localStorage.setItem("name", user.name);
+        localStorage.setItem("address", user.address);
+        localStorage.setItem("id", user.id);
+        user.profile_image &&
+          localStorage.setItem("profile_image", user.profile_image);
+        user.mobile_number &&
+          localStorage.setItem("mobile_number", user.mobile_number);
+        toast.success(res.data.message);
+        setTimeout(() => {
+          if (localStorage.getItem("redirect")) {
+            navigate(localStorage.getItem("redirect"));
+            localStorage.removeItem("redirect");
+          } else {
+            navigate("/home");
+          }
+        }, 2000);
+      }
+    } catch (err) {
+      const message = err.response?.data?.message || err.message;
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fieldsVerify = [
     {
@@ -186,7 +151,7 @@ function SignIn() {
       if (password === confirm_password) {
         const res = await axios.put(
           `${import.meta.env.VITE_API}/users/update`,
-          { password, email: localStorage.getItem("email") }
+          { password, email: localStorage.getItem("email") },
         );
 
         toast.success(res.data.message);
@@ -272,26 +237,6 @@ function SignIn() {
                       </div>
                     </div>
                   ))}
-                  <div>
-                    <label
-                      className="block text-sm font-medium text-gray-700"
-                      htmlFor="role"
-                    >
-                      Role
-                    </label>
-                    <div className="mt-2">
-                      <select
-                        name="selected_role"
-                        required
-                        className="outline-0 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-                      >
-                        <option value="admin">Admin</option>
-                        <option value="owner">Owner</option>
-                        <option value="farmer">Farmer</option>
-                      </select>
-                    </div>
-                  </div>
-
                   <Button
                     type={`submit`}
                     className={`w-full bg-green-600 hover:bg-green-700 text-white`}
@@ -299,22 +244,22 @@ function SignIn() {
                     Sign In
                   </Button>
 
-                  <Button
+                  {/* <Button
                     type={`button`}
                     onClick={() => setModalVerify(true)}
                     className={`w-full hover:bg-[rgba(0,0,0,0.3)] hover:text-white text-green-400`}
                   >
                     Forgot password?
-                  </Button>
+                  </Button> */}
                 </form>
 
                 <p className="mt-6 text-center text-sm text-gray-400">
-                  Don't have an account yet?{" "}
+                  Don't have a password yet?{" "}
                   <a
                     className="font-semibold text-green-400 hover:text-gray-400 underline cursor-pointer"
-                    onClick={handleRegister}
+                    onClick={handleRedirect}
                   >
-                    Click here to register
+                    Click here to activate
                   </a>
                 </p>
               </div>

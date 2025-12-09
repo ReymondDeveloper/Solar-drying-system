@@ -16,6 +16,7 @@ export const getUsers = async (req, res, next) => {
     let query = supabase
       .from("users")
       .select("*", { count: "exact" })
+      .is("deleted_at", null)
       .order("created_at", { ascending: false });
 
     if (typeof limit !== "undefined" && typeof offset !== "undefined") {
@@ -29,9 +30,7 @@ export const getUsers = async (req, res, next) => {
     }
 
     if (typeof search !== "undefined" && search) {
-      query = query.or(
-        `first_name.ilike.%${search}%,last_name.ilike.%${search}%`,
-      );
+      query = query.or(`name.ilike.%${search}%`);
     }
 
     if (typeof date_from !== "undefined" && date_from) {
@@ -96,41 +95,56 @@ export const verifyUser = async (req, res, next) => {
 
 export const registerUser = async (req, res, next) => {
   try {
-    const {
-      first_name,
-      middle_name,
-      last_name,
-      email,
-      password,
-      role,
-      address,
-      mobile_number,
-    } = req.body;
+    const { full_name, role, address } = req.body;
+    let user_id;
 
-    const existingUser = await User.findByEmail(email);
-    if (existingUser) {
-      return res.status(400).json({ message: "Email already exists." });
+    if (role === "farmer") {
+      const { data, error } = await supabase
+        .from("users")
+        .select("user_id")
+        .ilike("user_id", "FRS%")
+        .order("user_id", { ascending: false })
+        .limit(1)
+        .maybeSingle(); // allows 0 rows
+
+      const lastId = data?.user_id;
+
+      if (!lastId) {
+        user_id = "FRS9000";
+      } else {
+        const match = lastId.match(/^FRS(\d+)$/);
+        const num = match ? parseInt(match[1], 10) + 1 : 9000;
+        user_id = `FRS${num}`;
+      }
+    } else if (role === "owner") {
+      const { data, error } = await supabase
+        .from("users")
+        .select("user_id")
+        .ilike("user_id", "OR%")
+        .order("user_id", { ascending: false })
+        .limit(1)
+        .maybeSingle(); // allows 0 rows
+
+      const lastId = data?.user_id;
+
+      if (!lastId) {
+        user_id = "OR1100100";
+      } else {
+        // FIX: use OR here, not FRS
+        const match = lastId.match(/^OR(\d+)$/);
+        const num = match ? parseInt(match[1], 10) + 1 : 1100100;
+        user_id = `OR${num}`;
+      }
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
-    const date = new Date();
-    date.setMinutes(date.getMinutes() + 5);
-    const expiresAt = date.toString();
     const { data, error } = await supabase
       .from("users")
       .insert([
         {
-          first_name,
-          middle_name,
-          last_name,
-          email: email.toLowerCase(),
-          password: hashedPassword,
+          name: full_name,
           role,
-          otp_code: otp,
-          otp_expires_at: expiresAt,
           address,
-          mobile_number,
+          user_id,
         },
       ])
       .select()
@@ -140,92 +154,81 @@ export const registerUser = async (req, res, next) => {
       return res.status(400).json({ message: "Registration failed." });
     }
 
-    const email_data = {
-      email,
-      otp,
-    };
-    const params = new URLSearchParams();
-    params.append("data", JSON.stringify(email_data));
-    await axios.post(
-      "https://script.google.com/macros/s/AKfycbxvKYzaJaf7xFMNEENQPyBIGrTex6hquymsFF6dRztAUZqVnMcBxMK-wDPLhGvlSaUKtw/exec",
-      params,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      },
-    );
-
     res.status(201).json({
       id: data.id,
-      email: data.email,
-      message: "Registered successfully. Please verify with OTP.",
+      user_id: data.user_id,
+      message: `Registered successfully. ID: ${data.user_id}.`,
     });
   } catch (err) {
     next(err);
   }
 };
 
+export const deleteUser = async (req, res) => {
+  try {
+    const { user_id } = req.body;
+    const { data, error } = await supabase
+      .from("users")
+      .select("user_id")
+      .eq("user_id", user_id)
+      .single();
+
+    if (error) throw error;
+
+    if (!data || data.deleted_at !== null) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const { error: deleteError } = await supabase
+      .from("users")
+      .update({ deleted_at: new Date() })
+      .eq("user_id", user_id);
+
+    if (deleteError) throw deleteError;
+
+    res.json({ message: "Account deleted successfully." });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 export const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { user_id, password } = req.body;
 
-    const user = await User.findByEmail(email);
-    if (!user)
-      return res.status(404).json({ message: "Account doesn’t exist." });
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("user_id", user_id)
+      .single();
 
-    if (!user.is_verified) {
-      const otp = Math.floor(1000 + Math.random() * 9000).toString();
-      const date = new Date();
-      date.setMinutes(date.getMinutes() + 5);
-      const expiresAt = date.toString();
+    if (error && error.code !== "PGRST116") throw error;
 
-      await supabase
-        .from("users")
-        .update({ otp_code: otp, otp_expires_at: expiresAt })
-        .eq("email", user.email);
+    if (!data || data.delete_at !== null)
+      return res.status(404).json({ message: "User ID doesn’t exist." });
 
-      const email_data = {
-        email,
-        otp,
-      };
-      const params = new URLSearchParams();
-      params.append("data", JSON.stringify(email_data));
-      await axios.post(
-        "https://script.google.com/macros/s/AKfycbxvKYzaJaf7xFMNEENQPyBIGrTex6hquymsFF6dRztAUZqVnMcBxMK-wDPLhGvlSaUKtw/exec",
-        params,
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-        },
-      );
-
+    if (!data.password) {
       return res.status(200).json({
-        message: "Account is not yet verified.",
+        message: "User ID isn't activated yet.",
       });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, data.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid password." });
 
-    const token = generateToken(user.id);
+    const token = generateToken(data.id);
     if (!token)
       return res.status(401).json({ message: "Token is not working." });
 
     res.json({
       message: "Login successful",
       user: {
-        id: user.id,
-        full_name: `${user.last_name}, ${user.first_name} ${user.middle_name}`,
-        first_name: user.first_name,
-        middle_name: user.middle_name,
-        last_name: user.last_name,
-        role: user.role,
-        address: user.address,
-        email: user.email,
-        profile_image: user.profile_image,
-        mobile_number: user.mobile_number,
+        id: data.id,
+        name: data.name,
+        role: data.role,
+        address: data.address,
+        profile_image: data.profile_image,
+        mobile_number: data.mobile_number,
       },
       token: token,
     });
@@ -343,5 +346,42 @@ export const updateProfile = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const findUser = async (req, res, next) => {
+  try {
+    const { user_id } = req.query;
+
+    const { data, error } = await supabase
+      .from("users")
+      .select("user_id")
+      .eq("user_id", user_id)
+      .single();
+
+    if (error && error.code !== "PGRST116") throw error;
+
+    res.json({ user_id: data });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateUser = async (req, res, next) => {
+  try {
+    const { user_id, password } = req.body;
+    const newPassword = await bcrypt.hash(password, 10);
+    const { error } = await supabase
+      .from("users")
+      .update({ password: newPassword })
+      .eq("user_id", user_id);
+
+    if (error && error.code !== "PGRST116") throw error;
+
+    res.status(200).json({
+      message: "You've successfully activated your account.",
+    });
+  } catch (err) {
+    next(err);
   }
 };
