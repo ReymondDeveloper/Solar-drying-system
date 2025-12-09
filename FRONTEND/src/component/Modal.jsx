@@ -35,7 +35,7 @@ function Modal({
       (position) => {
         const { latitude, longitude } = position.coords;
         fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
         )
           .then((res) => res.json())
           .then((data) => {
@@ -46,15 +46,15 @@ function Modal({
             setAddress(`${address}`);
           })
           .catch((err) =>
-            console.log("Failed to get address. ", err.response?.data?.message)
+            console.log("Failed to get address. ", err.response?.data?.message),
           );
       },
       (err) => {
         console.log(
           "Permission denied or location error. ",
-          err.response?.data?.message
+          err.response?.data?.message,
         );
-      }
+      },
     );
   };
 
@@ -74,7 +74,7 @@ function Modal({
             sender: res.sender_number,
             date: res.transaction_date,
           }))
-        : []
+        : [],
     );
 
     try {
@@ -91,11 +91,11 @@ function Modal({
             amount: res.amount,
             sender: res.sender_number,
             date: res.transaction_date,
-          }))
+          })),
         );
         localStorage.setItem(
           "modal_reservation_data",
-          JSON.stringify(result.data)
+          JSON.stringify(result.data),
         );
       }
     } catch (error) {
@@ -112,7 +112,7 @@ function Modal({
             sender: res.sender,
             created_at: res.created_at,
           }))
-        : []
+        : [],
     );
 
     try {
@@ -128,7 +128,7 @@ function Modal({
             message: res.message,
             sender: res.sender,
             created_at: res.created_at,
-          }))
+          })),
         );
         localStorage.setItem("modal_chat_data", JSON.stringify(result.data));
       }
@@ -175,26 +175,23 @@ function Modal({
       setChats((prev) => [...prev, newChat]);
       localStorage.setItem(
         "modal_chat_data",
-        JSON.stringify([...chats, newChat])
+        JSON.stringify([...chats, newChat]),
       );
       setChatTextArea("");
 
       if (userRole === "owner") {
         axios.post(`${import.meta.env.VITE_API}/notification`, {
           user: datas.farmer_id.id,
-          context:
-            `A dryer owner message you regarding your reservation at "${datas.dryer_id.dryer_name.toUpperCase()}" dryer on ${new Date().toLocaleDateString()}. Tap to respond.`,
+          context: `A dryer owner message you regarding your reservation at "${datas.dryer_id.dryer_name.toUpperCase()}" dryer on ${new Date().toLocaleDateString()}. Tap to respond.`,
           url: `/home/reservation-history?id=${datas.id}`,
         });
       } else if (userRole === "farmer") {
         axios.post(`${import.meta.env.VITE_API}/notification`, {
           user: datas.owner_id.id,
-          context:
-            `A farmer messaged you regarding their reservation at "${datas.dryer_id.dryer_name.toUpperCase()}" dryer on ${new Date().toLocaleDateString()}. Tap to respond.`,
+          context: `A farmer messaged you regarding their reservation at "${datas.dryer_id.dryer_name.toUpperCase()}" dryer on ${new Date().toLocaleDateString()}. Tap to respond.`,
           url: `/home/booking-requests?id=${datas.id}`,
         });
       }
-      
     } catch (error) {
       console.error(error);
     }
@@ -342,7 +339,6 @@ function Modal({
                         }}
                       />
                     )}
-                    
 
                     {previewUrls[field.name] ? (
                       <>
@@ -359,13 +355,15 @@ function Modal({
                                 ? previewUrls[field.name]
                                 : `${import.meta.env.VITE_API.replace(
                                     "/api",
-                                    ""
+                                    "",
                                   )}${previewUrls[field.name]}`
                             }
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm font-bold text-green-500 hover:text-green-600"
-                          >View in another tab</a>
+                          >
+                            View in another tab
+                          </a>
                           <iframe
                             src={
                               previewUrls[field.name].startsWith("http") ||
@@ -373,7 +371,7 @@ function Modal({
                                 ? previewUrls[field.name]
                                 : `${import.meta.env.VITE_API.replace(
                                     "/api",
-                                    ""
+                                    "",
                                   )}${previewUrls[field.name]}`
                             }
                             alt="Preview"
@@ -399,7 +397,9 @@ function Modal({
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm font-bold text-green-500 hover:text-green-600"
-                          >View in another tab</a>
+                          >
+                            View in another tab
+                          </a>
                           <iframe
                             src={
                               field.defaultValue.startsWith("http") ||
@@ -476,7 +476,7 @@ function Modal({
                                 ? previewUrls[field.name]
                                 : `${import.meta.env.VITE_API.replace(
                                     "/api",
-                                    ""
+                                    "",
                                   )}${previewUrls[field.name]}`
                             }
                             alt="Preview"
@@ -499,7 +499,7 @@ function Modal({
                                 ? field.defaultValue
                                 : `${import.meta.env.VITE_API.replace(
                                     "/api",
-                                    ""
+                                    "",
                                   )}${field.defaultValue}`
                             }
                             alt="Preview"
@@ -674,6 +674,7 @@ function Modal({
                     step={field.step}
                     min={field.min}
                     onChange={field.onchange}
+                    disabled={field.disabled || false}
                   />
                 </>
               )}
@@ -730,7 +731,7 @@ function Modal({
                   <span className="capitalize font-bold">
                     {String(datas.dryer_id.location).includes("Sablayan") ||
                     String(datas.dryer_id.location).includes(
-                      "Occidental Mindoro"
+                      "Occidental Mindoro",
                     )
                       ? datas.dryer_id.location
                       : datas.dryer_id.location +
@@ -801,7 +802,8 @@ function Modal({
                 <p>
                   {"Total amount of payment: "}
                   <span className="capitalize font-bold">
-                    {safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity)}
+                    {safeNumber(datas.dryer_id.rate) *
+                      safeNumber(datas.crop_type_id.quantity)}
                   </span>
                 </p>
 
@@ -858,15 +860,17 @@ function Modal({
                         datas.status !== "pending" && (
                           <span
                             onClick={() => {
-                              localStorage.setItem("amount_of_payment", safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity))
+                              localStorage.setItem(
+                                "amount_of_payment",
+                                safeNumber(datas.dryer_id.rate) *
+                                  safeNumber(datas.crop_type_id.quantity),
+                              );
                               setGcashModal(true);
                               setModal(false);
                             }}
                             className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer"
                           >
-                            <span className="max-[768px]:hidden">
-                              Upload
-                            </span>
+                            <span className="max-[768px]:hidden">Upload</span>
                             <ImFolderUpload />
                           </span>
                         )}
@@ -874,15 +878,13 @@ function Modal({
                         onClick={() => handleChat()}
                         className="rounded-full p-3 bg-green-600 flex items-center gap-2 hover:bg-green-700 cursor-pointer"
                       >
-                        <span className="max-[768px]:hidden">
-                          Send
-                        </span>
+                        <span className="max-[768px]:hidden">Send</span>
                         <FaLocationArrow className="rotate-45" />
                       </span>
                     </div>
                   </div>
                 )}
-                
+
                 {datas.status !== "denied" && datas.status !== "pending" && (
                   <div className="w-full overflow-x-auto mt-4">
                     <table className="min-w-[700px] w-full">

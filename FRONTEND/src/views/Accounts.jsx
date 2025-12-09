@@ -10,7 +10,7 @@ import Loading from "../component/Loading";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import api from "../api/api";
-import Report from "../component/Report"
+import Report from "../component/Report";
 
 function Accounts() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,28 +21,18 @@ function Accounts() {
   const [isError, setIsError] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
   const [modalAdd, setModalAdd] = useState(false);
-  const [filter, setFilter] = useState({ role: "all", date_from: null, date_to: null, });
+  const [filter, setFilter] = useState({
+    role: "all",
+    date_from: null,
+    date_to: null,
+  });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState([]);
 
-  const tableHeadings = [
-    "First Name",
-    "Middle Name",
-    "Last Name",
-    "Address",
-    "Email",
-    "Role",
-  ];
+  const tableHeadings = ["Name", "Address", "User ID", "Role", "Action"];
 
-  const tableDataCell = [
-    "first_name",
-    "middle_name",
-    "last_name",
-    "address",
-    "email",
-    "role",
-  ];
+  const tableDataCell = ["name", "address", "user_id", "role", "action"];
 
   const fieldsFilter = [
     {
@@ -94,53 +84,9 @@ function Accounts() {
 
   const fieldsAdd = [
     {
-      label: "First Name",
+      label: "Full Name",
       type: "text",
-      name: "first_name",
-      required: true,
-      colspan: 1,
-    },
-    {
-      label: "Middle Name",
-      type: "text",
-      name: "middle_name",
-      required: false,
-      colspan: 1,
-    },
-    {
-      label: "Last Name",
-      type: "text",
-      name: "last_name",
-      required: true,
-      colspan: 1,
-    },
-    {
-      label: "Mobile Number",
-      type: "text",
-      name: "mobile_number",
-      required: true,
-      colspan: 1,
-      onchange: (e) => {
-        let newValue = e.target.value.replace(/\D/g, "");
-
-        if (newValue.startsWith("0")) {
-          newValue = "+63" + newValue.slice(1);
-        } else if (newValue.startsWith("63")) {
-          newValue = "+" + newValue;
-        } else if (!newValue.startsWith("+63") && newValue.length > 0) {
-          newValue = "+63" + newValue;
-        }
-
-        if (newValue.length > 13) {
-          newValue = newValue.slice(0, 13);
-        }
-        e.target.value = newValue;
-      },
-    },
-    {
-      label: "Email address",
-      type: "email",
-      name: "email",
+      name: "full_name",
       required: true,
       colspan: 2,
     },
@@ -162,48 +108,25 @@ function Accounts() {
       ],
       colspan: 2,
     },
-    {
-      label: "Password",
-      type: "password",
-      name: "password",
-      minLength: 8,
-      maxLength: 16,
-      required: true,
-      colspan: 2,
-    },
   ];
 
   const handleSubmitAdd = async (e) => {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.target);
-    const {
-      first_name,
-      middle_name,
-      last_name,
-      address,
-      email,
-      role,
-      password,
-      mobile_number,
-    } = Object.fromEntries(formData.entries());
+    const { full_name, address, role } = Object.fromEntries(formData.entries());
     try {
       const res = await api.post(`${import.meta.env.VITE_API}/users/register`, {
-        first_name,
-        middle_name,
-        last_name,
+        full_name,
         address,
-        email,
-        password,
         role,
-        mobile_number,
       });
       toast.success(res.data.message);
 
       axios.post(`${import.meta.env.VITE_API}/notification`, {
         user: localStorage.getItem("id"),
         context:
-          `You've successfully created an account for ${res.data.email} at ` +
+          `You've successfully created an account for ${res.data.full_name} at ` +
           new Date().toLocaleString(),
       });
 
@@ -226,18 +149,51 @@ function Accounts() {
   };
 
   const fetchData = useCallback(async () => {
+    async function handleDelete(e) {
+      setLoading(true);
+      try {
+        const res = await api.put(
+          `${import.meta.env.VITE_API}/users/register`,
+          {
+            user_id: e,
+          },
+        );
+
+        toast.success(res.data.message);
+
+        await axios.post(`${import.meta.env.VITE_API}/notification`, {
+          user: localStorage.getItem("id"),
+          context:
+            `You've successfully deleted an account for ${res.data.full_name} at ` +
+            new Date().toLocaleString(),
+        });
+
+        fetchData();
+      } catch (err) {
+        toast.error(err?.response?.data?.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    }
+
     const local = localStorage.getItem("accounts_data");
     const data = JSON.parse(local);
     setData(
       Array.isArray(data)
         ? data?.map((res) => ({
             id: res.id,
-            first_name: res.first_name,
-            middle_name: res.middle_name,
-            last_name: res.last_name,
+            name: res.name,
             address: res.address,
-            email: res.email,
+            user_id: res.user_id,
             role: res.role,
+            action: (
+              <Button
+                onClick={() => handleDelete(res.user_id)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
+              >
+                Delete
+              </Button>
+            ),
           }))
         : [],
     );
@@ -268,12 +224,18 @@ function Accounts() {
         setData(
           result.data.data?.map((res) => ({
             id: res.id,
-            first_name: res.first_name,
-            middle_name: res.middle_name,
-            last_name: res.last_name,
+            name: res.name,
             address: res.address,
-            email: res.email,
+            user_id: res.user_id,
             role: res.role,
+            action: (
+              <Button
+                onClick={() => handleDelete(res.user_id)}
+                className="bg-blue-400 hover:bg-blue-500 text-white"
+              >
+                Delete
+              </Button>
+            ),
           })),
         );
         localStorage.setItem("accounts_data", JSON.stringify(result.data.data));
@@ -285,7 +247,14 @@ function Accounts() {
     } finally {
       setIsLoading(false);
     }
-  }, [limit, currentPage, filter.role, filter.date_from, filter.date_to, search]);
+  }, [
+    limit,
+    currentPage,
+    filter.role,
+    filter.date_from,
+    filter.date_to,
+    search,
+  ]);
 
   useEffect(() => {
     fetchData();
@@ -324,8 +293,8 @@ function Accounts() {
       <div className="absolute top-0 left-0 w-full h-[calc(100dvh-56px)] text-5xl flex justify-center items-center font-bold py-5">
         Error while fetching the data
       </div>
-    )
-  };
+    );
+  }
 
   return (
     <>
@@ -356,7 +325,7 @@ function Accounts() {
       >
         <div className="w-full flex flex-col md:flex-row justify-center gap-5">
           <Search setSearch={setSearch} setModal={setModalFilter} />
-          <Report 
+          <Report
             column={[
               { label: "#", ratio: 0.05 },
               { label: "First Name", ratio: 0.2 },
@@ -364,8 +333,8 @@ function Accounts() {
               { label: "Address", ratio: 0.2 },
               { label: "Email", ratio: 0.2 },
               { label: "Role", ratio: 0.15 },
-            ]} 
-            data={report} 
+            ]}
+            data={report}
             report_title="LIST OF USERS"
           />
         </div>

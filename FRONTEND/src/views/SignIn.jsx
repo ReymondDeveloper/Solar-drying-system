@@ -17,9 +17,9 @@ function SignIn() {
   const [modalEdit, setModalEdit] = useState(false);
   const [modalVerify, setModalVerify] = useState(false);
 
-  const handleRegister = (e) => {
+  const handleRedirect = (e) => {
     e.preventDefault();
-    navigate("/registration");
+    navigate("/activate");
   };
 
   const formField = [
@@ -44,59 +44,37 @@ function SignIn() {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.target);
-    const { user_id, password } = Object.fromEntries(
-      formData.entries()
-    );
+    const { user_id, password } = Object.fromEntries(formData.entries());
 
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API}/users/login`,
-        {
-          user_id,
-          password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await axios.post(`${import.meta.env.VITE_API}/users/login`, {
+        user_id,
+        password,
+      });
 
       const { user = {}, token, message } = res.data;
-      const {
-        id,
-        role,
-        address,
-        name,
-        profile_image,
-        mobile_number,
-        user_id,
-      } = user;
-      if (message === "Account is not yet activated.") {
-        toast.error(message);
+      if (message === "User ID isn't activated yet.") {
+        toast.info(message);
         setTimeout(() => {
-          localStorage.setItem("user_id", user_id);
-          setOtp(true);
+          navigate("/activate");
         }, 2000);
       } else {
         localStorage.setItem("token", token);
-        localStorage.setItem("role", role);
-        localStorage.setItem("name", name);
-        localStorage.setItem("user_id", user_id);
-        localStorage.setItem("address", address);
-        localStorage.setItem("id", id);
-        profile_image && localStorage.setItem("profile_image", profile_image);
-        mobile_number && localStorage.setItem("mobile_number", mobile_number);
+        localStorage.setItem("role", user.role);
+        localStorage.setItem("name", user.name);
+        localStorage.setItem("address", user.address);
+        localStorage.setItem("id", user.id);
+        user.profile_image &&
+          localStorage.setItem("profile_image", user.profile_image);
+        user.mobile_number &&
+          localStorage.setItem("mobile_number", user.mobile_number);
         toast.success(res.data.message);
         setTimeout(() => {
           if (localStorage.getItem("redirect")) {
             navigate(localStorage.getItem("redirect"));
             localStorage.removeItem("redirect");
           } else {
-            if (role === "admin") navigate("/home");
-            else if (role === "owner") navigate("/home");
-            else if (role === "farmer") navigate("/home");
-            else navigate("/home");
+            navigate("/home");
           }
         }, 2000);
       }
@@ -173,7 +151,7 @@ function SignIn() {
       if (password === confirm_password) {
         const res = await axios.put(
           `${import.meta.env.VITE_API}/users/update`,
-          { password, email: localStorage.getItem("email") }
+          { password, email: localStorage.getItem("email") },
         );
 
         toast.success(res.data.message);
@@ -279,7 +257,7 @@ function SignIn() {
                   Don't have a password yet?{" "}
                   <a
                     className="font-semibold text-green-400 hover:text-gray-400 underline cursor-pointer"
-                    onClick={handleRegister}
+                    onClick={handleRedirect}
                   >
                     Click here to activate
                   </a>
