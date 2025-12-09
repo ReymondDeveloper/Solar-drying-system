@@ -104,7 +104,6 @@ function Accounts() {
       options: [
         { value: "owner", phrase: "Owner" },
         { value: "farmer", phrase: "Farmer" },
-        { value: "admin", phrase: "Admin" },
       ],
       colspan: 2,
     },
@@ -156,7 +155,7 @@ function Accounts() {
           `${import.meta.env.VITE_API}/users/register`,
           {
             user_id: e,
-          },
+          }
         );
 
         toast.success(res.data.message);
@@ -195,7 +194,7 @@ function Accounts() {
               </Button>
             ),
           }))
-        : [],
+        : []
     );
 
     if (!Array.isArray(data)) setIsLoading(true);
@@ -236,7 +235,7 @@ function Accounts() {
                 Delete
               </Button>
             ),
-          })),
+          }))
         );
         localStorage.setItem("accounts_data", JSON.stringify(result.data.data));
       }

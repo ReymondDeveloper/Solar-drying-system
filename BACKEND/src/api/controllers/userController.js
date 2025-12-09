@@ -82,7 +82,7 @@ export const verifyUser = async (req, res, next) => {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-      },
+      }
     );
 
     res
@@ -195,18 +195,21 @@ export const deleteUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   try {
-    const { user_id, password } = req.body;
+    const { name, user_id, password } = req.body;
 
     const { data, error } = await supabase
       .from("users")
       .select("*")
       .eq("user_id", user_id)
+      .eq("name", name)
       .single();
 
     if (error && error.code !== "PGRST116") throw error;
 
-    if (!data) return res.status(404).json({ message: "User ID doesn’t exist." });
-    if (data.delete_at) return res.status(404).json({ message: "User ID doesn’t exist." });
+    if (!data)
+      return res.status(404).json({ message: "User ID doesn’t exist." });
+    if (data.delete_at)
+      return res.status(404).json({ message: "User ID doesn’t exist." });
 
     if (!data.password) {
       return res.status(200).json({
@@ -307,8 +310,7 @@ export const verifyOtp = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, address, mobile_number } =
-      req.body;
+    const { name, address, mobile_number } = req.body;
 
     let profileImage = null;
 
@@ -350,13 +352,15 @@ export const updateProfile = async (req, res) => {
 
 export const findUser = async (req, res, next) => {
   try {
-    const { user_id } = req.query;
+    const { name, user_id } = req.query;
 
     const { data, error } = await supabase
       .from("users")
       .select("user_id")
       .eq("user_id", user_id)
+      .eq("name", name)
       .is("deleted_at", null)
+      .is("password", null)
       .single();
 
     if (error && error.code !== "PGRST116") throw error;

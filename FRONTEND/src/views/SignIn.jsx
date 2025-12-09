@@ -24,11 +24,16 @@ function SignIn() {
 
   const formField = [
     {
+      label: "Name",
+      type: "text",
+      required: true,
+      name: "name",
+    },
+    {
       label: "User ID",
       type: "text",
       required: true,
       name: "user_id",
-      defaultValue: localStorage.getItem("user_id"),
     },
     {
       label: "Password",
@@ -44,10 +49,11 @@ function SignIn() {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.target);
-    const { user_id, password } = Object.fromEntries(formData.entries());
+    const { name, user_id, password } = Object.fromEntries(formData.entries());
 
     try {
       const res = await axios.post(`${import.meta.env.VITE_API}/users/login`, {
+        name,
         user_id,
         password,
       });
@@ -86,125 +92,10 @@ function SignIn() {
     }
   };
 
-  const fieldsVerify = [
-    {
-      label: "Email",
-      type: "email",
-      required: true,
-      name: "email",
-      colspan: 2,
-    },
-  ];
-
-  const handleSubmitVerify = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const formData = new FormData(e.target);
-      const data = Object.fromEntries(formData.entries());
-      const { email } = data;
-      const res = await axios.post(`${import.meta.env.VITE_API}/users/verify`, {
-        email,
-      });
-      toast.success(res.data.message);
-      setModalVerify(false);
-      setTimeout(() => {
-        localStorage.setItem("email", email);
-        setOtpVerify(true);
-      }, 2000);
-    } catch (err) {
-      toast.error(err.response.data.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fieldsEdit = [
-    {
-      label: "Password",
-      type: "password",
-      minLength: 8,
-      maxLength: 16,
-      placeholder: "Enter 8-16 characters",
-      required: true,
-      name: "password",
-    },
-    {
-      label: "Confirm Password",
-      type: "password",
-      minLength: 8,
-      maxLength: 16,
-      placeholder: "Enter 8-16 characters",
-      required: true,
-      name: "confirm_password",
-    },
-  ];
-
-  const handleSubmitEdit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const formData = new FormData(e.target);
-      const data = Object.fromEntries(formData.entries());
-      const { password, confirm_password } = data;
-
-      if (password === confirm_password) {
-        const res = await axios.put(
-          `${import.meta.env.VITE_API}/users/update`,
-          { password, email: localStorage.getItem("email") },
-        );
-
-        toast.success(res.data.message);
-        setTimeout(() => {
-          setModalEdit(false);
-        }, 2000);
-      } else {
-        toast.error("Password and Confirm Password doesn’t match.");
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Update failed");
-    } finally {
-      setLoading(false);
-    }
-  };
   return (
     <>
       {loading && <Loading />}
       <ToastContainer position="top-center" autoClose={3000} />
-      {otp && (
-        <OTP
-          setOtp={setOtp}
-          onVerified={() => setOtp(false)}
-          loading={loading}
-          setLoading={setLoading}
-        />
-      )}
-      {modalVerify && (
-        <Modal
-          setModal={setModalVerify}
-          handleSubmit={handleSubmitVerify}
-          fields={fieldsVerify}
-          title={"Email Verification"}
-          button_name={"Confirm Email"}
-        />
-      )}
-      {modalEdit && (
-        <Modal
-          setModal={setModalEdit}
-          handleSubmit={handleSubmitEdit}
-          fields={fieldsEdit}
-          title={"Forgot Password"}
-          button_name={"Update Password"}
-        />
-      )}
-      {otpVerify && (
-        <OTP
-          setOtp={setOtpVerify}
-          onVerified={() => (setOtpVerify(false), setModalEdit(true))}
-          loading={loading}
-          setLoading={setLoading}
-        />
-      )}
       <div className="h-full flex">
         <div className="flex-grow bg-[url(/landing_page.avif)] bg-cover">
           <div className="w-full h-dvh backdrop-blur-sm backdrop-brightness-75 flex flex-col justify-center">
