@@ -19,6 +19,13 @@ function Activate() {
 
   const formField = [
     {
+      label: "Name",
+      type: "text",
+      name: "name",
+      required: true,
+      colspan: 2,
+    },
+    {
       label: "User ID",
       type: "text",
       name: "user_id",
@@ -31,19 +38,21 @@ function Activate() {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.target);
-    const { user_id } = Object.fromEntries(formData.entries());
+    const { user_id, name } = Object.fromEntries(formData.entries());
     try {
       const res = await axios.get(
         `${import.meta.env.VITE_API}/users/activate`,
         {
           params: {
             user_id,
+            name,
           },
-        },
+        }
       );
 
       res.data.user_id
         ? (localStorage.setItem("user_id", user_id),
+          localStorage.setItem("name", name),
           setModalUpdate(true),
           toast.info("Password requirements: 8-16 characters"))
         : toast.error("Invalid User ID.");
@@ -55,6 +64,14 @@ function Activate() {
   };
 
   const fieldsUpdate = [
+    {
+      label: "Name",
+      type: "text",
+      name: "name",
+      disabled: true,
+      defaultValue: localStorage.getItem("name"),
+      colspan: 2,
+    },
     {
       label: "User ID",
       type: "text",
@@ -85,7 +102,7 @@ function Activate() {
         {
           user_id: localStorage.getItem("user_id"),
           password,
-        },
+        }
       );
 
       axios.post(`${import.meta.env.VITE_API}/notification`, {
