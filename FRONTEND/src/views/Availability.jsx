@@ -65,6 +65,7 @@ function Availability() {
     "Reservation Status",
     "Action",
   ];
+  
   const tableDataCell = [
     "dryer_name",
     "location",
@@ -155,7 +156,7 @@ function Availability() {
       type: "select",
       name: "type",
       required: true,
-      defaultValue: selectedDryer?.type,
+      defaultValue: selectedDryer?.business_type,
       options: [
         { value: "PRIVATE", phrase: "PRIVATE" },
         { value: "PUBLIC", phrase: "PUBLIC" },
@@ -191,7 +192,7 @@ function Availability() {
             ? selectedDryer?.operation_reason
             : null,
         business_permit: selectedDryer?.pdf_business_permit,
-        type: updatedData.type,
+        business_type: updatedData.business_type,
       });
 
       toast.success(res.data.message);
