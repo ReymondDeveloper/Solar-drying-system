@@ -241,7 +241,7 @@ export const updateDryer = async (req, res) => {
       is_operation,
       operation_reason = null,
       business_permit,
-      type,
+      business_type,
     } = req.body;
 
     const { data: existingData, error: existingError } = await supabase
@@ -273,7 +273,7 @@ export const updateDryer = async (req, res) => {
         is_operation,
         operation_reason,
         business_permit,
-        type,
+        business_type,
       })
       .eq("id", id)
       .select()
