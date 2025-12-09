@@ -55,7 +55,7 @@ export const getDryers = async (req, res) => {
     let query = supabase
       .from("dryers")
       .select(
-        "id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id, created_at, is_operation, operation_reason, type, created_by_id, business_permit",
+        "id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id, created_at, is_operation, operation_reason, business_type, created_by_id, business_permit",
         { count: "exact" }
       )
       .order("created_at", { ascending: false });
@@ -132,7 +132,7 @@ export const getDryerById = async (req, res) => {
 
     const { data: owner, error: ownerError } = await supabase
       .from("users")
-      .select("first_name, middle_name, last_name")
+      .select("name")
       .eq("id", dryer.created_by_id)
       .single();
     if (ownerError) throw ownerError;
@@ -149,14 +149,14 @@ export const getDryerById = async (req, res) => {
       reservations.map(async (reservation) => {
         const { data: farmer, error: farmerError } = await supabase
           .from("users")
-          .select("first_name, last_name, id")
+          .select("name, id")
           .eq("id", reservation.farmer_id)
           .single();
         if (farmerError) return null;
 
         return {
           farmer_id: farmer.id,
-          farmer_name: `${farmer.first_name} ${farmer.last_name}`,
+          farmer_name: farmer.name,
           crop_type: reservation.crop_types.crop_type_name,
           quantity: reservation.crop_types.quantity,
           status: reservation.status,
@@ -171,9 +171,7 @@ export const getDryerById = async (req, res) => {
 
     res.json({
       ...dryer,
-      owner: `${owner.last_name}, ${owner.first_name} ${
-        owner.middle_name || ""
-      }`,
+      owner: owner.name || "",
       farmers: validFarmers,
     });
   } catch (err) {
@@ -194,6 +192,7 @@ export const createDryer = async (req, res) => {
       business_permit,
       is_operation = false,
       operation_reason = null,
+      dryer_type,
     } = req.body;
 
     const { data, error } = await supabase
@@ -211,6 +210,7 @@ export const createDryer = async (req, res) => {
           is_operation,
           operation_reason,
           business_permit,
+          dryer_type,
         },
       ])
       .select()

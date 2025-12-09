@@ -21,7 +21,7 @@ const Ratings = {
         `
         farmer_id:farmer_id (
           id,
-          first_name
+          name
         ),
         dryer_id,
         rating,

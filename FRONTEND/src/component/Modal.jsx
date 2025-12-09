@@ -723,7 +723,7 @@ function Modal({
                 <p>
                   {"Owner: "}
                   <span className="capitalize font-bold">
-                    {datas.owner_id.first_name}
+                    {datas.owner_id.name}
                   </span>
                 </p>
                 <p>
@@ -748,7 +748,7 @@ function Modal({
                 <p>
                   {"Reserved by: "}
                   <span className="capitalize font-bold">
-                    {datas.farmer_id.first_name}
+                    {datas.farmer_id.name}
                   </span>
                 </p>
                 <p>

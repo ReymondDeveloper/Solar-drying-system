@@ -126,7 +126,7 @@ function Accounts() {
       axios.post(`${import.meta.env.VITE_API}/notification`, {
         user: localStorage.getItem("id"),
         context:
-          `You've successfully created an account for ${res.data.full_name} at ` +
+          `You've successfully created an account for ${res.data.name} at ` +
           new Date().toLocaleString(),
       });
 

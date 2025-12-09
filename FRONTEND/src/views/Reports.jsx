@@ -15,7 +15,7 @@ function Reports() {
   const [showDialog, setShowDialog] = useState(false);
   const [downloadType, setDownloadType] = useState("");
 
-  const tableHeadings = ["#", "Name", "Email", "Mobile", "Role"];
+  const tableHeadings = ["#", "Name", "Mobile", "Role"];
 
   const filteredUsers =
     filter === "All"
@@ -60,13 +60,12 @@ function Reports() {
       [`Date: ${timestamp}`],
       [`Date Range: ${startDate} to ${endDate}`],
       [""],
-      ["#", "Name", "Email", "Mobile", "Address", "Role"],
+      ["#", "Name", "Mobile", "Address", "Role"],
     ];
 
     const data = dataToExport.map((u, i) => [
       i + 1,
-      `${u.first_name || ""} ${u.last_name || ""}`,
-      u.email || "N/A",
+      u.name,
       u.mobile_number || "N/A",
       u.address?.length > 50
         ? u.address.substring(0, 50) + "..."
@@ -78,7 +77,6 @@ function Reports() {
     ws["!cols"] = [
       { wch: 5 },
       { wch: 25 },
-      { wch: 30 },
       { wch: 18 },
       { wch: 40 },
       { wch: 15 },
@@ -121,9 +119,8 @@ function Reports() {
     const columns = [
       { label: "#", ratio: 0.05 },
       { label: "Name", ratio: 0.2 },
-      { label: "Email", ratio: 0.22 },
       { label: "Mobile", ratio: 0.15 },
-      { label: "Address", ratio: 0.23 },
+      { label: "Address", ratio: 0.45 },
       { label: "Role", ratio: 0.15 },
     ];
 
@@ -147,8 +144,7 @@ function Reports() {
     dataToExport.forEach((u, i) => {
       const row = {
         "#": i + 1,
-        Name: `${u.first_name || ""} ${u.last_name || ""}`,
-        Email: u.email || "N/A",
+        Name: u.name,
         Mobile: u.mobile_number || "N/A",
         Address:
           u.address?.length > 50
@@ -312,9 +308,8 @@ function Reports() {
                     >
                       <td className="py-3 px-4">{i + 1}</td>
                       <td className="py-3 px-4">
-                        {user.first_name || user.name}
+                        {user.name || user.name}
                       </td>
-                      <td className="py-3 px-4">{user.email}</td>
                       <td className="py-3 px-4">{user.mobile_number}</td>
                       <td className="py-3 px-4">
                         <span
