@@ -175,7 +175,7 @@ export const deleteUser = async (req, res) => {
 
     if (error) throw error;
 
-    if (!data) {
+    if (!data || data.deleted_at !== null) {
       return res.status(404).json({ message: "User not found." });
     }
 
@@ -204,7 +204,7 @@ export const loginUser = async (req, res) => {
 
     if (error && error.code !== "PGRST116") throw error;
 
-    if (!data)
+    if (!data || data.delete_at !== null)
       return res.status(404).json({ message: "User ID doesn’t exist." });
 
     if (!data.password) {
