@@ -119,10 +119,10 @@ export default function Dryer() {
     },
     {
       label: "Crop Type",
-      type: "text",
-      placeholder: "ex. Rice",
+      type: "select",
       required: true,
       name: "crop_type",
+      options: [{ value: "corn", phrase: "Corn" }, { value: "rice", phrase: "Rice" }],
       colspan: 1,
     },
     {
@@ -138,7 +138,7 @@ export default function Dryer() {
       label: "Payment Type",
       type: "select",
       name: "payment",
-      options: [{ value: "gcash" }, { value: "cash" }],
+      options: [{ value: "gcash", phrase: "Gcash" }, { value: "cash", phrase: "Cash" }],
       colspan: 2,
     },
   ];

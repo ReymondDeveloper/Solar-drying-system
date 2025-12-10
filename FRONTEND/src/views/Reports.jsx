@@ -1,13 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import JsPdf from "jspdf";
 import { toast } from "react-toastify";
-
+import { FaUserCheck } from "react-icons/fa";
+import { GiFarmer } from "react-icons/gi";
+import { MdSolarPower, MdVerified } from "react-icons/md";
 function Reports() {
   const [users, setUsers] = useState([]);
   const [farmers, setFarmers] = useState([]);
   const [dryers, setDryers] = useState([]);
+  const [owners, setOwners] = useState([]);
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState("");
@@ -168,47 +171,56 @@ function Reports() {
     doc.save("User_Report_Summary.pdf");
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("token");
-        const base = import.meta.env.VITE_API;
-        const headers = { Authorization: `Bearer ${token}` };
-
-        const usersRes = await axios.get(`${base}/users`, { headers });
-        const allUsers = usersRes.data.data || [];
-        setUsers(allUsers);
-        setFarmers(allUsers.filter((u) => u.role === "farmer"));
-
-        const dryersRes = await axios.get(`${base}/dryers`, { headers });
-        setDryers(dryersRes.data.data || []);
-      } catch (err) {
-        console.error("Error fetching reports:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      const base = import.meta.env.VITE_API;
+      const headers = { Authorization: `Bearer ${token}` };
+      const usersRes = await axios.get(`${base}/users`, { headers });
+      const dryersRes = await axios.get(`${base}/dryers`, { headers });
+      const allUsers = Array.isArray(usersRes.data.data) ? usersRes.data.data : [];
+      const allDryers = Array.isArray(dryersRes.data.data) ? dryersRes.data.data : [];
+      const cache = { users: allUsers, dryers: allDryers };
+      setUsers(cache.users);
+      setFarmers(cache.users.filter((u) => u.role === "farmer"));
+      setOwners(cache.users.filter((u) => u.role === "owner"));
+      setDryers(cache.dryers);
+    } catch (err) {
+      console.error("Error fetching reports:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const cards = [
     {
       label: "Registered Users",
       value: users.length,
-      icon: "👤",
+      icon: <FaUserCheck />,
       bg: "from-green-400 to-green-500",
     },
     {
       label: "Verified Solar Dryers",
       value: dryers.length,
-      icon: "☀️",
+      icon: <MdSolarPower />,
       bg: "from-blue-400 to-blue-500",
+    },
+    {
+      label: "Verified Solar Dryer Owners",
+      value: owners.length,
+      icon: <div className="flex"><MdSolarPower /><MdVerified /></div>,
+      bg: "from-yellow-400 to-yellow-500",
     },
     {
       label: "Registered Farmers",
       value: farmers.length,
-      icon: "🌾",
+      icon: <GiFarmer />,
       bg: "from-red-400 to-red-500",
     },
   ];
@@ -242,7 +254,7 @@ function Reports() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {cards.map((card, idx) => (
             <div
               key={idx}
@@ -250,7 +262,7 @@ function Reports() {
             >
               <div className="flex items-center justify-between">
                 <span className="text-2xl">{card.icon}</span>
-                <span className="text-lg font-semibold">{card.label}</span>
+                <span className="text-lg font-semibold text-end">{card.label}</span>
               </div>
               <div className="mt-5 text-5xl font-bold text-center">
                 {loading ? "..." : card.value}

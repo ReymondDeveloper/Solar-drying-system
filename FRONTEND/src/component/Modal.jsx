@@ -241,58 +241,7 @@ function Modal({
                 field.colspan === 2 ? "md:col-span-2" : ""
               }`}
             >
-              {field.name === "payment" ? (
-                <>
-                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
-                    {field.label}
-                  </label>
-                  <select
-                    name={field.name}
-                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 outline-0"
-                    defaultValue={field.defaultValue || ""}
-                    required={field.required}
-                    disabled={field.disabled}
-                  >
-                    <option value="cash">Cash</option>
-                    <option value="gcash">GCash</option>
-                  </select>
-                </>
-              ) : field.name === "quantity" ? (
-                <>
-                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
-                    Quantity (Canvan)
-                  </label>
-                  <input
-                    type="number"
-                    name={field.name}
-                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 outline-0"
-                    defaultValue={field.defaultValue || ""}
-                    required={field.required}
-                    disabled={field.disabled}
-                    min={0}
-                    step={1}
-                  />
-                </>
-              ) : field.name === "crop_type" ? (
-                <>
-                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
-                    {field.label}
-                  </label>
-                  <select
-                    name={field.name}
-                    className="w-full border border-gray-300 rounded-lg p-2 bg-white text-sm focus:ring-2 focus:ring-green-500 outline-0"
-                    defaultValue={field.defaultValue || ""}
-                    disabled={field.disabled}
-                    required={field.required}
-                  >
-                    <option value="" disabled>
-                      Select crop type
-                    </option>
-                    <option value="corn">Corn</option>
-                    <option value="rice">Rice</option>
-                  </select>
-                </>
-              ) : field.name === "business_permit" ? (
+              {field.name === "business_permit" ? (
                 <>
                   <label className="text-[rgba(0,100,0,255)] font-bold text-md">
                     {field.label}
@@ -615,12 +564,14 @@ function Modal({
 
                   <DatePicker
                     selectsRange
-                    startDate={startDate}
-                    endDate={endDate}
+                    startDate={startDate ?? field.startDate}
+                    endDate={endDate ?? field.endDate}
                     onChange={(dates) => {
                       const [start, end] = dates;
                       setStartDate(start);
+                      field.startDate = start;
                       setEndDate(end);
+                      field.endDate = end;
                     }}
                     minDate={field.min ?? null}
                     // excludeDates={
@@ -650,12 +601,12 @@ function Modal({
                   <input
                     type="hidden"
                     name="date_from"
-                    value={formatDateLocal(startDate)}
+                    value={startDate ? formatDateLocal(startDate) : field.startDate}
                   />
                   <input
                     type="hidden"
                     name="date_to"
-                    value={formatDateLocal(endDate)}
+                    value={endDate ? formatDateLocal(endDate) : field.endDate}
                   />
                 </>
               ) : (
@@ -675,6 +626,7 @@ function Modal({
                     min={field.min}
                     onChange={field.onchange}
                     disabled={field.disabled || false}
+                    placeholder={field.placeholder || null}
                   />
                 </>
               )}

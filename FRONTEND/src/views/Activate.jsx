@@ -70,7 +70,6 @@ function Activate() {
       name: "name",
       disabled: true,
       defaultValue: localStorage.getItem("name"),
-      colspan: 2,
     },
     {
       label: "User ID",
@@ -87,6 +86,14 @@ function Activate() {
       maxLength: 16,
       required: true,
     },
+    {
+      label: "Confirm Password",
+      type: "password",
+      name: "confirm_password",
+      minLength: 8,
+      maxLength: 16,
+      required: true,
+    },
   ];
 
   const handleSubmitUpdate = async (e) => {
@@ -94,36 +101,42 @@ function Activate() {
     setLoading(true);
 
     const formData = new FormData(e.target);
-    const { password } = Object.fromEntries(formData.entries());
+    const { password, confirm_password } = Object.fromEntries(formData.entries());
 
-    try {
-      const res = await axios.put(
-        `${import.meta.env.VITE_API}/users/activate`,
-        {
-          user_id: localStorage.getItem("user_id"),
-          password,
-        }
-      );
+    if (password === confirm_password) {
+      try {
+        const res = await axios.put(
+          `${import.meta.env.VITE_API}/users/activate`,
+          {
+            user_id: localStorage.getItem("user_id"),
+            password,
+          }
+        );
 
-      axios.post(`${import.meta.env.VITE_API}/notification`, {
-        user: res.data.id,
-        context:
-          `You've successfully activated your account on ` +
-          new Date().toLocaleString(),
-      });
+        axios.post(`${import.meta.env.VITE_API}/notification`, {
+          user: res.data.id,
+          context:
+            `You've successfully activated your account on ` +
+            new Date().toLocaleString(),
+        });
 
-      toast.success(res.data.message);
+        toast.success(res.data.message);
 
-      setTimeout(() => {
-        setModalUpdate(false);
-        navigate("/sign-in");
-      }, 2000);
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Something went wrong...");
-      console.log(err);
-    } finally {
-      setLoading(false);
+        setTimeout(() => {
+          setModalUpdate(false);
+          navigate("/sign-in");
+        }, 2000);
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Something went wrong...");
+        console.log(err);
+      }
+    } else {
+      toast.error("Passwords did not match, please try again!");
+      document.querySelector('[name="password"]').value = "";
+      document.querySelector('[name="password"]').focus();
+      document.querySelector('[name="confirm_password"]').value = "";
     }
+    setLoading(false);
   };
 
   return (
