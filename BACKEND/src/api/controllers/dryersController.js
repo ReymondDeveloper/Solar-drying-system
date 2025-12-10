@@ -200,6 +200,14 @@ export const createDryer = async (req, res) => {
       dryer_type,
     } = req.body;
 
+    const { data: users, error: userNotFound } = await supabase
+      .from("users")
+      .select("business_type")
+      .eq("id", created_by_id)
+      .single();
+
+    if (userNotFound) throw userNotFound;
+
     const { data, error } = await supabase
       .from("dryers")
       .insert([
@@ -216,6 +224,7 @@ export const createDryer = async (req, res) => {
           operation_reason,
           business_permit,
           dryer_type,
+          business_type: users.business_type,
         },
       ])
       .select()

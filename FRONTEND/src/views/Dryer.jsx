@@ -349,7 +349,7 @@ export default function Dryer() {
             </div>
           )}
 
-          { data.available_capacity > 0 && data.owner !== localStorage.getItem("full_name") && localStorage.getItem("role") !== "admin" && (
+          { data.available_capacity > 0 && data.owner !== localStorage.getItem("name") && localStorage.getItem("role") !== "admin" && (
             <Button
               className="w-full bg-green-500 text-white py-3 rounded-full hover:bg-green-600 mt-4"
               onClick={() => setModalAdd(true)}
@@ -433,7 +433,7 @@ export default function Dryer() {
             <h2 className="text-2xl font-bold text-gray-800">Ratings</h2>
           </div>
           {data.available_capacity > 0 &&
-            data.owner !== localStorage.getItem("full_name") && (
+            data.owner !== localStorage.getItem("name") && (
               <form
                 className="flex flex-col gap-1"
                 onSubmit={handleRatingSubmit}
