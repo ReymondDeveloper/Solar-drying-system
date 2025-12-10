@@ -19,7 +19,8 @@ function CreateReservation() {
   const [filter, setFilter] = useState({
     status: "all",
     location: "all",
-    type: "all",
+    business_type: "all",
+    dryer_type: "all",
   });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -53,7 +54,8 @@ function CreateReservation() {
     "Location (Sablayan)",
     "Maximum Capacity (Cavan)",
     "Available Capacity (Cavan)",
-    "Type",
+    "Business Type",
+    "Dryer Type",
     "Status",
     "Action",
   ];
@@ -64,6 +66,7 @@ function CreateReservation() {
     "maximum_capacity",
     "available_capacity",
     "type",
+    "dryer",
     "status",
     "action",
   ];
@@ -93,15 +96,27 @@ function CreateReservation() {
       colspan: 2,
     },
     {
-      label: "Type",
+      label: "Business Type",
       type: "select",
-      name: "type",
+      name: "business_type",
       options: [
         { value: "all", phrase: "All" },
         { value: "PRIVATE", phrase: "PRIVATE" },
         { value: "PUBLIC", phrase: "PUBLIC" },
       ],
-      defaultValue: filter.type,
+      defaultValue: filter.business_type,
+      colspan: 2,
+    },
+    {
+      label: "Dryer Type",
+      type: "select",
+      name: "dryer_type",
+      options: [
+        { value: "all", phrase: "All" },
+        { value: "MACHINE", phrase: "MACHINE" },
+        { value: "MANUAL", phrase: "MANUAL" },
+      ],
+      defaultValue: filter.dryer_type,
       colspan: 2,
     },
   ];
@@ -133,7 +148,8 @@ function CreateReservation() {
             maximum_capacity: res.maximum_capacity,
             available_capacity: res.available_capacity,
             status: res.available_capacity > 0 ? "available" : "occupied",
-            type: res.type,
+            type: res.business_type,
+            dryer: res.dryer_type,
             action: (
               <Button
                 onClick={() => navigate("/home/create-reservation/" + res.id)}
@@ -156,7 +172,8 @@ function CreateReservation() {
           role: localStorage.getItem("role"),
           status: filter.status,
           location: filter.location,
-          type: filter.type,
+          business_type: filter.business_type,
+          dryer_type: filter.dryer_type,
           search: search,
         },
       });
@@ -180,7 +197,8 @@ function CreateReservation() {
               maximum_capacity: res.maximum_capacity,
               available_capacity: res.available_capacity,
               status: res.available_capacity > 0 ? "available" : "occupied",
-              type: res.type,
+              type: res.business_type,
+              dryer: res.dryer_type,
               action: (
                 <Button
                   onClick={() => navigate("/home/create-reservation/" + res.id)}
@@ -208,7 +226,8 @@ function CreateReservation() {
     currentPage,
     filter.status,
     filter.location,
-    filter.type,
+    filter.business_type,
+    filter.dryer_type,
     search,
   ]);
 

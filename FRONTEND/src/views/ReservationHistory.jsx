@@ -9,6 +9,9 @@ import Modal from "../component/Modal";
 import Button from "../component/Button";
 import api from "../api/api.js";
 import GcashModal from "../component/GcashModal.jsx";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function ReservationHistory() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,6 +21,7 @@ function ReservationHistory() {
   const [isLoading, setIsLoading] = useState(false);
   const [modalFilter, setModalFilter] = useState(false);
   const [modalView, setModalView] = useState(false);
+  const [modalEdit, setModalEdit] = useState(false);
   const [gcashModal, setGcashModal] = useState(false);
   const [filter, setFilter] = useState({ status: "all", location: "all" });
   const [search, setSearch] = useState("");
@@ -25,6 +29,7 @@ function ReservationHistory() {
   const [datasView, setDatasView] = useState([]);
   const { addresses } = useAddresses();
   const location = useLocation();
+  const [selected, setSelected] = useState(null);
 
   function useAddresses() {
     const [addresses, setAddresses] = useState([]);
@@ -219,8 +224,90 @@ function ReservationHistory() {
     setDatasView(() => data);
     setModalView(true);
   }, []);
+  
+  const fieldsEdit = [
+    {
+      label: "Date Range",
+      type: "date",
+      required: true,
+      min: new Date(),
+      colspan: 2,
+      startDate: selected?.date_from || null,
+      endDate: selected?.date_to || null,
+    },
+    {
+      label: "Crop Type",
+      type: "select",
+      required: true,
+      name: "crop_type",
+      options: [{ value: "corn", phrase: "Corn" }, { value: "rice", phrase: "Rice" }],
+      colspan: 1,
+      defaultValue: selected?.crop_type_id.crop_type_name || null,
+    },
+    {
+      label: "Quantity (Cavan)",
+      type: "number",
+      min: 1,
+      placeholder: "ex. 50",
+      required: true,
+      name: "quantity",
+      colspan: 1,
+      defaultValue: selected?.crop_type_id.quantity || null,
+    },
+    {
+      label: "Payment Type",
+      type: "select",
+      name: "payment",
+      options: [{ value: "gcash", phrase: "Gcash" }, { value: "cash", phrase: "Cash" }],
+      colspan: 2,
+      defaultValue: selected?.crop_type_id.payment || null,
+    },
+  ];
+
+  const handleSubmitEdit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData(e.target);
+    let updatedData = Object.fromEntries(formData.entries());
+
+    try {
+      await api.put(`/reservations/${selected.id}`, {
+        date_from: updatedData.date_from,
+        date_to: updatedData.date_to,
+        crop_type: updatedData.crop_type,
+        quantity: updatedData.quantity,
+        payment: updatedData.payment,
+      });
+
+      toast.success("The reservation is updated successfully.");
+
+      axios.post(`${import.meta.env.VITE_API}/notification`, {
+        user: selected.owner_id.id,
+        context:
+          `An farmer updated a reservation on "${selected.dryer_id.dryer_name.toUpperCase()}" located on "${
+            selected.dryer_id.location
+          }" at ` + new Date().toLocaleString(),
+        url: `/home/booking-requests?id=${selected.id}`,
+      });
+
+      fetchData();
+      setModalEdit(false);
+      setSelected(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update reservation");
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchData = useCallback(async () => {
+    function handleEdit(data) {
+      setSelected(data);
+      setModalEdit(true);
+    }
+
     const local = localStorage.getItem("reservation_history_data");
     const data = JSON.parse(local);
     setData(
@@ -235,12 +322,22 @@ function ReservationHistory() {
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
             status: res.status || "pending",
             action: (
-              <Button
-                onClick={() => handleView(res)}
-                className="bg-blue-400 hover:bg-blue-500 text-white"
-              >
-                View
-              </Button>
+              <div className="flex justify-center gap-2">
+                {res.status === "pending" && (
+                  <Button
+                    onClick={() => handleEdit(res)}
+                    className="bg-blue-400 hover:bg-blue-500 text-white"
+                  >
+                    Edit
+                  </Button>
+                )}
+                <Button
+                  onClick={() => handleView(res)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  View
+                </Button>
+              </div>
             ),
           }))
         : []
@@ -281,12 +378,22 @@ function ReservationHistory() {
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
             status: res.status || "pending",
             action: (
-              <Button
-                onClick={() => handleView(res)}
-                className="bg-blue-400 hover:bg-blue-500 text-white"
-              >
-                View
-              </Button>
+              <div className="flex justify-center gap-2">
+                {res.status === "pending" && (
+                  <Button
+                    onClick={() => handleEdit(res)}
+                    className="bg-blue-400 hover:bg-blue-500 text-white"
+                  >
+                    Edit
+                  </Button>
+                )}
+                <Button
+                  onClick={() => handleView(res)}
+                  className="bg-blue-400 hover:bg-blue-500 text-white"
+                >
+                  View
+                </Button>
+              </div>
             ),
           }))
         );
@@ -340,6 +447,7 @@ function ReservationHistory() {
   return (
     <>
       {loading && <Loading />}
+      <ToastContainer position="top-center" autoClose={3000} />
       {modalFilter && (
         <Modal
           setModal={setModalFilter}
@@ -357,6 +465,15 @@ function ReservationHistory() {
           datas={datasView}
           title="Reservation Details"
           button_name="Done"
+        />
+      )}
+      {modalEdit && (
+        <Modal
+          setModal={setModalEdit}
+          handleSubmit={handleSubmitEdit}
+          fields={fieldsEdit}
+          title={"Reservation Details"}
+          button_name={"Update"}
         />
       )}
       {gcashModal && (

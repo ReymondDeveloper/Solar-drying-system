@@ -5,17 +5,11 @@ import Loading from "../component/Loading";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import OTP from "../component/Otp";
-import Modal from "../component/Modal";
 import { RiCloseLargeLine } from "react-icons/ri";
 
 function SignIn() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [otp, setOtp] = useState(false);
-  const [otpVerify, setOtpVerify] = useState(false);
-  const [modalEdit, setModalEdit] = useState(false);
-  const [modalVerify, setModalVerify] = useState(false);
 
   const handleRedirect = (e) => {
     e.preventDefault();
@@ -108,25 +102,74 @@ function SignIn() {
                 </NavLink>
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {formField.map((field, index) => (
-                    <div key={index}>
-                      <label
-                        className="block text-sm font-medium text-gray-700"
-                        htmlFor={field.name}
-                      >
-                        {field.label}
-                      </label>
-                      <div className="mt-2">
-                        <input
-                          className="outline-0 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
-                          type={field.type}
-                          name={field.name}
-                          required={field.required}
-                          defaultValue={field.defaultValue}
-                          minLength={field.minLength}
-                          maxLength={field.maxLength}
-                        />
+                    field.name === "password" ? (
+                      <>
+                        <div key={index}>
+                          <label
+                            className="block text-sm font-medium text-gray-700"
+                            htmlFor={field.name}
+                          >
+                            {field.label}
+                          </label>
+                          <div className="mt-2">
+                            <input
+                              className="outline-0 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                              type={field.type}
+                              name={field.name}
+                              required={field.required}
+                              defaultValue={field.defaultValue}
+                              minLength={field.minLength}
+                              maxLength={field.maxLength}
+                            />
+                            <div className="flex items-center gap-1 cursor-pointer text-gray-700">
+                              <input name="show_password" type="checkbox"
+                                onChange={() => {
+                                  if (document.querySelector('[name="show_password"]').checked) {
+                                    document.querySelector('[name="password"]').type = "text"
+                                  } else {
+                                    document.querySelector('[name="password"]').type = "password"
+                                  }
+                                }} 
+                              />
+                              <small
+                                className="select-none"
+                                onClick={() => {
+                                  (document.querySelector('[name="show_password"]').checked = !document.querySelector('[name="show_password"]').checked)
+                                  if (document.querySelector('[name="show_password"]').checked) {
+                                    document.querySelector('[name="password"]').type = "text"
+                                  } else {
+                                    document.querySelector('[name="password"]').type = "password"
+                                  }
+                                }}
+                              >
+                                Show Password
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div key={index}>
+                        <label
+                          className="block text-sm font-medium text-gray-700"
+                          htmlFor={field.name}
+                        >
+                          {field.label}
+                        </label>
+                        <div className="mt-2">
+                          <input
+                            className="outline-0 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                            type={field.type}
+                            name={field.name}
+                            required={field.required}
+                            defaultValue={field.defaultValue}
+                            minLength={field.minLength}
+                            maxLength={field.maxLength}
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )
+                    
                   ))}
                   <Button
                     type={`submit`}

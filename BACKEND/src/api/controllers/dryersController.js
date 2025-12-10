@@ -49,13 +49,14 @@ export const getDryers = async (req, res) => {
     is_operation,
     date_from,
     date_to,
-    type,
+    business_type,
+    dryer_type,
   } = req.query;
   try {
     let query = supabase
       .from("dryers")
       .select(
-        "id, dryer_name, location, available_capacity, maximum_capacity, rate, image_url, created_by_id, created_at, is_operation, operation_reason, business_type, created_by_id, business_permit",
+        "*",
         { count: "exact" }
       )
       .order("created_at", { ascending: false });
@@ -102,8 +103,12 @@ export const getDryers = async (req, res) => {
       query = query.lte("created_at", toDate);
     }
 
-    if (typeof type !== "undefined" && type !== "all") {
-      query = query.eq("type", type);
+    if (typeof business_type !== "undefined" && business_type !== "all") {
+      query = query.eq("business_type", business_type);
+    }
+
+    if (typeof dryer_type !== "undefined" && dryer_type !== "all") {
+      query = query.eq("dryer_type", dryer_type);
     }
 
     const { data, count, error } = await query;

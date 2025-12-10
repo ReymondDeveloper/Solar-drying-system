@@ -199,10 +199,6 @@ export const createReservation = async (req, res) => {
       date_to,
     });
 
-    await Dryers.update(dryer_id, {
-      available_capacity: dryer.available_capacity - quantity,
-    });
-
     res
       .status(201)
       .json({ message: "Reservation created successfully", reservation });
@@ -217,11 +213,11 @@ export const createReservation = async (req, res) => {
 export const updateReservation = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, notes, payment, quantity } = req.body;
+    const { status, notes, payment, quantity, date_from, date_to, crop_type } = req.body;
 
     const { data: validation, error: failedValidation } = await supabase
       .from("reservations")
-      .select("status")
+      .select("*")
       .eq("id", id);
 
     if (failedValidation) throw failedValidation;
@@ -230,69 +226,91 @@ export const updateReservation = async (req, res) => {
       return res.status(404).json({ message: "Reservation not found" });
     }
 
-    if (validation.status !== status) {
-      const { data: updatedReservations, error: resError } = await supabase
-        .from("reservations")
-        .update({ status })
-        .eq("id", id)
-        .select();
+    const reservationUpdate = {};
 
-      if (resError) throw resError;
+    if (status !== undefined) reservationUpdate.status = status;
+    if (date_from !== undefined) reservationUpdate.date_from = date_from;
+    if (date_to !== undefined) reservationUpdate.date_to = date_to;
 
-      const reservation = updatedReservations[0];
+    const { data: updatedReservations, error: resError } = await supabase
+      .from("reservations")
+      .update(reservationUpdate)
+      .eq("id", id)
+      .select();
 
-      const cropUpdate = {};
+    if (resError) throw resError;
 
-      if (notes !== undefined) cropUpdate.notes = notes;
-      if (payment !== undefined) cropUpdate.payment = payment;
-      if (quantity !== undefined) cropUpdate.quantity = quantity;
+    const reservation = updatedReservations[0];
 
-      if (Object.keys(cropUpdate).length > 0) {
-        const { error: cropError } = await supabase
-          .from("crop_types")
-          .update(cropUpdate)
-          .eq("crop_type_id", reservation.crop_type_id);
+    const cropUpdate = {};
 
-        if (cropError) throw cropError;
-      }
+    if (notes !== undefined) cropUpdate.notes = notes;
+    if (payment !== undefined) cropUpdate.payment = payment;
+    if (quantity !== undefined) cropUpdate.quantity = quantity;
+    if (crop_type !== undefined) cropUpdate.crop_type_name = crop_type;
 
-      if (
-        status.toLowerCase() === "denied" ||
-        status.toLowerCase() === "completed"
-      ) {
-        const { data: cropType, error: cropError } = await supabase
-          .from("crop_types")
-          .select("quantity")
-          .eq("crop_type_id", reservation.crop_type_id)
-          .single();
-        if (cropError) throw cropError;
+    if (Object.keys(cropUpdate).length > 0) {
+      const { error: cropError } = await supabase
+        .from("crop_types")
+        .update(cropUpdate)
+        .eq("crop_type_id", reservation.crop_type_id);
 
-        const { data: dryer, error: dryerError } = await supabase
-          .from("dryers")
-          .select("available_capacity, maximum_capacity")
-          .eq("id", reservation.dryer_id)
-          .single();
-        if (dryerError) throw dryerError;
+      if (cropError) throw cropError;
+    }
 
-        const newAvailable =
-          Number(dryer.available_capacity) + Number(cropType.quantity);
+    if (status && status.toLowerCase() === "denied" || status && status.toLowerCase() === "completed") {
+      const { data: cropType, error: cropError } = await supabase
+        .from("crop_types")
+        .select("quantity")
+        .eq("crop_type_id", reservation.crop_type_id)
+        .single();
+      if (cropError) throw cropError;
 
-        const safeAvailable =
-          newAvailable > dryer.maximum_capacity
-            ? dryer.maximum_capacity
-            : newAvailable;
+      const { data: dryer, error: dryerError } = await supabase
+        .from("dryers")
+        .select("available_capacity, maximum_capacity")
+        .eq("id", reservation.dryer_id)
+        .single();
+      if (dryerError) throw dryerError;
 
-        const { error: updateDryerError } = await supabase
-          .from("dryers")
-          .update({ available_capacity: safeAvailable })
-          .eq("id", reservation.dryer_id);
+      const newAvailable =
+        Number(dryer.available_capacity) + Number(cropType.quantity);
 
-        if (updateDryerError) throw updateDryerError;
+      const safeAvailable =
+        newAvailable > dryer.maximum_capacity
+          ? dryer.maximum_capacity
+          : newAvailable;
 
-        console.log(
-          `Rolled back ${cropType.quantity} cavans to dryer ${reservation.dryer_id}`
-        );
-      }
+      const { error: updateDryerError } = await supabase
+        .from("dryers")
+        .update({ available_capacity: safeAvailable })
+        .eq("id", reservation.dryer_id);
+
+      if (updateDryerError) throw updateDryerError;
+    } else if (status && status.toLowerCase() === "approved") {
+      const { data: cropType, error: cropError } = await supabase
+        .from("crop_types")
+        .select("quantity")
+        .eq("crop_type_id", reservation.crop_type_id)
+        .single();
+      if (cropError) throw cropError;
+
+      const { data: dryer, error: dryerError } = await supabase
+        .from("dryers")
+        .select("available_capacity, maximum_capacity")
+        .eq("id", reservation.dryer_id)
+        .single();
+      if (dryerError) throw dryerError;
+
+      const newAvailable =
+        Number(dryer.available_capacity) - Number(cropType.quantity);
+
+      const { error: updateDryerError } = await supabase
+        .from("dryers")
+        .update({ available_capacity: newAvailable })
+        .eq("id", reservation.dryer_id);
+
+      if (updateDryerError) throw updateDryerError;
     }
 
     res.status(200).json({ success: true });
