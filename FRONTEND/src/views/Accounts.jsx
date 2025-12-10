@@ -31,6 +31,7 @@ function Accounts() {
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState([]);
   const { addresses } = useAddresses();
+  const [owner, setOwner] = useState(false);
 
   function useAddresses() {
     const [addresses, setAddresses] = useState([]);
@@ -140,24 +141,37 @@ function Accounts() {
       type: "select",
       name: "role",
       options: [
-        { value: "owner", phrase: "Owner" },
         { value: "farmer", phrase: "Farmer" },
+        { value: "owner", phrase: "Owner" },
+      ],
+      colspan: 2,
+      onChange: (e) => setOwner(e.target.value === "owner" ? true : false),
+    },
+    owner && {
+      label: "Business Type",
+      type: "select",
+      name: "business_type",
+      options: [
+        { value: "PUBLIC", phrase: "PUBLIC" },
+        { value: "PRIVATE", phrase: "PRIVATE" },
       ],
       colspan: 2,
     },
-  ];
+  ].filter(Boolean);
 
   const handleSubmitAdd = async (e) => {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.target);
-    const { full_name, address, role } = Object.fromEntries(formData.entries());
+    const { full_name, address, role, business_type } = Object.fromEntries(formData.entries());
     try {
       const res = await api.post(`${import.meta.env.VITE_API}/users/register`, {
         full_name,
         address,
         role,
+        business_type,
       });
+      
       toast.success(res.data.message);
 
       axios.post(`${import.meta.env.VITE_API}/notification`, {
@@ -176,6 +190,7 @@ function Accounts() {
 
       setTimeout(() => {
         setModalAdd(false);
+        setOwner(false);
         fetchData();
       }, 2000);
     } catch (err) {

@@ -99,7 +99,7 @@ export const verifyUser = async (req, res, next) => {
 
 export const registerUser = async (req, res, next) => {
   try {
-    const { full_name, role, address } = req.body;
+    const { full_name, role, address, business_type } = req.body;
     let user_id;
 
     if (role === "farmer") {
@@ -149,6 +149,7 @@ export const registerUser = async (req, res, next) => {
           role,
           address,
           user_id,
+          business_type,
         },
       ])
       .select()
