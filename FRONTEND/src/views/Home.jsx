@@ -410,7 +410,6 @@ function Home() {
         monthlyTotals[month] = { rice: 0, corn: 0 };
       });
 
-      // Guard against empty array
       if (!data || data.length === 0) {
         return monthsOrder.map((month) => ({
           month,
@@ -419,7 +418,6 @@ function Home() {
         }));
       }
 
-      // Check first element to determine data structure
       const firstItem = data[0];
 
       if (firstItem.quantity !== undefined) {
@@ -467,7 +465,6 @@ function Home() {
         "December",
       ];
 
-      // initialize
       const monthlyCounts = {};
       monthsOrder.forEach((month) => {
         monthlyCounts[month] = { PUBLIC: 0, PRIVATE: 0 };
@@ -482,10 +479,10 @@ function Home() {
       }
 
       data.forEach((item) => {
-        const date = new Date(item.created_at); // or item.crop_type_id.created_at if you prefer
+        const date = new Date(item.created_at);
         const month = date.toLocaleString("default", { month: "long" });
 
-        const type = item.dryer_id?.type; // "PUBLIC" or "PRIVATE"
+        const type = item.dryer_id?.business_type;
         if (!monthlyCounts[month] || (type !== "PUBLIC" && type !== "PRIVATE"))
           return;
 
