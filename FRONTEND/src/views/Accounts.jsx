@@ -23,12 +23,36 @@ function Accounts() {
   const [modalAdd, setModalAdd] = useState(false);
   const [filter, setFilter] = useState({
     role: "all",
+    location: "all",
     date_from: null,
     date_to: null,
   });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [report, setReport] = useState([]);
+  const { addresses } = useAddresses();
+
+  function useAddresses() {
+    const [addresses, setAddresses] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+      const fetchAddresses = async () => {
+        setLoading(true);
+        try {
+          const res = await api.get("/addresses");
+          setAddresses(res.data);
+        } catch (err) {
+          console.error("Failed to fetch addresses:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchAddresses();
+    }, []);
+
+    return { addresses, loading };
+  }
 
   const tableHeadings = ["Name", "Address", "User ID", "Role", "Action"];
 
@@ -46,7 +70,18 @@ function Accounts() {
         { value: "farmer", phrase: "farmer" },
       ],
       defaultValue: filter.role,
-      colspan: 2,
+      colspan: 1,
+    },
+    {
+      label: "Location (Sablayan)",
+      type: "select",
+      name: "location",
+      options: [
+        { value: "all", phrase: "All" },
+        ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
+      ],
+      defaultValue: filter.location,
+      colspan: 1,
     },
     {
       label: "Date From",
@@ -91,10 +126,13 @@ function Accounts() {
       colspan: 2,
     },
     {
-      label: "Address",
-      type: "text",
+      label: "Location (Sablayan)",
+      type: "select",
       name: "address",
-      required: true,
+      options: [
+        ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
+      ],
+      defaultValue: filter.location,
       colspan: 2,
     },
     {
@@ -205,6 +243,7 @@ function Accounts() {
           limit: limit,
           offset: currentPage * limit - limit,
           role: filter.role,
+          location: filter.location,
           date_from: filter.date_from,
           date_to: filter.date_to,
           search: search,
@@ -250,6 +289,7 @@ function Accounts() {
     limit,
     currentPage,
     filter.role,
+    filter.location,
     filter.date_from,
     filter.date_to,
     search,
@@ -274,6 +314,7 @@ function Accounts() {
         const response = await api.get("/users", {
           params: {
             role: filter.role,
+            location: filter.location,
             date_from: filter.date_from,
             date_to: filter.date_to,
             search: search,
@@ -285,7 +326,7 @@ function Accounts() {
       }
     }
     fetchReport();
-  }, [filter.role, filter.date_from, filter.date_to, search]);
+  }, [filter.role, filter.location, filter.date_from, filter.date_to, search]);
 
   if (isError) {
     return (

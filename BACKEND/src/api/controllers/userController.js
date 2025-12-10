@@ -12,7 +12,7 @@ const generateToken = (id) => {
 
 export const getUsers = async (req, res, next) => {
   try {
-    const { role, limit, offset, search, date_from, date_to } = req.query;
+    const { role, limit, offset, search, date_from, date_to, location } = req.query;
     let query = supabase
       .from("users")
       .select("*", { count: "exact" })
@@ -31,6 +31,10 @@ export const getUsers = async (req, res, next) => {
 
     if (typeof search !== "undefined" && search) {
       query = query.or(`name.ilike.%${search}%`);
+    }
+
+    if (typeof location !== "undefined" && location !== "all") {
+      query = query.or(`address.ilike.%${location}%`);
     }
 
     if (typeof date_from !== "undefined" && date_from) {

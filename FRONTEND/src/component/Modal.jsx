@@ -364,6 +364,94 @@ function Modal({
                     ) : null}
                   </div>
                 </>
+              ) : field.name === "password" ? (
+                <>
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                    {field.label}
+                  </label>
+                  <input
+                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 outline-0"
+                    type={field.type}
+                    required={field.required}
+                    name={field.name}
+                    minLength={field.minLength}
+                    maxLength={field.maxLength}
+                    defaultValue={field.defaultValue || ""}
+                    step={field.step}
+                    min={field.min}
+                    onChange={field.onchange}
+                    disabled={field.disabled || false}
+                    placeholder={field.placeholder || null}
+                  />
+                  <div className="flex items-center gap-1 cursor-pointer text-gray-700">
+                    <input name="show_password" type="checkbox"
+                      onChange={() => {
+                        if (document.querySelector('[name="show_password"]').checked) {
+                          document.querySelector('[name="password"]').type = "text"
+                        } else {
+                          document.querySelector('[name="password"]').type = "password"
+                        }
+                      }} 
+                    />
+                    <small
+                      className="select-none"
+                      onClick={() => {
+                        (document.querySelector('[name="show_password"]').checked = !document.querySelector('[name="show_password"]').checked)
+                        if (document.querySelector('[name="show_password"]').checked) {
+                          document.querySelector('[name="password"]').type = "text"
+                        } else {
+                          document.querySelector('[name="password"]').type = "password"
+                        }
+                      }}
+                    >
+                      Show Password
+                    </small>
+                  </div>
+                </>
+              ) : field.name === "confirm_password" ? (
+                <>
+                  <label className="text-[rgba(0,100,0,255)] font-bold text-md">
+                    {field.label}
+                  </label>
+                  <input
+                    className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 outline-0"
+                    type={field.type}
+                    required={field.required}
+                    name={field.name}
+                    minLength={field.minLength}
+                    maxLength={field.maxLength}
+                    defaultValue={field.defaultValue || ""}
+                    step={field.step}
+                    min={field.min}
+                    onChange={field.onchange}
+                    disabled={field.disabled || false}
+                    placeholder={field.placeholder || null}
+                  />
+                  <div className="flex items-center gap-1 cursor-pointer text-gray-700">
+                    <input name="show_confirm_password" type="checkbox"
+                      onChange={() => {
+                        if (document.querySelector('[name="show_confirm_password"]').checked) {
+                          document.querySelector('[name="confirm_password"]').type = "text"
+                        } else {
+                          document.querySelector('[name="confirm_password"]').type = "password"
+                        }
+                      }} 
+                    />
+                    <small
+                      className="select-none"
+                      onClick={() => {
+                        (document.querySelector('[name="show_confirm_password"]').checked = !document.querySelector('[name="show_confirm_password"]').checked)
+                        if (document.querySelector('[name="show_confirm_password"]').checked) {
+                          document.querySelector('[name="confirm_password"]').type = "text"
+                        } else {
+                          document.querySelector('[name="confirm_password"]').type = "password"
+                        }
+                      }}
+                    >
+                      Show Confirm Password
+                    </small>
+                  </div>
+                </>
               ) : field.type === "file" ? (
                 <>
                   <label className="text-[rgba(0,100,0,255)] font-bold text-md">
