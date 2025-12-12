@@ -553,7 +553,7 @@ function BookingRequests() {
               { label: "Farmer", ratio: 0.2 },
             ]} 
             data={report} 
-            report_title="LIST OF DRYERS"
+            report_title="LIST OF RESERVATION"
           />
         </div>
         <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
