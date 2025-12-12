@@ -213,12 +213,13 @@ export const createReservation = async (req, res) => {
 export const updateReservation = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, notes, payment, quantity, date_from, date_to, crop_type } = req.body;
+    const { status, notes, payment, quantity, date_from, date_to, crop_type, canceled_reason } = req.body;
 
     const { data: validation, error: failedValidation } = await supabase
       .from("reservations")
       .select("*")
-      .eq("id", id);
+      .eq("id", id)
+      .single();
 
     if (failedValidation) throw failedValidation;
 
@@ -231,6 +232,7 @@ export const updateReservation = async (req, res) => {
     if (status !== undefined) reservationUpdate.status = status;
     if (date_from !== undefined) reservationUpdate.date_from = date_from;
     if (date_to !== undefined) reservationUpdate.date_to = date_to;
+    if (canceled_reason !== undefined) reservationUpdate.canceled_reason = canceled_reason;
 
     const { data: updatedReservations, error: resError } = await supabase
       .from("reservations")
@@ -258,7 +260,7 @@ export const updateReservation = async (req, res) => {
       if (cropError) throw cropError;
     }
 
-    if (status && status.toLowerCase() === "denied" || status && status.toLowerCase() === "completed") {
+    if (validation.status === "approved" && status && (status.toLowerCase() === "denied" || status.toLowerCase() === "completed" || status.toLowerCase() === "canceled")) {
       const { data: cropType, error: cropError } = await supabase
         .from("crop_types")
         .select("quantity")
@@ -349,7 +351,7 @@ export const checkReservation = async (req, res) => {
 
 export const getReservationsByOwner = async (req, res) => {
   try {
-    const { ownerId, limit, offset, location, status, search } = req.query;
+    const { ownerId, limit, offset, location, status, search, date_from, date_to } = req.query;
 
     if (!ownerId) {
       return res.status(400).json({ message: "Missing ID." });
@@ -367,7 +369,8 @@ export const getReservationsByOwner = async (req, res) => {
         status,
         created_at,
         date_from,
-        date_to
+        date_to,
+        canceled_reason
       `,
         { count: "exact" }
       )
@@ -392,6 +395,16 @@ export const getReservationsByOwner = async (req, res) => {
       query = query
         .not("farmer_id", "is", null)
         .ilike("farmer_id.name", `%${search}%`);
+    }
+
+    if (typeof date_from !== "undefined" && date_from) {
+      const fromDate = `${date_from}T00:00:00Z`;
+      query = query.gte("created_at", fromDate);
+    }
+
+    if (typeof date_to !== "undefined" && date_to) {
+      const toDate = `${date_to}T23:59:59.999Z`;
+      query = query.lte("created_at", toDate);
     }
 
     const { data, count, error } = await query;

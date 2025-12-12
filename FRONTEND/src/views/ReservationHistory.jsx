@@ -30,6 +30,7 @@ function ReservationHistory() {
   const { addresses } = useAddresses();
   const location = useLocation();
   const [selected, setSelected] = useState(null);
+  const [canceled, setCanceled] = useState(false);
 
   function useAddresses() {
     const [addresses, setAddresses] = useState([]);
@@ -234,6 +235,7 @@ function ReservationHistory() {
       colspan: 2,
       startDate: selected?.date_from || null,
       endDate: selected?.date_to || null,
+      disabled: selected?.status === "approved" ? true : false,
     },
     {
       label: "Crop Type",
@@ -241,8 +243,8 @@ function ReservationHistory() {
       required: true,
       name: "crop_type",
       options: [{ value: "corn", phrase: "Corn" }, { value: "rice", phrase: "Rice" }],
-      colspan: 1,
       defaultValue: selected?.crop_type_id.crop_type_name || null,
+      disabled: selected?.status === "approved" ? true : false,
     },
     {
       label: "Quantity (Cavan)",
@@ -251,18 +253,34 @@ function ReservationHistory() {
       placeholder: "ex. 50",
       required: true,
       name: "quantity",
-      colspan: 1,
       defaultValue: selected?.crop_type_id.quantity || null,
+      disabled: selected?.status === "approved" ? true : false,
     },
     {
       label: "Payment Type",
       type: "select",
       name: "payment",
       options: [{ value: "gcash", phrase: "Gcash" }, { value: "cash", phrase: "Cash" }],
-      colspan: 2,
       defaultValue: selected?.crop_type_id.payment || null,
+      disabled: selected?.status === "approved" ? true : false,
     },
-  ];
+    {
+      label: "Status",
+      type: "select",
+      name: "status",
+      defaultValue: selected?.status,
+      options: [{ value: String(selected?.status), phrase: String(selected?.status).charAt(0).toUpperCase() + String(selected?.status).slice(1) }, { value: "canceled", phrase: "Canceled" }],
+      onChange: (e) => setCanceled(e.target.value === "canceled"),
+    },
+    canceled && {
+      label: "Reason for Canceled Reservation",
+      type: "text",
+      name: "canceled_reason",
+      required: true,
+      placeholder: "Provide reason why reservation is canceled.",
+      colspan: 2,
+    },
+  ].filter(Boolean);
 
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
@@ -278,6 +296,8 @@ function ReservationHistory() {
         crop_type: updatedData.crop_type,
         quantity: updatedData.quantity,
         payment: updatedData.payment,
+        status: updatedData.status,
+        canceled_reason: updatedData.canceled_reason,
       });
 
       toast.success("The reservation is updated successfully.");
@@ -323,7 +343,7 @@ function ReservationHistory() {
             status: res.status || "pending",
             action: (
               <div className="flex justify-center gap-2">
-                {res.status === "pending" && (
+                {(res.status === "pending" || res.status === "approved") && (
                   <Button
                     onClick={() => handleEdit(res)}
                     className="bg-blue-400 hover:bg-blue-500 text-white"
@@ -331,6 +351,7 @@ function ReservationHistory() {
                     Edit
                   </Button>
                 )}
+
                 <Button
                   onClick={() => handleView(res)}
                   className="bg-blue-400 hover:bg-blue-500 text-white"
@@ -379,7 +400,7 @@ function ReservationHistory() {
             status: res.status || "pending",
             action: (
               <div className="flex justify-center gap-2">
-                {res.status === "pending" && (
+                {(res.status === "pending" || res.status === "approved") && (
                   <Button
                     onClick={() => handleEdit(res)}
                     className="bg-blue-400 hover:bg-blue-500 text-white"
@@ -387,6 +408,7 @@ function ReservationHistory() {
                     Edit
                   </Button>
                 )}
+                
                 <Button
                   onClick={() => handleView(res)}
                   className="bg-blue-400 hover:bg-blue-500 text-white"

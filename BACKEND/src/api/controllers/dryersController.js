@@ -224,7 +224,7 @@ export const createDryer = async (req, res) => {
           operation_reason,
           business_permit,
           dryer_type,
-          business_type: users.business_type,
+          business_type: users.business_type || "PRIVATE",
         },
       ])
       .select()
