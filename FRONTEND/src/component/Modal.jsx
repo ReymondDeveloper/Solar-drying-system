@@ -662,6 +662,7 @@ function Modal({
                       field.endDate = end;
                     }}
                     minDate={field.min ?? null}
+                    disabled={field.disabled}
                     // excludeDates={
                     //   JSON.parse(localStorage.getItem("dryer_data"))
                     //     ?.farmers.filter(
@@ -815,7 +816,15 @@ function Modal({
                     <span className="capitalize font-bold">
                       {datas.notes ||
                         datas.crop_type_id.notes ||
-                        "No notes provided."}
+                        "No reason provided."}
+                    </span>
+                  </p>
+                )}
+                {datas.status === "canceled" && (
+                  <p>
+                    {"Reason for cancelation: "}
+                    <span className="capitalize font-bold">
+                      {datas.canceled_reason || "No reason provided."}
                     </span>
                   </p>
                 )}

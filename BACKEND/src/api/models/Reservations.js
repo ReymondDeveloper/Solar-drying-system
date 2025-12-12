@@ -23,7 +23,8 @@ const Reservations = {
         status,
         created_at,
         date_from,
-        date_to
+        date_to,
+        canceled_reason
       `,
         { count: "exact" }
       )

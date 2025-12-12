@@ -11,6 +11,7 @@ import api from "../api/api";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
+import Report from "../component/Report"
 
 function BookingRequests() {
   const role = localStorage.getItem("role");
@@ -24,11 +25,17 @@ function BookingRequests() {
   const [datasView, setDatasView] = useState([]);
   const [fieldsEdit, setFieldsEdit] = useState([]);
   const [modalEdit, setModalEdit] = useState(false);
-  const [filter, setFilter] = useState({ status: "all", location: "all" });
+  const [filter, setFilter] = useState({ 
+    status: "all",
+    location: "all",
+    date_from: null,
+    date_to: null,
+  });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const { addresses } = useAddresses();
   const location = useLocation();
+  const [report, setReport] = useState([]);
 
   function useAddresses() {
     const [addresses, setAddresses] = useState([]);
@@ -99,6 +106,23 @@ function BookingRequests() {
       ],
       defaultValue: filter.location,
       colspan: 2,
+    },
+    {
+      label: "Date From",
+      type: "date",
+      name: "date_from",
+      colspan: 1,
+      onchange: (e) => {
+        if (document.querySelector('input[name="date_to"]')) {
+          document.querySelector('input[name="date_to"]').min = e.target.value;
+        }
+      },
+    },
+    {
+      label: "Date To",
+      type: "date",
+      name: "date_to",
+      colspan: 1,
     },
   ];
 
@@ -287,8 +311,8 @@ function BookingRequests() {
             id: res.id,
             farmer_name: res.farmer_id.name || "N/A",
             location: res.dryer_id.location || "N/A",
-            crop_type: res.crop_type_id.crop_type_name || "N/A",
-            quantity: res.crop_type_id.quantity || "N/A",
+            crop_type: res.crop_type_id?.crop_type_name || "N/A",
+            quantity: res.crop_type_id?.quantity || "N/A",
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",
@@ -298,17 +322,18 @@ function BookingRequests() {
               : "N/A",
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
             status: res.status || "pending",
-            notes: res.crop_type_id.notes || "",
+            notes: res.crop_type_id?.notes || "",
             action: (
               <div className="flex justify-center gap-2">
-                <Button
-                  onClick={() =>
-                    res.status && res.status !== "completed" && handleEdit(res)
-                  }
-                  className="bg-blue-400 hover:bg-blue-500 text-white"
-                >
-                  Edit
-                </Button>
+                {res.status !== "completed" && res.status !== "denied" && res.status !== "canceled" && (
+                  <Button
+                    onClick={() => handleEdit(res)}
+                    className="bg-blue-400 hover:bg-blue-500 text-white"
+                  >
+                    Edit
+                  </Button>
+                )}
+                
                 <Button
                   onClick={() => handleView(res)}
                   className="bg-blue-400 hover:bg-blue-500 text-white"
@@ -331,6 +356,8 @@ function BookingRequests() {
           offset: currentPage * limit - limit,
           status: filter.status,
           location: filter.location,
+          date_from: filter.date_from,
+          date_to: filter.date_to,
           search: search,
         },
       });
@@ -349,8 +376,8 @@ function BookingRequests() {
             id: res.id,
             farmer_name: res.farmer_id.name || "N/A",
             location: res.dryer_id.location || "N/A",
-            crop_type: res.crop_type_id.crop_type_name || "N/A",
-            quantity: res.crop_type_id.quantity || "N/A",
+            crop_type: res.crop_type_id?.crop_type_name || "N/A",
+            quantity: res.crop_type_id?.quantity || "N/A",
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
                   year: "numeric",
@@ -360,17 +387,18 @@ function BookingRequests() {
               : "N/A",
             duration: `${res.date_from || "N/A"} - ${res.date_to || "N/A"}`,
             status: res.status || "pending",
-            notes: res.crop_type_id.notes || "",
+            notes: res.crop_type_id?.notes || "",
             action: (
               <div className="flex justify-center gap-2">
-                <Button
-                  onClick={() =>
-                    res.status && res.status !== "completed" && handleEdit(res)
-                  }
-                  className="bg-blue-400 hover:bg-blue-500 text-white"
-                >
-                  Edit
-                </Button>
+                {res.status !== "completed" && res.status !== "denied" && res.status !== "canceled" && (
+                  <Button
+                    onClick={() => handleEdit(res)}
+                    className="bg-blue-400 hover:bg-blue-500 text-white"
+                  >
+                    Edit
+                  </Button>
+                )}
+
                 <Button
                   onClick={() => handleView(res)}
                   className="bg-blue-400 hover:bg-blue-500 text-white"
@@ -409,6 +437,8 @@ function BookingRequests() {
     currentPage,
     filter.status,
     filter.location,
+    filter.date_from,
+    filter.date_to,
     search,
     location,
   ]);
@@ -434,6 +464,31 @@ function BookingRequests() {
 
   const currentPageSafe = Math.min(currentPage, totalPages);
   const startIndex = (currentPageSafe - 1) * limit;
+
+  useEffect(() => {
+    async function fetchReport() {
+      try {
+        const response = await api.get("/reservations/owner", {
+          params: {
+            ownerId: localStorage.getItem("id"),
+            status: filter.status,
+            location: filter.location,
+            search: search,
+          },
+        });
+        setReport(response.data.data);
+      } catch {
+        setReport([]);
+      }
+    }
+    fetchReport();
+  }, [
+    filter.status,
+    filter.location,
+    filter.date_from,
+    filter.date_to,
+    search,
+  ]);
 
   return (
     <>
@@ -481,8 +536,22 @@ function BookingRequests() {
           modalFilter || modalView ? "overflow-hidden" : "overflow-auto"
         }`}
       >
-        <div className="w-full flex justify-center">
+        <div className="w-full flex flex-col md:flex-row justify-center gap-5">
           <Search setSearch={setSearch} setModal={setModalFilter} />
+          <Report 
+            column={[
+              { label: "#", ratio: 0.05 },
+              { label: "Registered Dryer", ratio: 0.15 },
+              { label: "Location (Sablayan)", ratio: 0.2 },
+              { label: "Status", ratio: 0.1 },
+              { label: "Duration", ratio: 0.1 },
+              { label: "Crop Type", ratio: 0.1 },
+              { label: "Quantity", ratio: 0.1 },
+              { label: "Farmer", ratio: 0.2 },
+            ]} 
+            data={report} 
+            report_title="LIST OF DRYERS"
+          />
         </div>
         <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
           <div className="overflow-auto max-h-[400px]">

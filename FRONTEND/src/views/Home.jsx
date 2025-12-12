@@ -421,21 +421,25 @@ function Home() {
       const firstItem = data[0];
 
       if (firstItem.quantity !== undefined) {
-        data.forEach(({ quantity, crop_type, created_at }) => {
-          const date = new Date(created_at);
-          const month = date.toLocaleString("default", { month: "long" });
-          const crop = cropMap[crop_type.toLowerCase()];
-          if (crop && monthlyTotals[month]) {
-            monthlyTotals[month][crop] += quantity;
+        data.forEach((item) => {
+          if (item.status === "approved" || item.status === "completed") {
+            const date = new Date(item.created_at);
+            const month = date.toLocaleString("default", { month: "long" });
+            const crop = cropMap[item.crop_type.toLowerCase()];
+            if (crop && monthlyTotals[month]) {
+              monthlyTotals[month][crop] += item.quantity;
+            }
           }
         });
       } else if (firstItem.crop_type_id !== undefined) {
-        data.forEach(({ crop_type_id }) => {
-          const date = new Date(crop_type_id.created_at);
-          const month = date.toLocaleString("default", { month: "long" });
-          const crop = cropMap[crop_type_id.crop_type_name.toLowerCase()];
-          if (crop && monthlyTotals[month]) {
-            monthlyTotals[month][crop] += crop_type_id.quantity;
+        data.forEach((item) => {
+          if (item.status === "approved" || item.status === "completed") {
+            const date = new Date(item.crop_type_id.created_at);
+            const month = date.toLocaleString("default", { month: "long" });
+            const crop = cropMap[item.crop_type_id.crop_type_name.toLowerCase()];
+            if (crop && monthlyTotals[month]) {
+              monthlyTotals[month][crop] += item.crop_type_id.quantity;
+            }
           }
         });
       }
@@ -479,14 +483,16 @@ function Home() {
       }
 
       data.forEach((item) => {
-        const date = new Date(item.created_at);
-        const month = date.toLocaleString("default", { month: "long" });
+        if (item.status === "approved" || item.status === "completed") {
+          const date = new Date(item.created_at);
+          const month = date.toLocaleString("default", { month: "long" });
 
-        const type = item.dryer_id?.business_type;
-        if (!monthlyCounts[month] || (type !== "PUBLIC" && type !== "PRIVATE"))
-          return;
+          const type = item.dryer_id?.business_type;
+          if (!monthlyCounts[month] || (type !== "PUBLIC" && type !== "PRIVATE"))
+            return;
 
-        monthlyCounts[month][type] += 1;
+          monthlyCounts[month][type] += 1;
+        }
       });
 
       return monthsOrder.map((month) => ({
@@ -529,6 +535,15 @@ function Home() {
         }));
         cache.approved = result.data.filter(
           (item) => item.status === "approved"
+        ).length;
+
+        setCards((prev) => ({
+          ...prev,
+          completed: result.data.filter((item) => item.status === "completed")
+            .length,
+        }));
+        cache.completed = result.data.filter(
+          (item) => item.status === "completed"
         ).length;
 
         setCards((prev) => ({
@@ -702,16 +717,9 @@ function Home() {
         {localStorage.getItem("role") === "owner" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <ReportCard
-              onClick={() => navigate("/home/booking-requests")}
+              onClick={() => navigate("/home/booking-requests?pending=true")}
               icon={<GiBookmarklet className="w-full h-full" />}
               title={"Requests"}
-              logic={cards.reservation}
-            />
-
-            <ReportCard
-              onClick={() => navigate("/home/booking-requests?pending=true")}
-              icon={<MdOutlinePendingActions className="w-full h-full" />}
-              title={"Pending Requests"}
               logic={cards.pending}
             />
 
@@ -720,6 +728,13 @@ function Home() {
               icon={<MdOutlinePendingActions className="w-full h-full" />}
               title={"Approved Requests"}
               logic={cards.approved}
+            />
+
+            <ReportCard
+              onClick={() => navigate("/home/booking-requests?completed=true")}
+              icon={<MdOutlinePendingActions className="w-full h-full" />}
+              title={"Completed Requests"}
+              logic={cards.completed}
             />
 
             <ReportCard

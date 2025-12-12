@@ -127,6 +127,9 @@ export default function Report({ report_title, column, data }) {
 				"Email": u.email,
 				"Role": u.role,
 				"User ID": u.user_id,
+				"Crop Type": u.crop_type_id?.crop_type_name || "-",
+				"Quantity": u.crop_type_id?.quantity || "-",
+				"Farmer": u.farmer_id?.name || "-",
 			};
 
 			// Calculate max row height based on text wrapping

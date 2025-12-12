@@ -349,7 +349,7 @@ export default function Dryer() {
             </div>
           )}
 
-          { data.available_capacity > 0 && data.owner !== localStorage.getItem("name") && localStorage.getItem("role") !== "admin" && (
+          { data.available_capacity > 0 && data.created_by-id !== localStorage.getItem("id") && localStorage.getItem("role") === "farmer" && (
             <Button
               className="w-full bg-green-500 text-white py-3 rounded-full hover:bg-green-600 mt-4"
               onClick={() => setModalAdd(true)}
@@ -432,8 +432,7 @@ export default function Dryer() {
           <div className="flex items-center text-center border-b pb-2 mb-4">
             <h2 className="text-2xl font-bold text-gray-800">Ratings</h2>
           </div>
-          {data.available_capacity > 0 &&
-            data.owner !== localStorage.getItem("name") && (
+          {data.available_capacity > 0 && localStorage.getItem("role") === "farmer" && data.created_by-id !== localStorage.getItem("id") && (
               <form
                 className="flex flex-col gap-1"
                 onSubmit={handleRatingSubmit}
@@ -468,7 +467,7 @@ export default function Dryer() {
               </form>
             )}
           <div className="space-y-4">
-            {data.ratings ? (
+            {data.ratings && data.ratings.length > 0 ? (
               data.ratings.map((rating, index) => (
                 <div key={index} className="flex gap-3 border-b pb-3 mb-3">
                   <div className="flex flex-col">
@@ -491,7 +490,7 @@ export default function Dryer() {
                 </div>
               ))
             ) : (
-              <p className="text-gray-500">No ratings yet.</p>
+              <p className="text-gray-500 text-center">No ratings yet.</p>
             )}
           </div>
         </div>
