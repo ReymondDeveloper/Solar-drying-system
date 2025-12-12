@@ -134,6 +134,7 @@ function BookingRequests() {
       setFilter((prev) => ({ ...prev, ...data }));
       setModalFilter(false);
       setCurrentPage(1);
+      window.history.replaceState({}, '', location.pathname);
     } catch (error) {
       console.log(error);
     } finally {
@@ -449,6 +450,8 @@ function BookingRequests() {
       setFilter((prev) => ({ ...prev, status: "pending" }));
     } else if (params.get("approved")) {
       setFilter((prev) => ({ ...prev, status: "approved" }));
+    } else if (params.get("completed")) {
+      setFilter((prev) => ({ ...prev, status: "completed" }));
     }
   }, [location.search]);
 

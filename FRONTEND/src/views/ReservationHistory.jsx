@@ -164,6 +164,7 @@ function ReservationHistory() {
       setModalFilter(false);
       setCurrentPage(1);
       localStorage.removeItem("amount_of_payment");
+      window.history.replaceState({}, '', location.pathname);
     } catch (error) {
       console.log(error);
     } finally {
