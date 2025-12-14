@@ -7,7 +7,7 @@ import Modal from "../component/Modal";
 import Loading from "../component/Loading";
 import api from "../api/api";
 import Button from "../component/Button";
-import Report from "../component/Report"
+import Report from "../component/Report";
 
 function Reservations() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -16,15 +16,24 @@ function Reservations() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState(false);
-  const [filter, setFilter] = useState({ status: "all", location: "all", date_from: null, date_to: null });
+  const [filter, setFilter] = useState({
+    status: "all",
+    dryer_owner: "all",
+    location: "all",
+    date_from: null,
+    date_to: null,
+  });
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [modalView, setModalView] = useState(false);
   const [datasView, setDatasView] = useState([]);
   const [report, setReport] = useState([]);
-  
+  const { addresses } = useAddresses();
+  const { owners } = fetchOwners();
+
   const tableHeadings = [
     "Registered Dryer",
+    "Dryer Owner",
     "Location (Sablayan)",
     "Date Created",
     "Status",
@@ -34,37 +43,62 @@ function Reservations() {
 
   const tableDataCell = [
     "dryer_name",
+    "dryer_owner",
     "location",
     "created_at",
     "status",
     "duration",
     "action",
   ];
-  const { addresses } = useAddresses();
 
   function useAddresses() {
     const [addresses, setAddresses] = useState([]);
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
       const fetchAddresses = async () => {
-        setLoading(true);
         try {
           const res = await api.get("/addresses");
           setAddresses(res.data);
         } catch (err) {
           console.error("Failed to fetch addresses:", err);
-        } finally {
-          setLoading(false);
         }
       };
       fetchAddresses();
     }, []);
 
-    return { addresses, loading };
+    return { addresses };
+  }
+
+  function fetchOwners() {
+    const [owners, setOwners] = useState([]);
+
+    useEffect(() => {
+      const fetchOwners = async () => {
+        try {
+          const res = await api.get("reservations/owners");
+          setOwners(res.data);
+        } catch (err) {
+          console.error("Failed to fetch owners:", err);
+        }
+      };
+      fetchOwners();
+    }, []);
+
+    return { owners };
   }
 
   const fields = [
+    {
+      label: "Dryer Owner",
+      type: "select",
+      name: "dryer_owner",
+      options: [
+        { value: "all", phrase: "All" },
+        ...owners.map((name) => ({ value: name, phrase: name })),
+      ],
+      defaultValue: filter.dryer_owner,
+      colspan: 2,
+    },
     {
       label: "Location (Sablayan)",
       type: "select",
@@ -136,6 +170,7 @@ function Reservations() {
       Array.isArray(data)
         ? data?.map((res) => ({
             dryer_name: res.dryer_id.dryer_name,
+            dryer_owner: res.owner_id.name,
             location: res.dryer_id.location,
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
@@ -155,7 +190,7 @@ function Reservations() {
               </Button>
             ),
           }))
-        : [],
+        : []
     );
 
     if (!Array.isArray(data)) setIsLoading(true);
@@ -167,6 +202,7 @@ function Reservations() {
           offset: currentPage * limit - limit,
           status: filter.status,
           location: filter.location,
+          dryer_owner: filter.dryer_owner,
           date_from: filter.date_from,
           date_to: filter.date_to,
           search: search,
@@ -185,6 +221,7 @@ function Reservations() {
         setData(
           result.data.data?.map((res) => ({
             dryer_name: res.dryer_id.dryer_name,
+            dryer_owner: res.owner_id.name,
             location: res.dryer_id.location,
             created_at: res.created_at
               ? new Date(res.created_at).toLocaleString("en-PH", {
@@ -203,11 +240,11 @@ function Reservations() {
                 View
               </Button>
             ),
-          })),
+          }))
         );
         localStorage.setItem(
           "reservation_data",
-          JSON.stringify(result.data.data),
+          JSON.stringify(result.data.data)
         );
       }
     } catch (error) {
@@ -216,7 +253,17 @@ function Reservations() {
     } finally {
       setIsLoading(false);
     }
-  }, [handleView, limit, currentPage, filter.status, filter.location, filter.date_from, filter.date_to, search]);
+  }, [
+    handleView,
+    limit,
+    currentPage,
+    filter.status,
+    filter.location,
+    filter.date_from,
+    filter.date_to,
+    filter.dryer_owner,
+    search,
+  ]);
 
   useEffect(() => {
     fetchData();
@@ -240,6 +287,7 @@ function Reservations() {
             location: filter.location,
             date_from: filter.date_from,
             date_to: filter.date_to,
+            dryer_owner: filter.dryer_owner,
             search: search,
           },
         });
@@ -249,7 +297,14 @@ function Reservations() {
       }
     }
     fetchReport();
-  }, [filter.status, filter.location, filter.date_from, filter.date_to, search]);
+  }, [
+    filter.status,
+    filter.location,
+    filter.date_from,
+    filter.date_to,
+    filter.dryer_owner,
+    search,
+  ]);
 
   return (
     <>
@@ -278,20 +333,22 @@ function Reservations() {
       >
         <div className="w-full flex flex-col md:flex-row justify-center gap-5">
           <Search setSearch={setSearch} setModal={setModal} />
-          <Report 
+          <Report
             column={[
               { label: "#", ratio: 0.05 },
-              { label: "Registered Dryer", ratio: 0.2 },
-              { label: "Location (Sablayan)", ratio: 0.22 },
-              { label: "Date Created", ratio: 0.15 },
-              { label: "Status", ratio: 0.15 },
-              { label: "Duration", ratio: 0.23 },
+              { label: "Registered Dryer", ratio: 0.15 },
+              { label: "Location (Sablayan)", ratio: 0.2 },
+              { label: "Status", ratio: 0.1 },
+              { label: "Duration", ratio: 0.1 },
+              { label: "Crop Type", ratio: 0.1 },
+              { label: "Quantity", ratio: 0.1 },
+              { label: "Farmer", ratio: 0.2 },
             ]}
-            data={report} 
+            data={report}
             report_title="LIST OF RESERVATIONS"
           />
         </div>
-        
+
         <div className="w-full lg:bg-gray-300 rounded-lg lg:p-5 my-5">
           <div className="overflow-auto max-h-[400px]">
             {isLoading ? (

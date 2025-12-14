@@ -6,8 +6,16 @@ import { subMonths } from "date-fns";
 
 export const getReservations = async (req, res) => {
   try {
-    const { limit, offset, status, location, date_from, date_to, search } =
-      req.query;
+    const {
+      limit,
+      offset,
+      status,
+      location,
+      date_from,
+      date_to,
+      search,
+      dryer_owner,
+    } = req.query;
     let query = supabase
       .from("reservations")
       .select(
@@ -34,6 +42,12 @@ export const getReservations = async (req, res) => {
       query = query
         .not("dryer_id", "is", null)
         .eq("dryer_id.location", location);
+    }
+
+    if (typeof dryer_owner !== "undefined" && dryer_owner !== "all") {
+      query = query
+        .not("owner_id", "is", null)
+        .eq("owner_id.name", dryer_owner);
     }
 
     if (typeof search !== "undefined" && search) {
@@ -213,7 +227,16 @@ export const createReservation = async (req, res) => {
 export const updateReservation = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, notes, payment, quantity, date_from, date_to, crop_type, canceled_reason } = req.body;
+    const {
+      status,
+      notes,
+      payment,
+      quantity,
+      date_from,
+      date_to,
+      crop_type,
+      canceled_reason,
+    } = req.body;
 
     const { data: validation, error: failedValidation } = await supabase
       .from("reservations")
@@ -232,7 +255,8 @@ export const updateReservation = async (req, res) => {
     if (status !== undefined) reservationUpdate.status = status;
     if (date_from !== undefined) reservationUpdate.date_from = date_from;
     if (date_to !== undefined) reservationUpdate.date_to = date_to;
-    if (canceled_reason !== undefined) reservationUpdate.canceled_reason = canceled_reason;
+    if (canceled_reason !== undefined)
+      reservationUpdate.canceled_reason = canceled_reason;
 
     const { data: updatedReservations, error: resError } = await supabase
       .from("reservations")
@@ -260,7 +284,13 @@ export const updateReservation = async (req, res) => {
       if (cropError) throw cropError;
     }
 
-    if (validation.status === "approved" && status && (status.toLowerCase() === "denied" || status.toLowerCase() === "completed" || status.toLowerCase() === "canceled")) {
+    if (
+      validation.status === "approved" &&
+      status &&
+      (status.toLowerCase() === "denied" ||
+        status.toLowerCase() === "completed" ||
+        status.toLowerCase() === "canceled")
+    ) {
       const { data: cropType, error: cropError } = await supabase
         .from("crop_types")
         .select("quantity")
@@ -351,7 +381,16 @@ export const checkReservation = async (req, res) => {
 
 export const getReservationsByOwner = async (req, res) => {
   try {
-    const { ownerId, limit, offset, location, status, search, date_from, date_to } = req.query;
+    const {
+      ownerId,
+      limit,
+      offset,
+      location,
+      status,
+      search,
+      date_from,
+      date_to,
+    } = req.query;
 
     if (!ownerId) {
       return res.status(400).json({ message: "Missing ID." });
@@ -419,41 +458,22 @@ export const getReservationsByOwner = async (req, res) => {
   }
 };
 
-export const getAllOwnersWithDryers = async (req, res) => {
+export const getAllOwnersWithReservation = async (req, res) => {
   try {
-    const { data: dryers, error } = await supabase
-      .from("dryers")
-      .select("id, dryer_name, location, created_by_id, created_at");
+    const { data, error } = await supabase
+      .from("reservations")
+      .select("owner_id:owner_id (name)");
 
     if (error) throw error;
 
-    const ownerIds = [...new Set(dryers.map((d) => d.created_by_id))];
-    const { data: owners, error: ownersError } = await supabase
-      .from("users")
-      .select("id, name")
-      .in("id", ownerIds);
+    const names = data.map((row) => row.owner_id.name);
 
-    console.log("Owners fetched:", owners);
+    const uniqueNames = [...new Set(names)];
 
-    if (ownersError) throw ownersError;
-
-    const result = owners.map((owner) => ({
-      id: owner.id,
-      name: owner.name,
-      email: owner.email,
-      dryers: dryers
-        .filter((d) => d.created_by_id === owner.id)
-        .map((d) => ({
-          id: d.id,
-          name: d.dryer_name,
-          location: d.location,
-          created_at: d.created_at,
-        })),
-    }));
-    res.json(result);
+    res.json(uniqueNames);
   } catch (err) {
     res.status(500).json({
-      message: "Failed to fetch owners with dryers",
+      message: "Failed to fetch owners with reservations",
       error: err.message,
     });
   }
