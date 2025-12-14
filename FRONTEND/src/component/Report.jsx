@@ -2,15 +2,31 @@ import { CgSoftwareDownload } from "react-icons/cg";
 import JsPdf from "jspdf";
 
 export default function Report({ report_title, column, data }) {
-  function Generate() {
+  const getDataUrl = (imagePath) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.src = imagePath;
+    });
+  };
+
+  async function Generate() {
     const doc = new JsPdf("p", "mm", "a4");
     const getCenteredPage = (text) =>
       doc.internal.pageSize.width / 2 - doc.getTextWidth(text) / 2;
 
     doc.setFontSize(10);
 
-    const logo = "/logo.png";
-    doc.addImage(logo, "PNG", 5, 12, 30, 25);
+    const logoDataUrl = await getDataUrl("/logo.png"); // Absolute path from public/
+    doc.addImage(logoDataUrl, "PNG", 5, 12, 30, 25);
 
     doc.text(
       "Republic of the Philippines",
