@@ -6,10 +6,15 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RiCloseLargeLine } from "react-icons/ri";
+import Modal from "../component/Modal";
+import OTP from "../component/Otp";
 
 function SignIn() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [modalVerify, setModalVerify] = useState(false);
+  const [modalOTP, setModalOTP] = useState(false);
+  const [modalUpdate, setModalUpdate] = useState(false);
 
   const handleRedirect = (e) => {
     e.preventDefault();
@@ -64,6 +69,7 @@ function SignIn() {
         localStorage.setItem("name", user.name);
         localStorage.setItem("address", user.address);
         localStorage.setItem("id", user.id);
+        localStorage.setItem("email", user.email);
         user.profile_image &&
           localStorage.setItem("profile_image", user.profile_image);
         user.mobile_number &&
@@ -86,10 +92,134 @@ function SignIn() {
     }
   };
 
+  const fieldsVerify = [
+    {
+      label: "Email",
+      type: "email",
+      required: true,
+      name: "email",
+      colspan: 2,
+    },
+  ];
+
+  const handleSubmitVerify = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const formData = new FormData(e.target);
+    const { email } = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API}/users/verify`, {
+        email,
+      });
+
+      toast.success(res.data.message);
+      setTimeout(() => {
+        localStorage.setItem("email", email);
+        setModalVerify(false);
+        setModalOTP(true);
+      }, 2000);
+    } catch (err) {
+      const message = err.response?.data?.message || err.message;
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitOTP = () => {
+    setModalOTP(false);
+    setTimeout(() => {
+      setModalUpdate(true);
+    }, 2000);
+  };
+
+  const fieldsUpdate = [
+    {
+      label: "Password",
+      type: "password",
+      name: "password",
+      minLength: 8,
+      maxLength: 16,
+      required: true,
+    },
+    {
+      label: "Confirm Password",
+      type: "password",
+      name: "confirm_password",
+      minLength: 8,
+      maxLength: 16,
+      required: true,
+    },
+  ];
+
+  const handleSubmitUpdate = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData(e.target);
+    const { password, confirm_password } = Object.fromEntries(formData.entries());
+
+    if (password === confirm_password) {
+      try {
+        const res = await axios.put(
+          `${import.meta.env.VITE_API}/users/update`,
+          {
+            email: localStorage.getItem("email"),
+            password,
+          }
+        );
+
+        toast.success(res.data.message);
+
+        setTimeout(() => {
+          localStorage.removeItem("email");
+          setModalUpdate(false);
+          navigate("/sign-in");
+        }, 2000);
+      } catch (err) {
+        toast.error(err.response?.data?.message || "Something went wrong...");
+        console.log(err);
+      }
+    } else {
+      toast.error("Passwords did not match, please try again!");
+      document.querySelector('[name="password"]').value = "";
+      document.querySelector('[name="password"]').focus();
+      document.querySelector('[name="confirm_password"]').value = "";
+    }
+    setLoading(false);
+  };
+
   return (
     <>
       {loading && <Loading />}
       <ToastContainer position="top-center" autoClose={3000} />
+      {modalVerify && (
+        <Modal
+          setModal={setModalVerify}
+          handleSubmit={handleSubmitVerify}
+          fields={fieldsVerify}
+          title={"Email Verification"}
+          button_name={"Verify"}
+        />
+      )}
+      {modalOTP && (
+        <OTP
+          loading={loading}
+          setLoading={setLoading}
+          setOtp={modalOTP}
+          onVerified={handleSubmitOTP}
+        />
+      )}
+      {modalUpdate && (
+        <Modal
+          setModal={setModalUpdate}
+          handleSubmit={handleSubmitUpdate}
+          fields={fieldsUpdate}
+          title={"Forgot Password"}
+          button_name={"Update"}
+        />
+      )}
       <div className="h-full flex">
         <div className="flex-grow bg-[url(/landing_page.avif)] bg-cover">
           <div className="w-full h-dvh backdrop-blur-sm backdrop-brightness-75 flex flex-col justify-center">
@@ -178,13 +308,13 @@ function SignIn() {
                     Sign In
                   </Button>
 
-                  {/* <Button
+                  <Button
                     type={`button`}
                     onClick={() => setModalVerify(true)}
-                    className={`w-full hover:bg-[rgba(0,0,0,0.3)] hover:text-white text-green-400`}
+                    className={`w-full hover:bg-[rgba(0,255,0,0.3)] hover:text-white text-green-400`}
                   >
                     Forgot password?
-                  </Button> */}
+                  </Button>
                 </form>
 
                 <p className="mt-6 text-center text-sm text-gray-400">

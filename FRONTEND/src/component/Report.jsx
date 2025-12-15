@@ -70,8 +70,6 @@ export default function Report({ report_title, column, data }) {
 
     let y = 52;
     let x = 5;
-    let pageNumber = 1;
-    let totalRowsRendered = 0;
 
     column.forEach((c) => {
       c.x = x;
@@ -138,7 +136,6 @@ export default function Report({ report_title, column, data }) {
 
       if (wouldExceedPage && i > 0) {
         doc.addPage();
-        pageNumber++;
         y = 12;
 
         doc.setFontSize(8);
@@ -160,8 +157,6 @@ export default function Report({ report_title, column, data }) {
           doc.text(line, col.x + 2, y + 3 + lineIdx * 4);
         });
       });
-
-      totalRowsRendered++;
 
       y += maxRowHeight;
     });
@@ -185,7 +180,6 @@ export default function Report({ report_title, column, data }) {
       // page break for this row
       if (y + rowHeight > maxYPosition) {
         doc.addPage();
-        pageNumber++;
         y = 12;
         doc.setFontSize(8);
         doc.setFont("helvetica", "bold");

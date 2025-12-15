@@ -3,7 +3,7 @@ import Button from "../component/Button";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 
 function Settings() {
   const [profileImage, setProfileImage] = useState(null);
@@ -13,9 +13,11 @@ function Settings() {
     name: localStorage.getItem("name") || "",
     address: localStorage.getItem("address") || "",
     mobile_number: localStorage.getItem("mobile_number") || "",
+    email: localStorage.getItem("email") || "",
   });
 
   const navigate = useNavigate();
+
   const handleLogout = (e) => {
     e.preventDefault();
     localStorage.clear();
@@ -90,6 +92,7 @@ function Settings() {
       localStorage.setItem("name", formData.name);
       localStorage.setItem("address", formData.address);
       localStorage.setItem("mobile_number", formData.mobile_number);
+      localStorage.setItem("email", formData.email);
 
       if (res.data.profile_image) {
         localStorage.setItem("profile_image", res.data.profile_image);
@@ -102,6 +105,7 @@ function Settings() {
         err.response?.data?.message ||
           "Failed to update profile. Please try again."
       );
+      setIsEditing((prev) => !prev);
     }
   };
 
@@ -126,6 +130,13 @@ function Settings() {
       type: "text",
       colSpan: 2,
       required: true,
+    },
+    {
+      label: "Email",
+      name: "email",
+      type: "email",
+      colSpan: 2,
+      disabled: true,
     },
   ];
 

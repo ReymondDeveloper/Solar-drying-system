@@ -55,9 +55,9 @@ function Accounts() {
     return { addresses, loading };
   }
 
-  const tableHeadings = ["Name", "Address", "User ID", "Role", "Action"];
+  const tableHeadings = ["Name", "Address", "Email", "Mobile Number", "User ID", "Role", "Action"];
 
-  const tableDataCell = ["name", "address", "user_id", "role", "action"];
+  const tableDataCell = ["name", "address", "email", "mobile_number", "user_id", "role", "action"];
 
   const fieldsFilter = [
     {
@@ -65,10 +65,10 @@ function Accounts() {
       type: "select",
       name: "role",
       options: [
-        { value: "all", phrase: "all" },
-        { value: "admin", phrase: "admin" },
-        { value: "owner", phrase: "owner" },
-        { value: "farmer", phrase: "farmer" },
+        { value: "all", phrase: "All" },
+        { value: "admin", phrase: "Admin" },
+        { value: "owner", phrase: "Owner" },
+        { value: "farmer", phrase: "Farmer" },
       ],
       defaultValue: filter.role,
       colspan: 1,
@@ -122,7 +122,7 @@ function Accounts() {
     {
       label: "Full Name",
       type: "text",
-      name: "full_name",
+      name: "name",
       required: true,
       colspan: 2,
     },
@@ -134,7 +134,6 @@ function Accounts() {
         ...addresses.map((a) => ({ value: a.name, phrase: a.name })),
       ],
       defaultValue: filter.location,
-      colspan: 2,
     },
     {
       label: "Role",
@@ -144,7 +143,6 @@ function Accounts() {
         { value: "farmer", phrase: "Farmer" },
         { value: "owner", phrase: "Owner" },
       ],
-      colspan: 2,
       onChange: (e) => setOwner(e.target.value === "owner" ? true : false),
     },
     owner && {
@@ -157,19 +155,27 @@ function Accounts() {
       ],
       colspan: 2,
     },
+    {
+      label: "Email",
+      type: "email",
+      name: "email",
+      required: true,
+      colspan: 2,
+    },
   ].filter(Boolean);
 
   const handleSubmitAdd = async (e) => {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.target);
-    const { full_name, address, role, business_type } = Object.fromEntries(formData.entries());
+    const { name, address, role, business_type, email } = Object.fromEntries(formData.entries());
     try {
       const res = await api.post(`${import.meta.env.VITE_API}/users/register`, {
-        full_name,
+        name,
         address,
         role,
         business_type,
+        email,
       });
       
       toast.success(res.data.message);
@@ -236,6 +242,8 @@ function Accounts() {
             id: res.id,
             name: res.name,
             address: res.address,
+            email: res.email,
+            mobile_number: res.mobile_number ?? "-",
             user_id: res.user_id,
             role: res.role,
             action: (
@@ -279,6 +287,8 @@ function Accounts() {
             id: res.id,
             name: res.name,
             address: res.address,
+            email: res.email,
+            mobile_number: res.mobile_number ?? "-",
             user_id: res.user_id,
             role: res.role,
             action: (

@@ -29,7 +29,7 @@ function Reservations() {
   const [datasView, setDatasView] = useState([]);
   const [report, setReport] = useState([]);
   const { addresses } = useAddresses();
-  const { owners } = fetchOwners();
+  const { owners } = useOwners();
 
   const tableHeadings = [
     "Registered Dryer",
@@ -69,13 +69,13 @@ function Reservations() {
     return { addresses };
   }
 
-  function fetchOwners() {
+  function useOwners() {
     const [owners, setOwners] = useState([]);
 
     useEffect(() => {
       const fetchOwners = async () => {
         try {
-          const res = await api.get("reservations/owners");
+          const res = await api.get("/reservations/owners");
           setOwners(res.data);
         } catch (err) {
           console.error("Failed to fetch owners:", err);
