@@ -73,6 +73,8 @@ function Settings() {
       formDataToSend.append("name", formData.name);
       formDataToSend.append("address", formData.address);
       formDataToSend.append("mobile_number", formData.mobile_number);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("id", localStorage.getItem("id"));
 
       if (profileImage) {
         formDataToSend.append("file", profileImage);
@@ -136,7 +138,7 @@ function Settings() {
       name: "email",
       type: "email",
       colSpan: 2,
-      disabled: true,
+      required: true,
     },
   ];
 

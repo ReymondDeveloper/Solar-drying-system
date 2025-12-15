@@ -327,7 +327,7 @@ export const verifyOtp = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { name, address, mobile_number } = req.body;
+    const { name, address, mobile_number, email, id } = req.body;
 
     let profileImage = null;
 
@@ -339,11 +339,11 @@ export const updateProfile = async (req, res) => {
 
     const { data: validation } = await supabase
       .from("users")
-      .select("mobile_number")
+      .select("id, email, mobile_number")
       .eq("mobile_number", mobile_number)
       .single();
 
-    if (validation) {
+    if (validation && validation.id !== id) {
       return res.status(400).json({ message: "This mobile number is already used." });
     }
 
@@ -351,6 +351,7 @@ export const updateProfile = async (req, res) => {
       name,
       address,
       mobile_number,
+      email,
     };
 
     if (profileImage) {
