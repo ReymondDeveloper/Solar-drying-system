@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -20,9 +20,7 @@ function OTP({ setOtp, onVerified, loading, setLoading }) {
         }
       );
       toast.success(res.data.message);
-      setTimeout(() => {
-        onVerified?.();
-      }, 2000);
+      onVerified?.();
     } catch (err) {
       toast.error(err.response.data.message);
       inputRefs.current.forEach((e) => {

@@ -73,12 +73,12 @@ export const verifyUser = async (req, res, next) => {
       .update({ otp_code: otp, otp_expires_at: expiresAt })
       .eq("email", email);
 
-    const email_data = {
+    const data = {
       email,
       otp,
     };
     const params = new URLSearchParams();
-    params.append("data", JSON.stringify(email_data));
+    params.append("data", JSON.stringify(data));
     await axios.post(
       "https://script.google.com/macros/s/AKfycbxvKYzaJaf7xFMNEENQPyBIGrTex6hquymsFF6dRztAUZqVnMcBxMK-wDPLhGvlSaUKtw/exec",
       params,
@@ -99,17 +99,28 @@ export const verifyUser = async (req, res, next) => {
 
 export const registerUser = async (req, res, next) => {
   try {
-    const { full_name, role, address, business_type } = req.body;
+    const { name, role, address, business_type, email } = req.body;
+
+    const { data: emailValidation } = await supabase
+      .from("users")
+      .select("email, name")
+      .eq("email", email)
+      .single();
+
+    if (emailValidation) {
+      return res.status(400).json({ message: `Email is already registered to "${emailValidation.name}".` });
+    }
+
     let user_id;
 
     if (role === "farmer") {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("users")
         .select("user_id")
         .ilike("user_id", "FRS%")
         .order("user_id", { ascending: false })
         .limit(1)
-        .maybeSingle(); // allows 0 rows
+        .maybeSingle();
 
       const lastId = data?.user_id;
 
@@ -121,13 +132,13 @@ export const registerUser = async (req, res, next) => {
         user_id = `FRS${num}`;
       }
     } else if (role === "owner") {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("users")
         .select("user_id")
         .ilike("user_id", "OR%")
         .order("user_id", { ascending: false })
         .limit(1)
-        .maybeSingle(); // allows 0 rows
+        .maybeSingle();
 
       const lastId = data?.user_id;
 
@@ -145,11 +156,12 @@ export const registerUser = async (req, res, next) => {
       .from("users")
       .insert([
         {
-          name: full_name,
+          name: name,
           role,
           address,
           user_id,
           business_type,
+          email,
         },
       ])
       .select()
@@ -161,7 +173,6 @@ export const registerUser = async (req, res, next) => {
 
     res.status(201).json({
       id: data.id,
-      user_id: data.user_id,
       name: data.name,
       message: `Registered successfully. ID: ${data.user_id}.`,
     });
@@ -237,7 +248,8 @@ export const loginUser = async (req, res) => {
         role: data.role,
         address: data.address,
         profile_image: data.profile_image,
-        mobile_number: data.mobile_number,
+        mobile_number: data.mobile_number ?? null,
+        email: data.email,
       },
       token: token,
     });
@@ -258,7 +270,7 @@ export const updatePassword = async (req, res) => {
 
     const user = await User.findByEmail(email);
     if (!user)
-      return res.status(404).json({ message: "Invalid email address." });
+      return res.status(404).json({ message: "Account doesn’t exist." });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     await User.updatePassword(email, hashedPassword);
@@ -281,23 +293,23 @@ export const verifyOtp = async (req, res) => {
 
     if (!user || error) {
       console.log("Email:" + email);
-      return res.status(400).json({ message: "User not found" });
+      return res.status(400).json({ message: "Account doesn't exist." });
     }
 
     if (!user.otp_code || !user.otp_expires_at) {
       console.error(user);
-      return res.status(400).json({ message: "No OTP generated" });
+      return res.status(400).json({ message: "There's no OTP generated for this account." });
     }
 
     const expiry = user.otp_expires_at;
     const now = new Date().toString();
 
     if (user.otp_code !== otp) {
-      return res.status(400).json({ message: "Invalid OTP" });
+      return res.status(400).json({ message: "Incorrect OTP, please try again!" });
     }
 
     if (now > expiry) {
-      return res.status(400).json({ message: "OTP expired" });
+      return res.status(400).json({ message: "Your generated OTP has expired, verify your email again to generate a new one!" });
     }
 
     await supabase
@@ -323,6 +335,16 @@ export const updateProfile = async (req, res) => {
       profileImage = `${
         process.env.BASE_URL || "http://localhost:3000"
       }/uploads/${req.file.filename}`;
+    }
+
+    const { data: validation } = await supabase
+      .from("users")
+      .select("mobile_number")
+      .eq("mobile_number", mobile_number)
+      .single();
+
+    if (validation) {
+      return res.status(400).json({ message: "This mobile number is already used." });
     }
 
     const updateData = {

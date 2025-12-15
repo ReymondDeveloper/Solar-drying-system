@@ -28,18 +28,16 @@ const User = {
     return data;
   },
 
-  // Find user by email
   findByEmail: async (email) => {
     const { data, error } = await supabase
       .from("users")
       .select("*")
       .eq("email", email)
       .single();
-    if (error && error.code !== "PGRST116") throw error; // ignore not found
+    if (error && error.code !== "PGRST116") throw error;
     return data;
   },
 
-  // Update password
   updatePassword: async (email, hashedPassword) => {
     const { error } = await supabase
       .from("users")
