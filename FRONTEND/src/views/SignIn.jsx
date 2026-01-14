@@ -23,12 +23,6 @@ function SignIn() {
 
   const formField = [
     {
-      label: "Name",
-      type: "text",
-      required: true,
-      name: "name",
-    },
-    {
       label: "User ID",
       type: "text",
       required: true,
@@ -48,11 +42,10 @@ function SignIn() {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.target);
-    const { name, user_id, password } = Object.fromEntries(formData.entries());
+    const { user_id, password } = Object.fromEntries(formData.entries());
 
     try {
       const res = await axios.post(`${import.meta.env.VITE_API}/users/login`, {
-        name,
         user_id,
         password,
       });

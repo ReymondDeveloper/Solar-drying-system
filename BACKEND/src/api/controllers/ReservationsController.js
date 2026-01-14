@@ -190,7 +190,7 @@ export const createReservation = async (req, res) => {
 
     const dryer = await Dryers.findById(dryer_id);
 
-    if (dryer.available_capacity - quantity < 0) {
+    if (dryer.available_capacity - quantity <= 0) {
       return res
         .status(400)
         .json({ message: "Available capacity is not enough." });

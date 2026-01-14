@@ -211,13 +211,12 @@ export const deleteUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   try {
-    const { name, user_id, password } = req.body;
+    const { user_id, password } = req.body;
 
     const { data, error } = await supabase
       .from("users")
       .select("*")
       .eq("user_id", user_id)
-      .eq("name", name)
       .single();
 
     if (error && error.code !== "PGRST116") throw error;
