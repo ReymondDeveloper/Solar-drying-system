@@ -782,7 +782,7 @@ function Modal({
                 <p>
                   {"Rate: "}
                   <span className="capitalize font-bold">
-                    {datas.dryer_id.rate}
+                    &#8369;{Number(datas.dryer_id.rate).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                   </span>
                 </p>
                 <br />
@@ -851,8 +851,7 @@ function Modal({
                 <p>
                   {"Total amount of payment: "}
                   <span className="capitalize font-bold">
-                    {safeNumber(datas.dryer_id.rate) *
-                      safeNumber(datas.crop_type_id.quantity)}
+                    &#8369;{Number(safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                   </span>
                 </p>
 
@@ -911,8 +910,8 @@ function Modal({
                             onClick={() => {
                               localStorage.setItem(
                                 "amount_of_payment",
-                                safeNumber(datas.dryer_id.rate) *
-                                  safeNumber(datas.crop_type_id.quantity),
+                                ((safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity)) / (Math.ceil(Math.abs(new Date(datas.date_to + 'T00:00:00') - new Date(datas.date_from + 'T00:00:00')) / (1000 * 60 * 60 * 24)))),
+                                // safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity)
                               );
                               setGcashModal(true);
                               setModal(false);

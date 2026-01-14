@@ -138,7 +138,10 @@ export default function Dryer() {
       label: "Payment Type",
       type: "select",
       name: "payment",
-      options: [{ value: "gcash", phrase: "Gcash" }, { value: "cash", phrase: "Cash" }],
+      options: [
+        { value: "cash", phrase: "Cash" },
+        { value: "gcash", phrase: "Gcash" }
+      ],
       colspan: 2,
     },
   ];
