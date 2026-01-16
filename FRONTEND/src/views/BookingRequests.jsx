@@ -151,6 +151,7 @@ function BookingRequests() {
       await api.put(`/reservations/${data.id}`, {
         status: data.status,
         notes: data.notes || null,
+        quantity: data.quantity,
       });
 
       toast.success("Booking is updated successfully!");
@@ -253,7 +254,7 @@ function BookingRequests() {
         type: "number",
         name: "quantity",
         defaultValue: data.crop_type_id.quantity,
-        disabled: true,
+        disabled: data.dryer_id.dryer_type === "MANUAL" ? false : true,
         colspan: 2,
       },
       {
@@ -274,18 +275,15 @@ function BookingRequests() {
         colspan: 2,
         onChange: isOwner ? handleStatusChange : undefined,
       },
-    ];
-
-    if (data.status === "denied") {
-      baseFields.push({
+      data.status === "denied" && {
         label: "Notes",
         type: "textarea",
         name: "notes",
         defaultValue: data.crop_type_id.notes || "",
         placeholder: "Reason for denial",
         colspan: 2,
-      });
-    }
+      },
+    ].filter(Boolean);
 
     setFieldsEdit(baseFields);
     setModalEdit(true);
