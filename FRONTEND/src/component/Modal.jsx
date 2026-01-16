@@ -624,7 +624,7 @@ function Modal({
                     required={field.required}
                     name={field.name}
                     defaultValue={field.defaultValue || ""}
-                    min={field.min}
+                    min={new Date(new Date().setDate(new Date().getDate())).toISOString().split('T')[0]}
                     onChange={field.onchange}
                   />
                 </>
@@ -663,26 +663,6 @@ function Modal({
                     }}
                     minDate={field.min ?? null}
                     disabled={field.disabled}
-                    // excludeDates={
-                    //   JSON.parse(localStorage.getItem("dryer_data"))
-                    //     ?.farmers.filter(
-                    //       ({ date_from, date_to, status }) =>
-                    //         (!date_to && status === "approved") ||
-                    //         (date_to === "" && status === "approved") ||
-                    //         (date_from === date_to && status === "approved")
-                    //     )
-                    //     .map(({ date_from }) =>
-                    //       normalizeDate(new Date(date_from))
-                    //     ) || []
-                    // }
-                    // excludeDateIntervals={
-                    //   JSON.parse(localStorage.getItem("dryer_data"))
-                    //     ?.farmers.filter(({ status }) => status === "approved")
-                    //     .map(({ date_from, date_to }) => ({
-                    //       start: normalizeDate(new Date(date_from)),
-                    //       end: normalizeDate(new Date(date_to)),
-                    //     })) || []
-                    // }
                     className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-green-500 outline-0"
                     placeholderText="Select a date range"
                   />
@@ -849,7 +829,7 @@ function Modal({
                 </p>
 
                 <p>
-                  {"Total amount of payment: "}
+                  {"Estimated Total Amount: "}
                   <span className="capitalize font-bold">
                     &#8369;{Number(safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                   </span>
@@ -910,8 +890,7 @@ function Modal({
                             onClick={() => {
                               localStorage.setItem(
                                 "amount_of_payment",
-                                ((safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity)) / (Math.ceil(Math.abs(new Date(datas.date_to + 'T00:00:00') - new Date(datas.date_from + 'T00:00:00')) / (1000 * 60 * 60 * 24)))),
-                                // safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity)
+                                safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity)
                               );
                               setGcashModal(true);
                               setModal(false);

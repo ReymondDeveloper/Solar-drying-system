@@ -182,8 +182,7 @@ export const createReservation = async (req, res) => {
       !quantity ||
       !payment ||
       !owner_id ||
-      !date_from ||
-      !date_to
+      !date_from
     ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
@@ -210,7 +209,7 @@ export const createReservation = async (req, res) => {
       status: "pending",
       owner_id,
       date_from,
-      date_to,
+      date_to: date_to ?? null,
     });
 
     res
@@ -266,8 +265,7 @@ export const updateReservation = async (req, res) => {
 
     if (resError) throw resError;
 
-    const reservation = updatedReservations[0];
-
+    const reservation = updatedReservations.length > 0 ? updatedReservations[0] : validation;
     const cropUpdate = {};
 
     if (notes !== undefined) cropUpdate.notes = notes;
@@ -403,7 +401,7 @@ export const getReservationsByOwner = async (req, res) => {
         id,
         farmer_id:farmer_id (id, name, mobile_number),
         owner_id:owner_id (id, name, mobile_number),
-        dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity),
+        dryer_id:dryer_id (id, dryer_name, location, rate, available_capacity, dryer_type),
         crop_type_id:crop_type_id (crop_type_id, crop_type_name, quantity, payment, notes, created_at),
         status,
         created_at,

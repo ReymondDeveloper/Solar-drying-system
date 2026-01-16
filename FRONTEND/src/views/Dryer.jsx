@@ -110,11 +110,18 @@ export default function Dryer() {
   }, [fetchData]);
 
   const fieldsAdd = [
-    {
+    data.dryer_type === "MANUAL" && {
       label: "Date Range",
       type: "date",
       required: true,
       min: new Date(),
+      colspan: 2,
+    },
+    data.dryer_type === "MACHINE" && {
+      label: "Date",
+      name: "date_from",
+      type: "date",
+      required: true,
       colspan: 2,
     },
     {
@@ -144,7 +151,7 @@ export default function Dryer() {
       ],
       colspan: 2,
     },
-  ];
+  ].filter(Boolean);
 
   const handleAddFormSubmit = async (e) => {
     e.preventDefault();
