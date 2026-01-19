@@ -271,7 +271,7 @@ function BookingRequests() {
         name: "status",
         defaultValue: data.status,
         options: options,
-        disabled: isDateLessThanToday(data.date_to),
+        disabled: data.dryer_id.dryer_type === "MANUAL" ? false : isDateLessThanToday(data.date_to),
         colspan: 2,
         onChange: isOwner ? handleStatusChange : undefined,
       },

@@ -273,6 +273,18 @@ export const updateReservation = async (req, res) => {
     if (quantity !== undefined) cropUpdate.quantity = quantity;
     if (crop_type !== undefined) cropUpdate.crop_type_name = crop_type;
 
+    const { data: validationQuantity, error: failedValidationQuantity } = await supabase
+      .from("crop_types")
+      .select("quantity")
+      .eq("crop_type_id", reservation.crop_type_id)
+      .single();
+
+    if (failedValidationQuantity) throw failedValidationQuantity;
+
+    if (!validationQuantity) {
+      return res.status(404).json({ message: "Reservation not found" });
+    }
+
     if (Object.keys(cropUpdate).length > 0) {
       const { error: cropError } = await supabase
         .from("crop_types")
@@ -305,6 +317,43 @@ export const updateReservation = async (req, res) => {
 
       const newAvailable =
         Number(dryer.available_capacity) + Number(cropType.quantity);
+
+      const safeAvailable =
+        newAvailable > dryer.maximum_capacity
+          ? dryer.maximum_capacity
+          : newAvailable;
+
+      const { error: updateDryerError } = await supabase
+        .from("dryers")
+        .update({ available_capacity: safeAvailable })
+        .eq("id", reservation.dryer_id);
+
+      if (updateDryerError) throw updateDryerError;
+    } else if (validation.status === "approved" && status && status.toLowerCase() === "approved") {
+      const { data: dryer, error: dryerError } = await supabase
+        .from("dryers")
+        .select("available_capacity, maximum_capacity")
+        .eq("id", reservation.dryer_id)
+        .single();
+      if (dryerError) throw dryerError;
+
+      const { data: cropType, error: cropError } = await supabase
+        .from("crop_types")
+        .select("quantity")
+        .eq("crop_type_id", reservation.crop_type_id)
+        .single();
+      if (cropError) throw cropError;
+
+      const valQ = Number(validationQuantity?.quantity ?? 0);
+      const cropQ = Number(cropType?.quantity ?? 0);
+      const cap = Number(dryer?.available_capacity ?? 0);
+
+      let newAvailable;
+      if (valQ > cropQ) {
+        newAvailable = Math.max(0, cap + (valQ - cropQ));
+      } else {
+        newAvailable = Math.max(0, cap - (cropQ - valQ));
+      }
 
       const safeAvailable =
         newAvailable > dryer.maximum_capacity
