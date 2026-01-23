@@ -624,7 +624,7 @@ function Modal({
                     required={field.required}
                     name={field.name}
                     defaultValue={field.defaultValue || ""}
-                    min={new Date(new Date().setDate(new Date().getDate())).toISOString().split('T')[0]}
+                    min={field.min}
                     onChange={field.onchange}
                   />
                 </>
