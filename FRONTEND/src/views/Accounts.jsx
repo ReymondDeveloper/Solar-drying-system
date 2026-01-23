@@ -371,7 +371,7 @@ function Accounts() {
           handleSubmit={handleSubmitFilter}
           fields={fieldsFilter}
           title={"Filters"}
-          button_name={"Apply Role"}
+          button_name={"Apply Filters"}
         />
       )}
       {modalAdd && (

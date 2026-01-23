@@ -107,20 +107,17 @@ export const getReservationById = async (req, res) => {
 export const getArchivedReservations = async (req, res) => {
   try {
     const oneMonthAgo = subMonths(new Date(), 1);
-    const { limit, offset } = req.query;
+    const { status, limit, offset, search, date_from, location } = req.query;
     let query = supabase
       .from("reservations")
-      .select(
-        `
+      .select(`
         id,
         farmer_id:farmer_id(id, name, mobile_number),
         dryer_id:dryer_id(id, dryer_name, location, rate, available_capacity, created_by_id),
         crop_type_id:crop_type_id(crop_type_name, quantity, payment, notes),
         status,
         created_at
-      `,
-        { count: "exact" }
-      )
+      `, { count: "exact" })
       .lt("created_at", oneMonthAgo.toISOString())
       .order("created_at", { ascending: false });
 
@@ -128,6 +125,27 @@ export const getArchivedReservations = async (req, res) => {
       const start = Number(offset);
       const end = start + Number(limit) - 1;
       query = query.range(start, end);
+    }
+
+    if (typeof status !== "undefined" && status !== "all") {
+      query = query.eq("status", status.toLowerCase());
+    }
+
+    if (typeof search !== "undefined" && search) {
+      query = query
+        .not("farmer_id", "is", null)
+        .ilike("farmer_id.name", `%${search}%`);
+    }
+
+    if (typeof location !== "undefined" && location !== "all") {
+      query = query
+        .not("dryer_id", "is", null)
+        .eq("dryer_id.location", location);
+    }
+
+    if (typeof date_from !== "undefined" && date_from) {
+      const fromDate = `${date_from}T00:00:00Z`;
+      query = query.gte("created_at", fromDate);
     }
 
     const { data, count, error } = await query;
