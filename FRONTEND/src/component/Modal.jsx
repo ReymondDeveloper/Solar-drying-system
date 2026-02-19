@@ -696,6 +696,7 @@ function Modal({
                     onChange={field.onchange}
                     disabled={field.disabled || false}
                     placeholder={field.placeholder || null}
+                    max={field.max}
                   />
                 </>
               )}

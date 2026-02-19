@@ -140,6 +140,13 @@ export default function Dryer() {
       required: true,
       name: "quantity",
       colspan: 1,
+      max: Number(data.available_capacity),
+      onchange: (e) => {
+        const value = Number(e.target.value);
+        if (value > Number(data.available_capacity)) {
+          e.target.value = data.available_capacity;
+        }
+      },
     },
     {
       label: "Payment Type",
