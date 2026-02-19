@@ -3,6 +3,7 @@ import Dryers from "../models/dryersModel.js";
 import CropTypes from "../models/CropTypes.js";
 import supabase from "../../database/supabase.db.js";
 import { subMonths } from "date-fns";
+import { v4 as uuidv4 } from "uuid";
 
 export const getReservations = async (req, res) => {
   try {
@@ -30,7 +31,7 @@ export const getReservations = async (req, res) => {
         date_from,
         date_to
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .order("created_at", { ascending: false });
 
@@ -110,14 +111,17 @@ export const getArchivedReservations = async (req, res) => {
     const { status, limit, offset, search, date_from, location } = req.query;
     let query = supabase
       .from("reservations")
-      .select(`
+      .select(
+        `
         id,
         farmer_id:farmer_id(id, name, mobile_number),
         dryer_id:dryer_id(id, dryer_name, location, rate, available_capacity, created_by_id),
         crop_type_id:crop_type_id(crop_type_name, quantity, payment, notes),
         status,
         created_at
-      `, { count: "exact" })
+      `,
+        { count: "exact" },
+      )
       .lt("created_at", oneMonthAgo.toISOString())
       .order("created_at", { ascending: false });
 
@@ -283,7 +287,8 @@ export const updateReservation = async (req, res) => {
 
     if (resError) throw resError;
 
-    const reservation = updatedReservations.length > 0 ? updatedReservations[0] : validation;
+    const reservation =
+      updatedReservations.length > 0 ? updatedReservations[0] : validation;
     const cropUpdate = {};
 
     if (notes !== undefined) cropUpdate.notes = notes;
@@ -291,11 +296,12 @@ export const updateReservation = async (req, res) => {
     if (quantity !== undefined) cropUpdate.quantity = quantity;
     if (crop_type !== undefined) cropUpdate.crop_type_name = crop_type;
 
-    const { data: validationQuantity, error: failedValidationQuantity } = await supabase
-      .from("crop_types")
-      .select("quantity")
-      .eq("crop_type_id", reservation.crop_type_id)
-      .single();
+    const { data: validationQuantity, error: failedValidationQuantity } =
+      await supabase
+        .from("crop_types")
+        .select("quantity")
+        .eq("crop_type_id", reservation.crop_type_id)
+        .single();
 
     if (failedValidationQuantity) throw failedValidationQuantity;
 
@@ -304,6 +310,24 @@ export const updateReservation = async (req, res) => {
     }
 
     if (Object.keys(cropUpdate).length > 0) {
+      if (
+        validation.status === "approved" &&
+        quantity !== undefined &&
+        validationQuantity.quantity !== quantity
+      ) {
+        const { error: error_old } = await supabase
+          .from("crop_history")
+          .insert([
+            {
+              id: uuidv4(),
+              quantity: validationQuantity.quantity,
+              crop_types: reservation.crop_type_id,
+            },
+          ]);
+
+        if (error_old) throw error_old;
+      }
+
       const { error: cropError } = await supabase
         .from("crop_types")
         .update(cropUpdate)
@@ -347,7 +371,11 @@ export const updateReservation = async (req, res) => {
         .eq("id", reservation.dryer_id);
 
       if (updateDryerError) throw updateDryerError;
-    } else if (validation.status === "approved" && status && status.toLowerCase() === "approved") {
+    } else if (
+      validation.status === "approved" &&
+      status &&
+      status.toLowerCase() === "approved"
+    ) {
       const { data: dryer, error: dryerError } = await supabase
         .from("dryers")
         .select("available_capacity, maximum_capacity")
@@ -476,7 +504,7 @@ export const getReservationsByOwner = async (req, res) => {
         date_to,
         canceled_reason
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .eq("owner_id", ownerId)
       .order("created_at", { ascending: false });
@@ -513,7 +541,33 @@ export const getReservationsByOwner = async (req, res) => {
 
     const { data, count, error } = await query;
     if (error) throw error;
-    res.json({ data, totalCount: count });
+
+    const reservationsWithHistory = await Promise.all(
+      data.map(async (reservation) => {
+        const crop_type_id = reservation.crop_type_id?.crop_type_id;
+        const quantity = reservation.crop_type_id?.quantity;
+        const created_at = reservation.crop_type_id?.created_at;
+
+        let crop_history = [];
+        if (crop_type_id) {
+          const { data } = await supabase
+            .from("crop_history")
+            .select("quantity, created_at")
+            .eq("crop_types", crop_type_id);
+
+          crop_history = data || [];
+
+          crop_history = [...crop_history, { quantity, created_at }];
+        }
+
+        return {
+          ...reservation,
+          crop_history,
+        };
+      }),
+    );
+
+    res.json({ data: reservationsWithHistory, totalCount: count });
   } catch (err) {
     console.error("Error in getReservationsByOwner:", err);
     res.status(500).json({

@@ -384,23 +384,39 @@ function Modal({
                     placeholder={field.placeholder || null}
                   />
                   <div className="flex items-center gap-1 cursor-pointer text-gray-700">
-                    <input name="show_password" type="checkbox"
+                    <input
+                      name="show_password"
+                      type="checkbox"
                       onChange={() => {
-                        if (document.querySelector('[name="show_password"]').checked) {
-                          document.querySelector('[name="password"]').type = "text"
+                        if (
+                          document.querySelector('[name="show_password"]')
+                            .checked
+                        ) {
+                          document.querySelector('[name="password"]').type =
+                            "text";
                         } else {
-                          document.querySelector('[name="password"]').type = "password"
+                          document.querySelector('[name="password"]').type =
+                            "password";
                         }
-                      }} 
+                      }}
                     />
                     <small
                       className="select-none"
                       onClick={() => {
-                        (document.querySelector('[name="show_password"]').checked = !document.querySelector('[name="show_password"]').checked)
-                        if (document.querySelector('[name="show_password"]').checked) {
-                          document.querySelector('[name="password"]').type = "text"
+                        document.querySelector(
+                          '[name="show_password"]',
+                        ).checked = !document.querySelector(
+                          '[name="show_password"]',
+                        ).checked;
+                        if (
+                          document.querySelector('[name="show_password"]')
+                            .checked
+                        ) {
+                          document.querySelector('[name="password"]').type =
+                            "text";
                         } else {
-                          document.querySelector('[name="password"]').type = "password"
+                          document.querySelector('[name="password"]').type =
+                            "password";
                         }
                       }}
                     >
@@ -428,23 +444,45 @@ function Modal({
                     placeholder={field.placeholder || null}
                   />
                   <div className="flex items-center gap-1 cursor-pointer text-gray-700">
-                    <input name="show_confirm_password" type="checkbox"
+                    <input
+                      name="show_confirm_password"
+                      type="checkbox"
                       onChange={() => {
-                        if (document.querySelector('[name="show_confirm_password"]').checked) {
-                          document.querySelector('[name="confirm_password"]').type = "text"
+                        if (
+                          document.querySelector(
+                            '[name="show_confirm_password"]',
+                          ).checked
+                        ) {
+                          document.querySelector(
+                            '[name="confirm_password"]',
+                          ).type = "text";
                         } else {
-                          document.querySelector('[name="confirm_password"]').type = "password"
+                          document.querySelector(
+                            '[name="confirm_password"]',
+                          ).type = "password";
                         }
-                      }} 
+                      }}
                     />
                     <small
                       className="select-none"
                       onClick={() => {
-                        (document.querySelector('[name="show_confirm_password"]').checked = !document.querySelector('[name="show_confirm_password"]').checked)
-                        if (document.querySelector('[name="show_confirm_password"]').checked) {
-                          document.querySelector('[name="confirm_password"]').type = "text"
+                        document.querySelector(
+                          '[name="show_confirm_password"]',
+                        ).checked = !document.querySelector(
+                          '[name="show_confirm_password"]',
+                        ).checked;
+                        if (
+                          document.querySelector(
+                            '[name="show_confirm_password"]',
+                          ).checked
+                        ) {
+                          document.querySelector(
+                            '[name="confirm_password"]',
+                          ).type = "text";
                         } else {
-                          document.querySelector('[name="confirm_password"]').type = "password"
+                          document.querySelector(
+                            '[name="confirm_password"]',
+                          ).type = "password";
                         }
                       }}
                     >
@@ -670,7 +708,9 @@ function Modal({
                   <input
                     type="hidden"
                     name="date_from"
-                    value={startDate ? formatDateLocal(startDate) : field.startDate}
+                    value={
+                      startDate ? formatDateLocal(startDate) : field.startDate
+                    }
                   />
                   <input
                     type="hidden"
@@ -739,15 +779,25 @@ function Modal({
                 <table>
                   <tbody>
                     <tr>
-                      <th className="text-start font-normal" scope="row">Dryer:</th>
-                      <td className="text-start font-bold">{datas.dryer_id.dryer_name}</td>
+                      <th className="text-start font-normal" scope="row">
+                        Dryer:
+                      </th>
+                      <td className="text-start font-bold">
+                        {datas.dryer_id.dryer_name}
+                      </td>
                     </tr>
                     <tr>
-                      <th className="text-start font-normal" scope="row">Owner:</th>
-                      <td className="text-start font-bold">{datas.owner_id.name}</td>
+                      <th className="text-start font-normal" scope="row">
+                        Owner:
+                      </th>
+                      <td className="text-start font-bold">
+                        {datas.owner_id.name}
+                      </td>
                     </tr>
                     <tr>
-                      <th className="text-start font-normal" scope="row">Location:</th>
+                      <th className="text-start font-normal" scope="row">
+                        Location:
+                      </th>
                       <td className="text-start font-bold capitalize">
                         {String(datas.dryer_id.location).includes("Sablayan") ||
                         String(datas.dryer_id.location).includes(
@@ -758,72 +808,137 @@ function Modal({
                             ", Sablayan, Occidental Mindoro"}
                       </td>
                     </tr>
-                    <tr><br></br></tr>
+
                     <tr>
-                      <th className="text-start font-normal" scope="row">Rate:</th>
-                      <td className="text-start font-bold capitalize">
-                        &#8369;{Number(datas.dryer_id.rate).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                      </td>
+                      <th className="py-3"></th>
                     </tr>
+
                     <tr>
-                      <th className="text-start font-normal" scope="row">Reserved by:</th>
-                      <td className="text-start font-bold">{datas.farmer_id.name}</td>
-                    </tr>
-                    <tr>
-                      <th className="text-start font-normal" scope="row">Reserved on:</th>
+                      <th className="text-start font-normal" scope="row">
+                        Rate:
+                      </th>
                       <td className="text-start font-bold capitalize">
-                        {new Date(datas.created_at).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                          hour12: true,
+                        &#8369;
+                        {Number(datas.dryer_id.rate).toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
                         })}
                       </td>
                     </tr>
                     <tr>
-                      <th className="text-start font-normal" scope="row">Status:</th>
-                      <td className="text-start font-bold capitalize">{datas.status}</td>
+                      <th className="text-start font-normal" scope="row">
+                        Reserved by:
+                      </th>
+                      <td className="text-start font-bold">
+                        {datas.farmer_id.name}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className="text-start font-normal" scope="row">
+                        Reserved on:
+                      </th>
+                      <td className="text-start font-bold capitalize">
+                        {new Date(datas.created_at).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                            hour12: true,
+                          },
+                        )}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className="text-start font-normal" scope="row">
+                        Status:
+                      </th>
+                      <td className="text-start font-bold capitalize">
+                        {datas.status}
+                      </td>
                     </tr>
                     {datas.status === "denied" && (
                       <tr>
-                        <th className="text-start font-normal" scope="row">Reason for denial:</th>
+                        <th className="text-start font-normal" scope="row">
+                          Reason for denial:
+                        </th>
                         <td className="text-start font-bold capitalize">
-                          {
-                            datas.notes ||
+                          {datas.notes ||
                             datas.crop_type_id.notes ||
-                            "No reason provided."
-                          }
+                            "No reason provided."}
                         </td>
                       </tr>
                     )}
                     {datas.status === "canceled" && (
                       <tr>
-                        <th className="text-start font-normal" scope="row">Reason for cancelation:</th>
+                        <th className="text-start font-normal" scope="row">
+                          Reason for cancelation:
+                        </th>
                         <td className="text-start font-bold capitalize">
                           {datas.canceled_reason || "No reason provided."}
                         </td>
                       </tr>
                     )}
-                    <tr><br></br></tr>
                     <tr>
-                      <th className="text-start font-normal" scope="row">Payment method:</th>
-                      <td className="text-start font-bold capitalize">{datas.crop_type_id.payment}</td>
+                      <th className="py-3"></th>
                     </tr>
                     <tr>
-                      <th className="text-start font-normal" scope="row">Crop type:</th>
-                      <td className="text-start font-bold capitalize">{datas.crop_type_id.crop_type_name}</td>
+                      <th className="text-start font-normal" scope="row">
+                        Payment method:
+                      </th>
+                      <td className="text-start font-bold capitalize">
+                        {datas.crop_type_id.payment}
+                      </td>
                     </tr>
                     <tr>
-                      <th className="text-start font-normal" scope="row">Quantity (Canvan):</th>
-                      <td className="text-start font-bold capitalize">{datas.crop_type_id.quantity}</td>
+                      <th className="text-start font-normal" scope="row">
+                        Crop type:
+                      </th>
+                      <td className="text-start font-bold capitalize">
+                        {datas.crop_type_id.crop_type_name}
+                      </td>
                     </tr>
+                  </tbody>
+                </table>
+
+                <br />
+
+                <table className="w-full">
+                  <thead className="border-b">
                     <tr>
-                      <th className="text-start font-normal" scope="row">Estimated Total Amount:</th>
-                      <td className="text-start font-bold capitalize">&#8369;{Number(safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                      <td className="text-center py-1">#</td>
+                      <td className="text-center">Quantity (Canvan)</td>
+                      <td className="text-center">Total Amount</td>
                     </tr>
+                  </thead>
+                  <tbody>
+                    {datas.crop_history &&
+                      datas.crop_history.map((data, index) => (
+                        <tr className="border-b-1" key={index}>
+                          <th
+                            className="text-center font-bold py-1"
+                            scope="row"
+                          >
+                            {index + 1}
+                          </th>
+                          <td className="text-center font-bold">
+                            {data.quantity}
+                          </td>
+                          <td className="text-end font-bold">
+                            &#8369;
+                            {Number(
+                              safeNumber(datas.dryer_id.rate) *
+                                safeNumber(data.quantity),
+                            ).toLocaleString("en-US", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
 
@@ -882,7 +997,8 @@ function Modal({
                             onClick={() => {
                               localStorage.setItem(
                                 "amount_of_payment",
-                                safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity)
+                                safeNumber(datas.dryer_id.rate) *
+                                  safeNumber(datas.crop_type_id.quantity),
                               );
                               setGcashModal(true);
                               setModal(false);
