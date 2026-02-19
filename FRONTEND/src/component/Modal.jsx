@@ -736,105 +736,96 @@ function Modal({
                   </div>
                 )}
 
-                <p>
-                  {"Dryer: "}
-                  <span className="capitalize font-bold">
-                    {datas.dryer_id.dryer_name}
-                  </span>
-                </p>
-                <p>
-                  {"Owner: "}
-                  <span className="capitalize font-bold">
-                    {datas.owner_id.name}
-                  </span>
-                </p>
-                <p>
-                  {"Location: "}
-                  <span className="capitalize font-bold">
-                    {String(datas.dryer_id.location).includes("Sablayan") ||
-                    String(datas.dryer_id.location).includes(
-                      "Occidental Mindoro",
-                    )
-                      ? datas.dryer_id.location
-                      : datas.dryer_id.location +
-                        ", Sablayan, Occidental Mindoro"}
-                  </span>
-                </p>
-                <p>
-                  {"Rate: "}
-                  <span className="capitalize font-bold">
-                    &#8369;{Number(datas.dryer_id.rate).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                  </span>
-                </p>
-                <br />
-                <p>
-                  {"Reserved by: "}
-                  <span className="capitalize font-bold">
-                    {datas.farmer_id.name}
-                  </span>
-                </p>
-                <p>
-                  {"Reserved on: "}
-                  <span className="capitalize font-bold">
-                    {new Date(datas.created_at).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                      hour12: true,
-                    })}
-                  </span>
-                </p>
-                <p>
-                  {"Status: "}
-                  <span className="capitalize font-bold">{datas.status}</span>
-                </p>
-                {datas.status === "denied" && (
-                  <p>
-                    {"Reason for denial: "}
-                    <span className="capitalize font-bold">
-                      {datas.notes ||
-                        datas.crop_type_id.notes ||
-                        "No reason provided."}
-                    </span>
-                  </p>
-                )}
-                {datas.status === "canceled" && (
-                  <p>
-                    {"Reason for cancelation: "}
-                    <span className="capitalize font-bold">
-                      {datas.canceled_reason || "No reason provided."}
-                    </span>
-                  </p>
-                )}
-                <br />
-                <p>
-                  {"Payment method: "}
-                  <span className="capitalize font-bold">
-                    {datas.crop_type_id.payment}
-                  </span>
-                </p>
-                <p>
-                  {"Crop type: "}
-                  <span className="capitalize font-bold">
-                    {datas.crop_type_id.crop_type_name}
-                  </span>
-                </p>
-                <p>
-                  {"Quantity (Canvan): "}
-                  <span className="capitalize font-bold">
-                    {datas.crop_type_id.quantity}
-                  </span>
-                </p>
-
-                <p>
-                  {"Estimated Total Amount: "}
-                  <span className="capitalize font-bold">
-                    &#8369;{Number(safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                  </span>
-                </p>
+                <table>
+                  <tbody>
+                    <tr>
+                      <th className="text-start font-normal" scope="row">Dryer:</th>
+                      <td className="text-start font-bold">{datas.dryer_id.dryer_name}</td>
+                    </tr>
+                    <tr>
+                      <th className="text-start font-normal" scope="row">Owner:</th>
+                      <td className="text-start font-bold">{datas.owner_id.name}</td>
+                    </tr>
+                    <tr>
+                      <th className="text-start font-normal" scope="row">Location:</th>
+                      <td className="text-start font-bold capitalize">
+                        {String(datas.dryer_id.location).includes("Sablayan") ||
+                        String(datas.dryer_id.location).includes(
+                          "Occidental Mindoro",
+                        )
+                          ? datas.dryer_id.location
+                          : datas.dryer_id.location +
+                            ", Sablayan, Occidental Mindoro"}
+                      </td>
+                    </tr>
+                    <tr><br></br></tr>
+                    <tr>
+                      <th className="text-start font-normal" scope="row">Rate:</th>
+                      <td className="text-start font-bold capitalize">
+                        &#8369;{Number(datas.dryer_id.rate).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className="text-start font-normal" scope="row">Reserved by:</th>
+                      <td className="text-start font-bold">{datas.farmer_id.name}</td>
+                    </tr>
+                    <tr>
+                      <th className="text-start font-normal" scope="row">Reserved on:</th>
+                      <td className="text-start font-bold capitalize">
+                        {new Date(datas.created_at).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          hour12: true,
+                        })}
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className="text-start font-normal" scope="row">Status:</th>
+                      <td className="text-start font-bold capitalize">{datas.status}</td>
+                    </tr>
+                    {datas.status === "denied" && (
+                      <tr>
+                        <th className="text-start font-normal" scope="row">Reason for denial:</th>
+                        <td className="text-start font-bold capitalize">
+                          {
+                            datas.notes ||
+                            datas.crop_type_id.notes ||
+                            "No reason provided."
+                          }
+                        </td>
+                      </tr>
+                    )}
+                    {datas.status === "canceled" && (
+                      <tr>
+                        <th className="text-start font-normal" scope="row">Reason for cancelation:</th>
+                        <td className="text-start font-bold capitalize">
+                          {datas.canceled_reason || "No reason provided."}
+                        </td>
+                      </tr>
+                    )}
+                    <tr><br></br></tr>
+                    <tr>
+                      <th className="text-start font-normal" scope="row">Payment method:</th>
+                      <td className="text-start font-bold capitalize">{datas.crop_type_id.payment}</td>
+                    </tr>
+                    <tr>
+                      <th className="text-start font-normal" scope="row">Crop type:</th>
+                      <td className="text-start font-bold capitalize">{datas.crop_type_id.crop_type_name}</td>
+                    </tr>
+                    <tr>
+                      <th className="text-start font-normal" scope="row">Quantity (Canvan):</th>
+                      <td className="text-start font-bold capitalize">{datas.crop_type_id.quantity}</td>
+                    </tr>
+                    <tr>
+                      <th className="text-start font-normal" scope="row">Estimated Total Amount:</th>
+                      <td className="text-start font-bold capitalize">&#8369;{Number(safeNumber(datas.dryer_id.rate) * safeNumber(datas.crop_type_id.quantity)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    </tr>
+                  </tbody>
+                </table>
 
                 {userRole !== "admin" && (
                   <div className="flex flex-col mt-4">
