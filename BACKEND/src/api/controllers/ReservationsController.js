@@ -278,7 +278,7 @@ export const updateReservation = async (req, res) => {
     if (date_to !== undefined) reservationUpdate.date_to = date_to;
     if (canceled_reason !== undefined)
       reservationUpdate.canceled_reason = canceled_reason;
-    if (validation.status === "approved") reservationUpdate.updated_at = new Date().toLocaleString('sv', { 
+    if (validation.status !== "canceled" || validation.status !== "denied" || validation.status !== "completed") reservationUpdate.updated_at = new Date().toLocaleString('sv', { 
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', second: '2-digit'
     }).replace(' ', 'T');
