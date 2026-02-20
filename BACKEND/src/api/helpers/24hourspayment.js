@@ -1,7 +1,7 @@
 import supabase from "../../database/supabase.db.js";
 
 export const payment_validation = async () => {
-    let query = supabase
+    const { data, error } = await supabase
         .from("reservations")
         .select(
             `
@@ -13,7 +13,6 @@ export const payment_validation = async () => {
         )
         .not("updated_at", "is", null);
 
-    const { data, error } = await query;
     if (error) throw error;
     
     await Promise.all(
@@ -56,10 +55,6 @@ export const payment_validation = async () => {
 
                     console.log(data);
                 }
-
-                console.log("history_count: ", history_count)
-                console.log("transactions_count: ", transactions_count)
-                console.log("condition: ", history_count >= transactions_count)
             }
         })
     )
