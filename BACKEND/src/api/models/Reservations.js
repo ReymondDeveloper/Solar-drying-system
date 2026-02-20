@@ -48,13 +48,38 @@ const Reservations = {
       query = query.ilike("dryer_id.dryer_name", `%${search}%`);
     }
 
-    if (farmer_id) query = query.eq("farmer_id", farmer_id); // Filter by farmer_id
-    query = query.gte("created_at", oneMonthAgo); // Filter to get only reservations from the last month
+    if (farmer_id) query = query.eq("farmer_id", farmer_id);
+    query = query.gte("created_at", oneMonthAgo);
 
     const { data, count, error } = await query;
     if (error) throw error;
 
-    return { data, totalCount: count };
+    const reservationsWithHistory = await Promise.all(
+      data.map(async (reservation) => {
+        const crop_type_id = reservation.crop_type_id?.crop_type_id;
+        const quantity = reservation.crop_type_id?.quantity;
+        const created_at = reservation.crop_type_id?.created_at;
+
+        let crop_history = [];
+        if (crop_type_id) {
+          const { data } = await supabase
+            .from("crop_history")
+            .select("quantity, created_at")
+            .eq("crop_types", crop_type_id);
+
+          crop_history = data || [];
+
+          crop_history = [...crop_history, { quantity, created_at }];
+        }
+
+        return {
+          ...reservation,
+          crop_history,
+        };
+      }),
+    );
+
+    return { data: reservationsWithHistory, totalCount: count };
   },
 
   findById: async (id) => {

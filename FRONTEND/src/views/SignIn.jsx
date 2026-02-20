@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { RiCloseLargeLine } from "react-icons/ri";
 import Modal from "../component/Modal";
 import OTP from "../component/Otp";
+import api from "../api/api";
 
 function SignIn() {
   const navigate = useNavigate();
@@ -75,6 +76,8 @@ function SignIn() {
           } else {
             navigate("/home");
           }
+          
+          api.get("/validate");
         }, 2000);
       }
     } catch (err) {

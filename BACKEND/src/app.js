@@ -12,6 +12,7 @@ import transactionsRoutes from "../src/api/routes/transactionsRoutes.js";
 
 import { errorHandler } from "../src/api/middleware/errorHandler.js";
 import { protect } from "../src/api/middleware/authMiddleware.js";
+import { payment_validation } from "../src/api/helpers/24hourspayment.js";
 import { fileURLToPath } from "url";
 import addressRoutes from "../src/api/routes/addressRoutes.js";
 import notificationRoutes from "../src/api/routes/notificationRoutes.js";
@@ -38,6 +39,7 @@ app.use("/api/notification", notificationRoutes);
 app.use("/api/transactions", protect, transactionsRoutes);
 app.use("/api/chats", protect, chatRoutes);
 app.use("/api/ratings", protect, ratingRoutes);
+app.use("/api/validate", protect, payment_validation);
 
 app.use(errorHandler);
 
